@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "CYasd1ayIrw=",
+  "dgSpecHash": "7RKtyuoLmQ8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj",
+  "projectFilePath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\Repository\\Repository.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\daksh\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
-    "C:\\Users\\daksh\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
-    "C:\\Users\\daksh\\.nuget\\packages\\npgsql\\10.0.1\\npgsql.10.0.1.nupkg.sha512",
-    "C:\\Users\\daksh\\.nuget\\packages\\system.diagnostics.diagnosticsource\\9.0.11\\system.diagnostics.diagnosticsource.9.0.11.nupkg.sha512"
+    "C:\\Users\\an973\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\an973\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\an973\\.nuget\\packages\\npgsql\\10.0.1\\npgsql.10.0.1.nupkg.sha512",
+    "C:\\Users\\an973\\.nuget\\packages\\system.diagnostics.diagnosticsource\\9.0.11\\system.diagnostics.diagnosticsource.9.0.11.nupkg.sha512"
   ],
   "logs": []
 }

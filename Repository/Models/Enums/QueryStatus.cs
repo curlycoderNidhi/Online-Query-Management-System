@@ -5,5 +5,6 @@ namespace Repository.Models.Enums
         Open,
         InProgress,
         Solved
+        
     }
 }

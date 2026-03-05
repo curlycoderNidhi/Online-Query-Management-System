@@ -11,6 +11,9 @@ namespace Repository.Models
         [Required]
         public int UserId { get; set; }
 
+        public string? Username{get;set;}
+        public string? EmployeeName{get;set;}
+
         [Required]
         [StringLength(200)]
         public string Title { get; set; } = "";
