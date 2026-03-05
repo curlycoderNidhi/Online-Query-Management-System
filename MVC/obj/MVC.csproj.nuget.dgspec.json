@@ -1,6 +1,7 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD
     "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj": {}
   },
   "projects": {
@@ -15,6 +16,22 @@
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
+=======
+    "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj": {}
+  },
+  "projects": {
+    "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
+        "projectName": "MVC",
+        "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
+        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+        "outputPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
+>>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -26,8 +43,13 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
               "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj": {
                 "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj"
+=======
+              "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj": {
+                "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj"
+>>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
               }
             }
           }
@@ -69,6 +91,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -80,6 +103,19 @@
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
+=======
+    "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj",
+        "projectName": "Repository",
+        "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj",
+        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+        "outputPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
+>>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
         ],
         "originalTargetFrameworks": [
           "net8.0"

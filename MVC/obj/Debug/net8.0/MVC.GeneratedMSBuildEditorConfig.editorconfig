@@ -9,12 +9,17 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = MVC
 build_property.RootNamespace = MVC
+<<<<<<< HEAD
 build_property.ProjectDir = D:\Internship\New\Project\Online-Query-Management-System\MVC\
+=======
+build_property.ProjectDir = E:\Casepoint_Assignment\Kendo\MyProject\Online-Query-Management-System\MVC\
+>>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+<<<<<<< HEAD
 build_property.MSBuildProjectDirectory = D:\Internship\New\Project\Online-Query-Management-System\MVC
 build_property._RazorSourceGeneratorDebug = 
 
@@ -43,5 +48,35 @@ build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Internship/New/Project/Online-Query-Management-System/MVC/Views/Shared/_Layout.cshtml]
+=======
+build_property.MSBuildProjectDirectory = E:\Casepoint_Assignment\Kendo\MyProject\Online-Query-Management-System\MVC
+build_property._RazorSourceGeneratorDebug = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Casepoint_Assignment/Kendo/MyProject/Online-Query-Management-System/MVC/Views/Shared/_Layout.cshtml]
+>>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-q0a04yuu0e
