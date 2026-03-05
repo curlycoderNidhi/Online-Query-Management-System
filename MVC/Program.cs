@@ -1,4 +1,6 @@
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services.AddScoped<NpgsqlConnection>(sp =>
 
 }
 );
+builder.Services.AddScoped<IUserRepository,UserRepository>();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
