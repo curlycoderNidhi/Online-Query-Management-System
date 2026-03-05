@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\MVC\\MVC.csproj": {}
+    "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\MVC\\MVC.csproj": {
+    "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\MVC\\MVC.csproj",
+        "projectUniqueName": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj",
         "projectName": "MVC",
-        "projectPath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\MVC\\MVC.csproj",
-        "packagesPath": "C:\\Users\\daksh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\MVC\\obj\\",
+        "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj",
+        "packagesPath": "C:\\Users\\ppate\\.nuget\\packages\\",
+        "outputPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\daksh\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -30,8 +26,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj": {
-                "projectPath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj"
+              "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj": {
+                "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj"
               }
             }
           }
@@ -73,21 +69,17 @@
         }
       }
     },
-    "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj": {
+    "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj",
+        "projectUniqueName": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj",
         "projectName": "Repository",
-        "projectPath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\Repository.csproj",
-        "packagesPath": "C:\\Users\\daksh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\daksh\\Desktop\\Casepoint\\QueryMangmentSystem\\Repository\\obj\\",
+        "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj",
+        "packagesPath": "C:\\Users\\ppate\\.nuget\\packages\\",
+        "outputPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\daksh\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
