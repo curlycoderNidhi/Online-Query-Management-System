@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\MVC.csproj": {}
+    "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\MVC.csproj": {}
   },
   "projects": {
-    "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\MVC.csproj": {
+    "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\MVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\MVC.csproj",
+        "projectUniqueName": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\MVC.csproj",
         "projectName": "MVC",
-        "projectPath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\MVC.csproj",
+        "projectPath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\MVC.csproj",
         "packagesPath": "C:\\Users\\an973\\.nuget\\packages\\",
-        "outputPath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\obj\\",
+        "outputPath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

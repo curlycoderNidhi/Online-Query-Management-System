@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "WK46lk/ET7s=",
+  "dgSpecHash": "OEXda1X8YNE=",
   "success": true,
-  "projectFilePath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\MVC\\MVC.csproj",
+  "projectFilePath": "D:\\.NetK All\\New folder (2)\\Online-Query-Management-System\\mvc\\MVC.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\an973\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\an973\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",

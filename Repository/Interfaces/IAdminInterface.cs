@@ -4,13 +4,28 @@ using System.Linq;
 using System.Threading.Tasks;
 using Repository.Models;
 
-namespace repositories.Interfaces
+namespace Repositories.Interfaces
 {
     public interface IAdminInterface
     {
-        public Task<List<Query>> GetAllQueriesSolved();
-        public Task<List<Query>> GetAllQueriesInProgress();
-        public Task<List<Query>> GetAllQueriesOpen();
-        public Task<List<Query>> GetAllQueries();
+        // Query Management
+        Task<List<Query>> GetAllQueries();
+        Task<List<Query>> GetAllQueriesSolved();
+        Task<List<Query>> GetAllQueriesInProgress();
+        Task<List<Query>> GetAllQueriesOpen();
+
+        // Dashboard
+        Task<Dictionary<string,int>> GetDashboardCards();
+        Task<List<EmployeePerformance>> GetEmployeePerformance();
+
+        // User Management
+        Task<List<User>> GetAllUsers();
+        Task<User> GetUserDetails(int id);
+
+        // User Queries
+        Task<List<Query>> GetSubmittedQueries(int id);
+
+        // Query Assignment
+        Task<int> AssignEmployee(int queryId,int empId);
     }
 }

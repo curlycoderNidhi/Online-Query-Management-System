@@ -1,5 +1,5 @@
 using Npgsql;
-using repositories.Interfaces;
+using Repositories.Interfaces;
 using Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
