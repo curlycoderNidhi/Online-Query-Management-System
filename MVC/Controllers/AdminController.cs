@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Repositories.Interfaces;
+using Repository.Models;
+using Repository.Models.Enums;
 
 namespace MVC.Controllers
 {
@@ -25,11 +27,55 @@ namespace MVC.Controllers
         {
             return View();
         }
-
-        public IActionResult AdminDashBoard()
+        [HttpGet]
+        public async Task<IActionResult> AdminDashboard()
         {
+            ViewBag.AllQueries      = await _adminRepo.GetAllQueries();
+            ViewBag.SolvedQueries   = await _adminRepo.GetAllQueriesSolved();
+            ViewBag.OpenQueries     = await _adminRepo.GetAllQueriesOpen();
+            ViewBag.ProgressQueries = await _adminRepo.GetAllQueriesInProgress();
+            ViewBag.Cards           = await _adminRepo.GetDashboardCards();
+            ViewBag.EmpPerformance  = await _adminRepo.GetEmployeePerformance();
+
             return View();
+        }    
+        [HttpPost]
+        public async Task<IActionResult> AssignEmployee(int queryId, int empId)
+        {
+            try
+            {
+                var result = await _adminRepo.AssignEmployee(queryId, empId);
+                if (result > 0)
+                    return Json(new { success = true,  message = "Employee assigned successfully." });
+                else
+                    return Json(new { success = false, message = "Assignment failed." });
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false, message = e.Message });
+            }
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UnassignEmployee(int queryId)
+        {
+            try
+            {
+                // Sets empId = 0 / null to unassign
+                var result = await _adminRepo.AssignEmployee(queryId, 0);
+                if (result > 0)
+                    return Json(new { success = true,  message = "Employee unassigned." });
+                else
+                    return Json(new { success = false, message = "Unassign failed." });
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false, message = e.Message });
+            }
+        }
+
+        
 
         [HttpGet]
         public IActionResult GetAllQueriesSolved()
@@ -164,23 +210,23 @@ public async Task<IActionResult> GetSubmittedQueries(int id)
 }
 
 
-[HttpPost]
-public async Task<IActionResult> AssignEmployee(int queryId,int empId)
-{
-    try
-    {
-        var result = await _adminRepo.AssignEmployee(queryId,empId);
+// [HttpPost]
+// public async Task<IActionResult> AssignEmployee(int queryId,int empId)
+// {
+//     try
+//     {
+//         var result = await _adminRepo.AssignEmployee(queryId,empId);
 
-        if(result > 0)
-            return Ok("Employee Assigned Successfully");
-        else
-            return BadRequest("Assignment Failed");
-    }
-    catch(Exception e)
-    {
-        return StatusCode(500,e.Message);
-    }
-}
+//         if(result > 0)
+//             return Ok("Employee Assigned Successfully");
+//         else
+//             return BadRequest("Assignment Failed");
+//     }
+//     catch(Exception e)
+//     {
+//         return StatusCode(500,e.Message);
+//     }
+// }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

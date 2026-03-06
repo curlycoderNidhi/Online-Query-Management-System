@@ -35,3 +35,40 @@ D:\.NetK All\New folder (2)\Online-Query-Management-System\mvc\obj\Debug\net8.0\
 D:\.NetK All\New folder (2)\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.pdb
 D:\.NetK All\New folder (2)\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.genruntimeconfig.cache
 D:\.NetK All\New folder (2)\Online-Query-Management-System\mvc\obj\Debug\net8.0\ref\MVC.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\appsettings.Development.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\appsettings.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.staticwebassets.runtime.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.exe
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.deps.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.runtimeconfig.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\MVC.pdb
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\Npgsql.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\Repository.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\bin\Debug\net8.0\Repository.pdb
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.csproj.AssemblyReference.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.GeneratedMSBuildEditorConfig.editorconfig
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.AssemblyInfoInputs.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.AssemblyInfo.cs
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.csproj.CoreCompileInputs.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.MvcApplicationPartsAssemblyInfo.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.RazorAssemblyInfo.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.RazorAssemblyInfo.cs
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.sourcelink.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets.build.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets.development.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets\msbuild.MVC.Microsoft.AspNetCore.StaticWebAssets.props
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets\msbuild.build.MVC.props
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.MVC.props
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.MVC.props
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\staticwebassets.pack.json
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\scopedcss\bundle\MVC.styles.css
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\scopedcss\projectbundle\MVC.bundle.scp.css
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.csproj.Up2Date
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\refint\MVC.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.pdb
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\MVC.genruntimeconfig.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\mvc\obj\Debug\net8.0\ref\MVC.dll

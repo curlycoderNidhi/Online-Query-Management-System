@@ -1,585 +1,321 @@
+@using Repository.Models
+@using Repository.Models.Enums
+@using System.Text.Json
+
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
+
+    var allQueries      = (ViewBag.AllQueries      as List<Query>)               ?? new List<Query>();
+    var solvedQueries   = (ViewBag.SolvedQueries   as List<Query>)               ?? new List<Query>();
+    var openQueries     = (ViewBag.OpenQueries      as List<Query>)               ?? new List<Query>();
+    var progressQueries = (ViewBag.ProgressQueries  as List<Query>)               ?? new List<Query>();
+    var empPerformance  = (ViewBag.EmpPerformance   as List<EmployeePerformance>) ?? new List<EmployeePerformance>();
+    var employees       = ViewBag.Employees as IEnumerable<dynamic>               ?? Enumerable.Empty<dynamic>();
+    var cards           = (ViewBag.Cards            as Dictionary<string,int>)    ?? new Dictionary<string,int>();
+
+    int totalQueries = cards.GetValueOrDefault("TotalQueries",  0);
+    int todayQueries = cards.GetValueOrDefault("TodayQueries",  0);
+    int solvedAll    = cards.GetValueOrDefault("SolvedQueries", 0);
+    int solvedToday  = cards.GetValueOrDefault("SolvedToday",   0);
+    int pendingAll   = cards.GetValueOrDefault("PendingQueries",0);
+    int pendingToday = cards.GetValueOrDefault("PendingToday",  0);
+
+    string PriorityLabel(Priority p)  => p switch { Priority.High => "High", Priority.Medium => "Medium", _ => "Low" };
+    string StatusLabel(QueryStatus s) => s switch { QueryStatus.Solved => "Solved", QueryStatus.InProgress => "In Progress", _ => "Open" };
+
+    // ── Filter out Admin from efficiency display ──────────────
+    var empOnly = empPerformance
+        .Where(e => !string.Equals(e.EmployeeName, "Admin", StringComparison.OrdinalIgnoreCase)
+                 && !string.Equals(e.EmployeeName, "admin", StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    int maxResolved = empOnly.Any() ? empOnly.Max(e => e.ResolvedQueries) : 1;
+    if (maxResolved == 0) maxResolved = 1;
+
+    var allJson = allQueries.Select(q => new {
+        queryId = q.QueryId, username = q.Username, title = q.Title,
+        priorityLabel = PriorityLabel(q.Priority), statusLabel = StatusLabel(q.Status),
+        employeeName = q.EmployeeName, comments = q.Comments
+    });
+    var solvedJson = solvedQueries.Select(q => new {
+        queryId = q.QueryId, username = q.Username, title = q.Title,
+        priorityLabel = PriorityLabel(q.Priority), statusLabel = StatusLabel(q.Status), employeeName = q.EmployeeName
+    });
+    var openJson = openQueries.Select(q => new {
+        queryId = q.QueryId, username = q.Username, title = q.Title,
+        priorityLabel = PriorityLabel(q.Priority), statusLabel = StatusLabel(q.Status), employeeName = q.EmployeeName
+    });
+    var progressJson = progressQueries.Select(q => new {
+        queryId = q.QueryId, username = q.Username, title = q.Title,
+        priorityLabel = PriorityLabel(q.Priority), statusLabel = StatusLabel(q.Status), employeeName = q.EmployeeName
+    });
+
+    var jsonOpts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 }
 
 <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
 <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
 
 <style>
-    @@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
-
-    :root {
-        --bg: #f8fafc;
-        --bg-card: #ffffff;
-        --bg-header: #ffffff;
-        --bg-dark: #f8fafc;
-        --bg-dark2: #eef4fb;
-        --accent1: #f97316;
-        --accent2: #2563eb;
-        --accent3: #16a34a;
-        --text-main: #0f172a;
-        --text-soft: #64748b;
-        --border: #e2e8f0;
-        --border-dark: #dbe4ee;
-        --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-        --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.10);
-    }
-
-    *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        font-family: 'IBM Plex Sans', sans-serif;
-        background: var(--bg);
-        color: var(--text-main);
-    }
-
-    .dash-shell {
-        min-height: 100vh;
-        background: linear-gradient(to bottom, #f8fafc, #eef4fb);
-        padding-bottom: 60px;
-    }
-
-    /* Header */
-    .dash-header {
-        background: var(--bg-header);
-        padding: 0 48px;
-        height: 68px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        border-bottom: 1px solid var(--border);
-        box-shadow: 0 2px 16px rgba(15, 23, 42, 0.05);
-    }
-
-    .dash-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.45rem;
-        font-weight: 700;
-        color: var(--text-main);
-        letter-spacing: -0.01em;
-    }
-
-    .dash-title span {
-        color: var(--accent2);
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-
-    .dash-meta {
-        font-size: 0.7rem;
-        color: var(--text-soft);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
-
-    .header-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--accent3);
-        box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
-        animation: pulse 2.4s ease-in-out infinite;
-    }
-
-    @@keyframes pulse {
-        0%,100% { box-shadow: 0 0 0 3px rgba(22,163,74,0.18); }
-        50% { box-shadow: 0 0 0 7px rgba(22,163,74,0.07); }
-    }
-
-    /* Stat cards */
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        padding: 36px 48px 0;
-    }
-
-    .stat-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 28px 30px 24px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: var(--shadow);
-        transition: box-shadow 0.2s, transform 0.2s;
-    }
-
-    .stat-card:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
-    }
-
-    .stat-card::before {
-        content:'';
-        position:absolute;
-        top:0;
-        left:0;
-        right:0;
-        height:4px;
-    }
-
-    .stat-card.card-total::before  { background: var(--accent2); }
-    .stat-card.card-solved::before { background: var(--accent3); }
-    .stat-card.card-open::before   { background: var(--accent1); }
-
-    .stat-card::after {
-        content:'';
-        position:absolute;
-        top:28px;
-        left:0;
-        width:4px;
-        height:36px;
-        border-radius:0 4px 4px 0;
-    }
-
-    .stat-card.card-total::after  { background: var(--accent2); }
-    .stat-card.card-solved::after { background: var(--accent3); }
-    .stat-card.card-open::after   { background: var(--accent1); }
-
-    .stat-label {
-        font-size: 0.67rem;
-        letter-spacing: 0.13em;
-        text-transform: uppercase;
-        color: var(--text-soft);
-        margin-bottom: 14px;
-        font-weight: 600;
-    }
-
-    .stat-numbers {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-    }
-
-    .stat-big {
-        font-family: 'Playfair Display', serif;
-        font-size: 3.2rem;
-        font-weight: 800;
-        line-height: 1;
-    }
-
-    .stat-card.card-total  .stat-big { color: var(--accent2); }
-    .stat-card.card-solved .stat-big { color: var(--accent3); }
-    .stat-card.card-open   .stat-big { color: var(--accent1); }
-
-    .stat-today-box {
-        text-align: right;
-        padding-bottom: 6px;
-    }
-
-    .stat-today-label {
-        font-size: 0.65rem;
-        color: var(--text-soft);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 2px;
-    }
-
-    .stat-today-val {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-main);
-    }
-
-    /* Section headers */
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 40px 48px 16px;
-    }
-
-    .section-title {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--text-soft);
-        white-space: nowrap;
-    }
-
-    .section-line {
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-    }
-
-    /* Layout */
-    .dash-body {
-        padding: 0 48px;
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 24px;
-        align-items: start;
-    }
-
-    /* Kendo Grid styling only */
-    .k-grid {
-        border-radius: 14px !important;
-        overflow: hidden;
-        border: 1px solid var(--border) !important;
-        background: var(--bg-card) !important;
-        font-family: 'IBM Plex Sans', sans-serif;
-        font-size: 0.82rem;
-        box-shadow: var(--shadow);
-    }
-
-    .k-grid-header,
-    .k-grid-header-wrap {
-        background: var(--bg-dark) !important;
-        border-bottom: 1px solid var(--border-dark) !important;
-    }
-
-    .k-grid th {
-        background: var(--bg-dark) !important;
-        color: var(--text-soft) !important;
-        font-family: 'IBM Plex Sans', sans-serif;
-        font-size: 0.67rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        font-weight: 700;
-        border-color: var(--border-dark) !important;
-        padding: 14px 12px !important;
-    }
-
-    .k-grid td {
-        background: var(--bg-card) !important;
-        color: var(--text-main) !important;
-        border-color: #edf2f7 !important;
-        padding: 12px !important;
-    }
-
-    .k-grid tr:nth-child(even) td {
-        background: #fcfdff !important;
-    }
-
-    .k-grid tr:hover td {
-        background: #f4f8ff !important;
-    }
-
-    .k-pager-wrap {
-        background: var(--bg-dark) !important;
-        border-top: 1px solid var(--border-dark) !important;
-        color: var(--text-soft) !important;
-    }
-
-    .k-pager-wrap .k-link {
-        color: var(--text-soft) !important;
-    }
-
-    .k-pager-wrap .k-state-selected {
-        background: var(--accent2) !important;
-        border-color: var(--accent2) !important;
-        color: #fff !important;
-        border-radius: 4px;
-    }
-
-    .k-grid-toolbar {
-        background: var(--bg-dark) !important;
-        border-bottom: 1px solid var(--border-dark) !important;
-        padding: 10px 14px !important;
-    }
-
-    .k-button {
-        font-family: 'IBM Plex Sans', sans-serif !important;
-        font-size: 0.72rem !important;
-        font-weight: 500 !important;
-        background: #ffffff !important;
-        color: var(--text-main) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 6px !important;
-        transition: background 0.15s !important;
-    }
-
-    .k-button:hover {
-        background: #eff6ff !important;
-        color: var(--accent2) !important;
-        border-color: #bfdbfe !important;
-    }
-
-    /* only styling filter row, no JS change */
-    .k-filter-row th {
-        background: #f8fafc !important;
-        padding: 8px !important;
-    }
-
-    .k-filtercell input,
-    .k-textbox,
-    .k-picker-wrap,
-    .k-dropdown-wrap {
-        font-family: 'IBM Plex Sans', sans-serif !important;
-        font-size: 0.78rem !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 6px !important;
-        background: #ffffff !important;
-        color: var(--text-main) !important;
-    }
-
-    /* Badges */
-    .badge {
-        display: inline-block;
-        padding: 3px 11px;
-        border-radius: 20px;
-        font-size: 0.67rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    .badge-open {
-        background: #fff7ed;
-        color: #ea580c;
-        border: 1px solid #fed7aa;
-    }
-
-    .badge-progress {
-        background: #eff6ff;
-        color: #2563eb;
-        border: 1px solid #bfdbfe;
-    }
-
-    .badge-solved {
-        background: #f0fdf4;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
-    }
-
-    .pri-low {
-        color: var(--accent3);
-        font-weight: 600;
-    }
-
-    .pri-medium {
-        color: #ca8a04;
-        font-weight: 600;
-    }
-
-    .pri-high {
-        color: var(--accent1);
-        font-weight: 600;
-    }
-
-    /* Right panel */
-    .right-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    /* Tabstrip */
-    .k-tabstrip {
-        background: var(--bg-card) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 14px !important;
-        overflow: hidden;
-        font-family: 'IBM Plex Sans', sans-serif;
-        box-shadow: var(--shadow);
-    }
-
-    .k-tabstrip-items {
-        background: var(--bg-dark) !important;
-        border-bottom: 1px solid var(--border-dark) !important;
-    }
-
-    .k-tabstrip-items .k-item {
-        color: var(--text-soft) !important;
-        font-size: 0.72rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.05em !important;
-    }
-
-    .k-tabstrip-items .k-item:hover {
-        color: var(--accent2) !important;
-    }
-
-    .k-tabstrip-items .k-state-active {
-        background: var(--bg-card) !important;
-        color: var(--accent2) !important;
-        border-color: var(--border-dark) !important;
-        border-bottom-color: var(--bg-card) !important;
-        font-weight: 700 !important;
-    }
-
-    .k-content {
-        background: var(--bg-card) !important;
-        padding: 16px !important;
-    }
-
-    /* Chart card */
-    .chart-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 20px 20px 8px;
-        box-shadow: var(--shadow);
-    }
-
-    .chart-label {
-        font-size: 0.67rem;
-        font-weight: 700;
-        letter-spacing: 0.13em;
-        text-transform: uppercase;
-        color: var(--text-soft);
-        margin-bottom: 6px;
-        padding: 0 4px;
-    }
-
-    /* Employee list */
-    .emp-row {
-        display: flex;
-        align-items: center;
-        padding: 10px 8px;
-        border-bottom: 1px solid #edf2f7;
-        transition: background 0.15s;
-        border-radius: 6px;
-        margin: 0 -4px;
-    }
-
-    .emp-row:last-child {
-        border-bottom: none;
-    }
-
-    .emp-row:hover {
-        background: #f8fbff;
-    }
-
-    .emp-avatar {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #dbeafe;
-        color: var(--accent2);
-        font-size: 0.7rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-right: 10px;
-    }
-
-    .emp-info {
-        flex: 1;
-    }
-
-    .emp-name {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--text-main);
-    }
-
-    .emp-sub {
-        font-size: 0.67rem;
-        color: var(--text-soft);
-        margin-top: 1px;
-    }
-
-    .emp-count {
-        font-family: 'Playfair Display', serif;
-        font-weight: 700;
-        color: var(--accent3);
-        font-size: 1.15rem;
-    }
-
-    #notification {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 9999;
-    }
-
-    ::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #e2e8f0;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #94a3b8;
-        border-radius: 10px;
-    }
+* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --primary:      #3B82F6;
+    --primary-dark: #1D4ED8;
+    --success:      #10B981;
+    --success-dark: #059669;
+    --warning:      #F59E0B;
+    --warning-dark: #D97706;
+    --danger:       #EF4444;
+    --purple:       #8B5CF6;
+    --purple-dark:  #6D28D9;
+    --shadow:       rgba(0,0,0,0.10);
+    --shadow-hover: rgba(0,0,0,0.22);
+}
+
+body { background: #F1F5F9; color: #1E293B; }
+
+/* ── AppBar ── */
+.dashboard-appbar {
+    background: linear-gradient(to right, #b39fff, #4300af);
+    padding: 14px 2.5rem; border-radius: 15px;
+    margin: 1.5rem 1.5rem 2rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 8px 32px rgba(67,0,175,0.25);
+}
+.appbar-title { font-size:1.45rem; font-weight:800; color:#fff; letter-spacing:-0.01em; }
+.appbar-meta  { font-size:0.72rem; color:rgba(255,255,255,0.55); letter-spacing:0.1em; text-transform:uppercase; }
+.appbar-dot   { width:9px; height:9px; border-radius:50%; background:#4ade80; box-shadow:0 0 0 3px rgba(74,222,128,0.25); animation:livepulse 2.2s ease-in-out infinite; }
+@@keyframes livepulse {
+    0%,100% { box-shadow:0 0 0 3px rgba(74,222,128,0.25); }
+    50%      { box-shadow:0 0 0 8px rgba(74,222,128,0.08); }
+}
+
+/* ── Container — full width ── */
+.dashboard-container { width:100%; padding: 0 2rem 4rem; }
+
+/* ── Stat cards ── */
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.75rem; margin-bottom:2.5rem; }
+.metric-card {
+    background:linear-gradient(145deg,#fff 0%,#F8FAFC 100%);
+    border:2px solid transparent; border-radius:1.5rem;
+    transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+    position:relative; overflow:hidden;
+    box-shadow:0 10px 30px var(--shadow); cursor:default;
+}
+.metric-card:hover { transform:translateY(-8px) scale(1.02); box-shadow:0 28px 60px var(--shadow-hover); }
+.metric-card::before { content:''; position:absolute; inset:0; background:linear-gradient(45deg,rgba(255,255,255,0.6),rgba(255,255,255,0.2)); opacity:0; transition:opacity 0.4s ease; z-index:1; }
+.metric-card:hover::before { opacity:1; }
+.card-total   { border-top:4px solid var(--primary); }
+.card-solved  { border-top:4px solid var(--success); }
+.card-pending { border-top:4px solid var(--warning); }
+.metric-body  { position:relative; z-index:2; padding:2rem 2rem 1.75rem; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.metric-icon  { font-size:2.2rem; width:4.5rem; height:4.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem; box-shadow:0 6px 20px rgba(0,0,0,0.15); transition:transform 0.3s ease; }
+.metric-card:hover .metric-icon { transform:scale(1.1) rotate(-5deg); }
+.icon-blue   { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; }
+.icon-green  { background:linear-gradient(135deg,var(--success),var(--success-dark)); color:#fff; }
+.icon-orange { background:linear-gradient(135deg,var(--warning),var(--warning-dark)); color:#fff; }
+.metric-label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#64748B; margin-bottom:0.75rem; }
+.metric-big   { font-size:3.5rem; font-weight:900; line-height:1; margin-bottom:0.5rem; }
+.card-total   .metric-big { color:var(--primary); }
+.card-solved  .metric-big { color:var(--success); }
+.card-pending .metric-big { color:var(--warning-dark); }
+.metric-today { font-size:0.78rem; color:#94A3B8; font-weight:500; }
+.metric-today strong { color:#475569; font-weight:700; }
+
+/* ── Section row ── */
+.section-row  { display:flex; align-items:center; gap:14px; margin-bottom:1rem; }
+.section-lbl  { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.13em; color:#94A3B8; white-space:nowrap; }
+.section-line { flex:1; height:1px; background:#E2E8F0; }
+
+/* ── Body layout: big grid left, side panel right ── */
+.dash-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+/* ── Kendo Grid — larger, scrollable ── */
+.k-grid { border-radius:1.25rem!important; overflow:hidden; border:2px solid #E2E8F0!important; background:#fff!important; font-size:0.85rem; box-shadow:0 10px 30px var(--shadow); }
+.k-grid-header, .k-grid-header-wrap { background:linear-gradient(to right,#b39fff,#4300af)!important; border-bottom:none!important; }
+.k-grid th { background:transparent!important; color:rgba(255,255,255,0.9)!important; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important; font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:700; border-color:rgba(255,255,255,0.15)!important; padding:15px 14px!important; }
+.k-grid td { background:#fff!important; color:#1E293B!important; border-color:#F1F5F9!important; padding:13px 14px!important; vertical-align:middle; }
+.k-grid tr:nth-child(even) td { background:#FAFAFA!important; }
+.k-grid tr:hover td { background:#EFF6FF!important; }
+.k-pager-wrap { background:linear-gradient(to right,#b39fff,#4300af)!important; border-top:none!important; color:rgba(255,255,255,0.6)!important; padding:8px 14px!important; }
+.k-pager-wrap .k-link { color:rgba(255,255,255,0.75)!important; }
+.k-pager-wrap .k-state-selected { background:rgba(255,255,255,0.28)!important; border-color:rgba(255,255,255,0.45)!important; color:#fff!important; border-radius:6px; }
+.k-grid-toolbar { background:linear-gradient(to right,#b39fff,#4300af)!important; border-bottom:none!important; padding:10px 14px!important; }
+.k-button { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important; font-size:0.72rem!important; font-weight:600!important; background:rgba(255,255,255,0.15)!important; color:#fff!important; border:1px solid rgba(255,255,255,0.25)!important; border-radius:8px!important; transition:background 0.15s!important; }
+.k-button:hover { background:rgba(255,255,255,0.28)!important; }
+.k-filtercell input { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important; font-size:0.78rem!important; border:1px solid #E2E8F0!important; border-radius:6px!important; background:#F8FAFC!important; color:#1E293B!important; }
+
+/* ── Assign dropdown ── */
+.assign-wrap   { display:flex; align-items:center; gap:6px; }
+.assign-select {
+    font-size:0.76rem!important; font-weight:500;
+    border:1.5px solid #E2E8F0; border-radius:8px;
+    background:#F8FAFC; color:#1E293B;
+    padding:5px 8px; cursor:pointer;
+    transition:border-color 0.15s, box-shadow 0.15s;
+    flex:1; min-width:0;
+}
+.assign-select:focus { outline:none; border-color:var(--purple); box-shadow:0 0 0 3px rgba(139,92,246,0.15); }
+.assign-btn {
+    white-space:nowrap;
+    font-size:0.72rem!important; font-weight:600!important;
+    padding:5px 12px!important; border-radius:8px!important;
+    background:linear-gradient(135deg,#b39fff,#4300af)!important;
+    color:#fff!important; border:none!important; cursor:pointer;
+    transition:opacity 0.15s!important; flex-shrink:0;
+}
+.assign-btn:hover { opacity:0.82!important; }
+
+/* ── Badges ── */
+.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+.badge-open     { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+.badge-progress { background:#DBEAFE; color:#1E40AF; border:1px solid #BFDBFE; }
+.badge-solved   { background:#D1FAE5; color:#065F46; border:1px solid #A7F3D0; }
+.pri-low    { color:var(--success);      font-weight:600; }
+.pri-medium { color:var(--warning-dark); font-weight:600; }
+.pri-high   { color:var(--danger);       font-weight:600; }
+
+/* ── Right panel ── */
+.right-panel { display:flex; flex-direction:column; gap:1.5rem; }
+
+/* ── TabStrip ── */
+.k-tabstrip { background:#fff!important; border:2px solid #E2E8F0!important; border-radius:1.25rem!important; overflow:hidden; box-shadow:0 10px 30px var(--shadow); }
+.k-tabstrip-items { background:linear-gradient(to right,#b39fff,#4300af)!important; border-bottom:none!important; }
+.k-tabstrip-items .k-item { color:rgba(255,255,255,0.5)!important; font-size:0.72rem!important; font-weight:600!important; letter-spacing:0.05em!important; }
+.k-tabstrip-items .k-item:hover { color:rgba(255,255,255,0.85)!important; }
+.k-tabstrip-items .k-state-active { background:#fff!important; color:var(--purple-dark)!important; border-color:transparent!important; font-weight:700!important; }
+.k-content { background:#fff!important; padding:14px!important; }
+
+/* ── Employee efficiency card ── */
+.eff-card { background:linear-gradient(145deg,#fff 0%,#F8FAFC 100%); border:2px solid #E2E8F0; border-radius:1.5rem; padding:18px 20px; box-shadow:0 10px 30px var(--shadow); }
+.eff-row  { margin-bottom:16px; }
+.eff-row:last-child { margin-bottom:0; }
+.eff-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.eff-name   { font-size:0.84rem; font-weight:600; color:#1E293B; }
+.eff-count  { font-size:0.84rem; font-weight:700; color:var(--purple-dark); }
+.eff-bar-bg { height:9px; background:#E2E8F0; border-radius:10px; overflow:hidden; }
+.eff-bar-fill { height:100%; border-radius:10px; background:linear-gradient(to right,#b39fff,#4300af); transition:width 0.9s cubic-bezier(0.23,1,0.32,1); }
+.eff-meta { font-size:0.67rem; color:#94A3B8; margin-top:4px; }
+
+/* ── Chart card ── */
+.chart-card { background:linear-gradient(145deg,#fff 0%,#F8FAFC 100%); border:2px solid #E2E8F0; border-radius:1.5rem; padding:20px 20px 10px; box-shadow:0 10px 30px var(--shadow); }
+.chart-lbl  { font-size:0.67rem; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; color:#94A3B8; margin-bottom:8px; }
+
+/* ── Notification ── */
+#notification { position:fixed; bottom:24px; right:24px; z-index:9999; }
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:#F1F5F9; }
+::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:10px; }
 </style>
 
-<div class="dash-shell">
-
-    <div class="dash-header">
-        <div class="dash-title">Query<span>.</span>Admin</div>
-        <div class="header-right">
-            <div class="dash-meta">Online Query Management &nbsp;·&nbsp; Admin Panel</div>
-            <div class="header-dot"></div>
-        </div>
+<!-- AppBar -->
+<div class="dashboard-appbar">
+    <div class="appbar-title">Admin Dashboard</div>
+    <div style="display:flex;align-items:center;gap:16px;">
+        <div class="appbar-meta">Online Query Management · Admin Panel</div>
+        <div class="appbar-dot"></div>
     </div>
+</div>
 
-    <div class="stats-row">
-        <div class="stat-card card-total">
-            <div class="stat-label">Total Queries</div>
-            <div class="stat-numbers">
-                <div class="stat-big" id="statTotal">—</div>
-                <div class="stat-today-box">
-                    <div class="stat-today-label">Today</div>
-                    <div class="stat-today-val" id="statTotalToday">—</div>
-                </div>
+<div class="dashboard-container">
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+        <div class="metric-card card-total">
+            <div class="metric-body">
+                <div class="metric-icon icon-blue">📋</div>
+                <div class="metric-label">Total Queries</div>
+                <div class="metric-big">@totalQueries</div>
+                <div class="metric-today">Today: <strong>@todayQueries</strong></div>
             </div>
         </div>
-        <div class="stat-card card-solved">
-            <div class="stat-label">Solved Queries</div>
-            <div class="stat-numbers">
-                <div class="stat-big" id="statSolved">—</div>
-                <div class="stat-today-box">
-                    <div class="stat-today-label">Today</div>
-                    <div class="stat-today-val" id="statSolvedToday">—</div>
-                </div>
+        <div class="metric-card card-solved">
+            <div class="metric-body">
+                <div class="metric-icon icon-green">✓</div>
+                <div class="metric-label">Solved Queries</div>
+                <div class="metric-big">@solvedAll</div>
+                <div class="metric-today">Today: <strong>@solvedToday</strong></div>
             </div>
         </div>
-        <div class="stat-card card-open">
-            <div class="stat-label">Pending Queries</div>
-            <div class="stat-numbers">
-                <div class="stat-big" id="statPending">—</div>
-                <div class="stat-today-box">
-                    <div class="stat-today-label">Today</div>
-                    <div class="stat-today-val" id="statPendingToday">—</div>
-                </div>
+        <div class="metric-card card-pending">
+            <div class="metric-body">
+                <div class="metric-icon icon-orange">⏰</div>
+                <div class="metric-label">Pending Queries</div>
+                <div class="metric-big">@pendingAll</div>
+                <div class="metric-today">Today: <strong>@pendingToday</strong></div>
             </div>
         </div>
     </div>
 
-    <div class="section-header">
-        <span class="section-title">All Queries</span>
+    <!-- All Queries -->
+    <div class="section-row">
+        <span class="section-lbl">All Queries</span>
         <div class="section-line"></div>
     </div>
 
     <div class="dash-body">
+
+        <!-- ── Left: Main Grid (takes all remaining width) ── -->
         <div>
             <div id="queryGrid"></div>
         </div>
 
+        <!-- ── Right Panel ── -->
         <div class="right-panel">
-            <div class="section-header" style="padding:0 0 12px;">
-                <span class="section-title">Employee Efficiency</span>
+
+            <!-- Employee Efficiency (employees only, no Admin) -->
+            <div class="section-row" style="margin-bottom:0;">
+                <span class="section-lbl">Employee Efficiency</span>
                 <div class="section-line"></div>
             </div>
-            <div id="empTabStrip"></div>
 
-            <div class="chart-label" style="margin-top:4px;">Status Distribution</div>
+            <div class="eff-card">
+                @if (empOnly.Any())
+                {
+                    foreach (var emp in empOnly.OrderByDescending(e => e.ResolvedQueries))
+                    {
+                        int pct           = (int)Math.Round((double)emp.ResolvedQueries / maxResolved * 100);
+                        int totalAssigned = allQueries.Count(q => q.EmployeeName == emp.EmployeeName);
+                        int pending       = allQueries.Count(q => q.EmployeeName == emp.EmployeeName && q.Status != QueryStatus.Solved);
+                        <div class="eff-row">
+                            <div class="eff-header">
+                                <span class="eff-name">@emp.EmployeeName</span>
+                                <span class="eff-count">@emp.ResolvedQueries resolved</span>
+                            </div>
+                            <div class="eff-bar-bg">
+                                <div class="eff-bar-fill" style="width:@pct%"></div>
+                            </div>
+                            <div class="eff-meta">@totalAssigned assigned &nbsp;·&nbsp; @pending pending</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:#94A3B8;font-size:0.8rem;padding:4px;">No employee data yet.</p>
+                }
+            </div>
+
+            <!-- Query Lists TabStrip -->
+            <div class="section-row" style="margin-bottom:0;">
+                <span class="section-lbl">Query Lists</span>
+                <div class="section-line"></div>
+            </div>
+            <div id="queryTabStrip"></div>
+
+            <!-- Donut Chart -->
+            <div class="chart-lbl" style="margin-top:4px;">Status Distribution</div>
             <div class="chart-card">
                 <div id="statusChart"></div>
             </div>
+
         </div>
     </div>
 
@@ -590,108 +326,144 @@
 @section Scripts {
 <script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
 <script>
+    var allData      = @Html.Raw(JsonSerializer.Serialize(allJson,      jsonOpts));
+    var solvedData   = @Html.Raw(JsonSerializer.Serialize(solvedJson,   jsonOpts));
+    var openData     = @Html.Raw(JsonSerializer.Serialize(openJson,     jsonOpts));
+    var progressData = @Html.Raw(JsonSerializer.Serialize(progressJson, jsonOpts));
+
+    /* Employee list for assign dropdown — excludes Admin */
+    var employeeList = [
+        { empId: 0, empName: "— Unassign —" },
+        @foreach (var emp in employees)
+        {
+            <text>{ empId: @emp.EmpId, empName: "@emp.EmpName" },</text>
+        }
+    ];
+
+    var chartCounts = {
+        open:     @openQueries.Count,
+        progress: @progressQueries.Count,
+        solved:   @solvedQueries.Count
+    };
+
 $(document).ready(function () {
 
     var notification = $("#notification").kendoNotification({
         position: { bottom: 24, right: 24 }, autoHideAfter: 3500
     }).data("kendoNotification");
 
-    var allDS      = new kendo.data.DataSource({ transport: { read: { url: "/api/AdminApi/GetAllQueries",           dataType:"json" } }, schema: { model: { id:"queryId", fields: { queryId:{type:"number"}, title:{type:"string"}, description:{type:"string"}, priority:{type:"string"}, status:{type:"string"}, queryDate:{type:"date"}, empId:{type:"number"} } } }, pageSize:8, sort:{field:"queryDate",dir:"desc"} });
-    var solvedDS   = new kendo.data.DataSource({ transport: { read: { url: "/api/AdminApi/GetAllQueriesSolved",     dataType:"json" } }, pageSize:6 });
-    var openDS     = new kendo.data.DataSource({ transport: { read: { url: "/api/AdminApi/GetAllQueriesOpen",       dataType:"json" } }, pageSize:6 });
-    var progressDS = new kendo.data.DataSource({ transport: { read: { url: "/api/AdminApi/GetAllQueriesInProgress", dataType:"json" } }, pageSize:6 });
+    var statusTpl   = "# var sc = statusLabel==='Solved'?'badge-solved':statusLabel==='In Progress'?'badge-progress':'badge-open'; #<span class='badge #= sc #'>#= statusLabel #</span>";
+    var priorityTpl = "# var pc = priorityLabel==='High'?'pri-high':priorityLabel==='Medium'?'pri-medium':'pri-low'; #<span class='#= pc #'>#= priorityLabel #</span>";
 
-    var statusTpl   = "#= status   ? '<span class=\"badge '+(status==='Solved'?'badge-solved':status==='In Progress'?'badge-progress':'badge-open')+'\">' + status   + '</span>' : '' #";
-    var priorityTpl = "#= priority ? '<span class=\"'+(priority==='High'?'pri-high':priority==='Medium'?'pri-medium':'pri-low')+'\">' + priority + '</span>' : '' #";
+    function assignTemplate(dataItem) {
+        var opts = employeeList.map(function(e) {
+            var sel = (dataItem.employeeName && e.empName === dataItem.employeeName) ? ' selected' : '';
+            return '<option value="' + e.empId + '"' + sel + '>' + kendo.htmlEncode(e.empName) + '</option>';
+        }).join('');
+        return '<div class="assign-wrap">'
+             + '<select class="assign-select" data-queryid="' + dataItem.queryId + '">' + opts + '</select>'
+             + '<button class="assign-btn k-button" onclick="doAssign(' + dataItem.queryId + ', this)">Assign</button>'
+             + '</div>';
+    }
 
+    /* ── Main Grid — scrollable, larger rows ── */
     $("#queryGrid").kendoGrid({
-        dataSource: allDS,
-        pageable: { pageSizes: [8,15,25] },
+        dataSource: {
+            data: allData,
+            pageSize: 10,
+            sort: { field: "queryId", dir: "desc" }
+        },
+        pageable: { pageSizes: [10, 20, 50] },
         sortable: true,
         filterable: { mode: "row" },
-        toolbar: [{ template: '<span style="font-size:0.67rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);padding:4px 6px;">All Queries</span>' }],
+        scrollable: { virtual: false },
+        toolbar: [{
+            template: '<span style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);padding:4px 6px;font-weight:700;">All Queries</span>'
+        }],
         columns: [
-            { field:"queryId",   title:"ID",           width:65  },
-            { field:"title",     title:"Title",        width:190 },
-            { field:"priority",  title:"Priority",     width:105, template: priorityTpl },
-            { field:"status",    title:"Status",       width:130, template: statusTpl   },
-            { field:"queryDate", title:"Date",         width:125, template:"#= kendo.toString(kendo.parseDate(queryDate), 'dd MMM yyyy') #" },
-            { field:"empId",     title:"Assigned Emp", width:120 }
+            { field: "queryId",       title: "ID",               width: 65  },
+            { field: "username",      title: "Company",          width: 160 },
+            { field: "title",         title: "Title",            width: 200 },
+            { field: "priorityLabel", title: "Priority",         width: 110, template: priorityTpl },
+            { field: "statusLabel",   title: "Status",           width: 140, template: statusTpl   },
+            { field: "employeeName",  title: "Assigned To",      width: 130 },
+            { field: "comments",      title: "Comments",         width: 160 },
+            { title: "Assign / Unassign",                        width: 230, template: assignTemplate }
         ]
     });
 
-    $("#empTabStrip").kendoTabStrip({
-        animation: { open: { effects:"fadeIn", duration:180 } },
-        select: function(e) {
-            var t = $(e.item).find(".k-link").text().trim();
-            if (t==="Solved")   solvedDS.read();
-            if (t==="Open")     openDS.read();
-            if (t==="Progress") progressDS.read();
-        },
+    /* ── Query Lists TabStrip ── */
+    $("#queryTabStrip").kendoTabStrip({
+        animation: { open: { effects: "fadeIn", duration: 180 } },
         items: [
-            { text:"Efficiency", selected:true, content:'<div id="empListPane" style="min-height:168px;"></div>' },
-            { text:"Solved",   content:'<div id="solvedMini"></div>'   },
-            { text:"Open",     content:'<div id="openMini"></div>'     },
-            { text:"Progress", content:'<div id="progressMini"></div>' }
+            { text: "Solved",   selected: true, content: '<div id="solvedMini"></div>'   },
+            { text: "Open",                     content: '<div id="openMini"></div>'     },
+            { text: "Progress",                 content: '<div id="progressMini"></div>' }
         ]
     });
 
-    function miniGrid(sel, ds) {
+    function miniGrid(sel, data) {
         $(sel).kendoGrid({
-            dataSource: ds, pageable:{pageSizes:[5,10]}, sortable:true,
+            dataSource: { data: data, pageSize: 5 },
+            pageable: true, sortable: true,
             columns: [
-                { field:"queryId", title:"ID",     width:52  },
-                { field:"title",   title:"Title",  width:160 },
-                { field:"status",  title:"Status", template: statusTpl }
+                { field: "queryId",       title: "ID",       width: 50  },
+                { field: "title",         title: "Title",    width: 130 },
+                { field: "priorityLabel", title: "Priority", width: 82,  template: priorityTpl },
+                { field: "statusLabel",   title: "Status",               template: statusTpl   }
             ]
         });
     }
 
-    miniGrid("#solvedMini", solvedDS); miniGrid("#openMini", openDS); miniGrid("#progressMini", progressDS);
+    miniGrid("#solvedMini",   solvedData);
+    miniGrid("#openMini",     openData);
+    miniGrid("#progressMini", progressData);
 
-    function loadStats() {
-        var today = kendo.toString(new Date(), "yyyy-MM-dd");
-        $.when(
-            $.getJSON("/api/AdminApi/GetAllQueries"),
-            $.getJSON("/api/AdminApi/GetAllQueriesSolved"),
-            $.getJSON("/api/AdminApi/GetAllQueriesOpen"),
-            $.getJSON("/api/AdminApi/GetAllQueriesInProgress")
-        ).done(function(all, solved, open, inprog) {
-            var aD=all[0], sD=solved[0], oD=open[0], pD=inprog[0];
-            var isToday = function(q){ return kendo.toString(kendo.parseDate(q.queryDate),"yyyy-MM-dd")===today; };
-            var pendD = oD.concat(pD);
+    /* ── Donut chart ── */
+    $("#statusChart").kendoChart({
+        legend: { visible: true, position: "bottom", labels: { color: "#64748B", font: "600 0.69rem -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" } },
+        seriesDefaults: { type: "donut" },
+        series: [{
+            data: [
+                { category: "Open",        value: chartCounts.open,     color: "#F59E0B" },
+                { category: "In Progress", value: chartCounts.progress, color: "#3B82F6" },
+                { category: "Solved",      value: chartCounts.solved,   color: "#10B981" }
+            ],
+            labels: { visible: false }, holeSize: 52
+        }],
+        tooltip: { visible: true, template: "#= category #: #= value #", background: "#4300af", color: "#fff", border: { color: "#8B5CF6", width: 1 }, font: "0.75rem -apple-system" },
+        chartArea: { background: "transparent", height: 210 },
+        plotArea:  { background: "transparent" }
+    });
 
-            $("#statTotal").text(aD.length);     $("#statTotalToday").text(aD.filter(isToday).length);
-            $("#statSolved").text(sD.length);    $("#statSolvedToday").text(sD.filter(isToday).length);
-            $("#statPending").text(pendD.length);$("#statPendingToday").text(pendD.filter(isToday).length);
-
-            var empMap = {};
-            sD.forEach(function(q){ if(!q.empId) return; if(!empMap[q.empId]) empMap[q.empId]={name:"Employee #"+q.empId,count:0}; empMap[q.empId].count++; });
-            var html = Object.values(empMap).sort(function(a,b){return b.count-a.count;}).map(function(e){
-                var ini = e.name.split(" ").map(function(w){return w[0];}).join("").substring(0,2).toUpperCase();
-                return '<div class="emp-row"><div class="emp-avatar">'+ini+'</div><div class="emp-info"><div class="emp-name">'+kendo.htmlEncode(e.name)+'</div><div class="emp-sub">Queries resolved</div></div><div class="emp-count">'+e.count+'</div></div>';
-            }).join("");
-            $("#empListPane").html(html || '<span style="color:#b0b8cc;font-size:0.8rem;padding:8px 4px;display:block;">No data available yet.</span>');
-
-            $("#statusChart").kendoChart({
-                legend: { visible:true, position:"bottom", labels:{color:"#7c85a0",font:"500 0.69rem 'IBM Plex Sans'"} },
-                seriesDefaults: { type:"donut" },
-                series: [{ data:[
-                    { category:"Open",        value:oD.length, color:"#e8622a" },
-                    { category:"In Progress", value:pD.length, color:"#2a7ae8" },
-                    { category:"Solved",      value:sD.length, color:"#27a96c" }
-                ], labels:{visible:false}, holeSize:52 }],
-                tooltip: { visible:true, template:"#= category #: #= value #", background:"#1a2340", color:"#fff", border:{color:"#2e3d60",width:1}, font:"0.75rem 'IBM Plex Sans'" },
-                chartArea: { background:"transparent", height:200 },
-                plotArea: { background:"transparent" }
-            });
-
-            notification.show("Dashboard loaded successfully.", "success");
-        }).fail(function(){ notification.show("Failed to load dashboard data.", "error"); });
-    }
-
-    loadStats();
-    allDS.read();
+    notification.show("Dashboard loaded.", "success");
 });
+
+/* ── Assign AJAX ── */
+function doAssign(queryId, btn) {
+    var select  = $(btn).closest('.assign-wrap').find('.assign-select');
+    var empId   = parseInt(select.val());
+    var empName = select.find('option:selected').text();
+    var notification = $("#notification").data("kendoNotification");
+
+    $.post('/Admin/AssignEmployee', { queryId: queryId, empId: empId })
+        .done(function(res) {
+            if (res && res.success === false) {
+                notification.show(res.message || "Assignment failed.", "error");
+                return;
+            }
+            notification.show(
+                empId === 0 ? "Employee unassigned." : empName + " assigned successfully.",
+                "success"
+            );
+            /* Update Assigned To column live */
+            var grid = $("#queryGrid").data("kendoGrid");
+            var item = grid.dataSource.get(queryId);
+            if (item) item.set("employeeName", empId === 0 ? "" : empName);
+        })
+        .fail(function() {
+            notification.show("Request failed.", "error");
+        });
+}
 </script>
 }

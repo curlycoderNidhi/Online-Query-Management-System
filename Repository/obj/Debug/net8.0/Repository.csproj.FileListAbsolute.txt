@@ -11,3 +11,16 @@ D:\.NetK All\New folder (2)\Online-Query-Management-System\Repository\obj\Debug\
 D:\.NetK All\New folder (2)\Online-Query-Management-System\Repository\obj\Debug\net8.0\refint\Repository.dll
 D:\.NetK All\New folder (2)\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.pdb
 D:\.NetK All\New folder (2)\Online-Query-Management-System\Repository\obj\Debug\net8.0\ref\Repository.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.deps.json
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.pdb
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.csproj.AssemblyReference.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.GeneratedMSBuildEditorConfig.editorconfig
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.AssemblyInfoInputs.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.AssemblyInfo.cs
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.csproj.CoreCompileInputs.cache
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.sourcelink.json
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\refint\Repository.dll
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.pdb
+D:\casepoint\Query_Management\Online-Query-Management-System\Repository\obj\Debug\net8.0\ref\Repository.dll
