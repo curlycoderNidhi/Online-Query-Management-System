@@ -1,0 +1,16 @@
+D:\Internship\New\Project\Online-Query-Management-System\temp-build-output\Repository.deps.json
+D:\Internship\New\Project\Online-Query-Management-System\temp-build-output\Repository.dll
+D:\Internship\New\Project\Online-Query-Management-System\temp-build-output\Repository.pdb
+D:\Internship\New\Project\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.deps.json
+D:\Internship\New\Project\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.dll
+D:\Internship\New\Project\Online-Query-Management-System\Repository\bin\Debug\net8.0\Repository.pdb
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.csproj.AssemblyReference.cache
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.GeneratedMSBuildEditorConfig.editorconfig
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.AssemblyInfoInputs.cache
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.AssemblyInfo.cs
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.csproj.CoreCompileInputs.cache
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.sourcelink.json
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.dll
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\refint\Repository.dll
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\Repository.pdb
+D:\Internship\New\Project\Online-Query-Management-System\Repository\obj\Debug\net8.0\ref\Repository.dll

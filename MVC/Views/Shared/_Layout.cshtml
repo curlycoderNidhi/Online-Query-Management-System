@@ -1,49 +1,346 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MVC</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>@ViewData["Title"] - MVC</title>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+<!-- Bootstrap -->
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+<!-- Kendo UI CSS -->
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css"/>
+
+<!-- Site CSS -->
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
+
+<!-- ELITE CUSTOM LAYOUT CSS -->
+<style>
+/* ===========================================
+   ELITE NAVBAR - PREMIUM ENTERPRISE DESIGN
+============================================= */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 50%, #06B6D4 100%);
+    --secondary-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(226, 232, 240, 0.6);
+    --shadow-lg: 0 25px 80px rgba(15, 23, 42, 0.15);
+    --shadow-xl: 0 40px 120px rgba(15, 23, 42, 0.22);
+}
+
+/* MAIN LAYOUT */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+}
+
+/* ELITE NAVBAR */
+.navbar {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(24px) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    box-shadow: var(--shadow-lg) !important;
+    padding: 0.75rem 0 !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.navbar.scrolled {
+    padding: 0.5rem 0 !important;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* BRAND LOGO */
+.navbar-brand {
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    background: var(--primary-gradient) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(16px) !important;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3) !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* NAVBAR LINKS */
+.nav-link {
+    padding: 0.875rem 1.25rem !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.025em !important;
+    color: #1e293b !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    margin: 0 0.25rem !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+.nav-link:hover {
+    background: rgba(59, 130, 246, 0.08) !important;
+    color: #1D4ED8 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* ACTIVE LINK */
+.nav-link.active {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* USER GREETING */
+.nav-item.d-flex.align-items-center.me-2 {
+    background: rgba(16, 185, 129, 0.1) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    color: #059669 !important;
+}
+
+/* LOGOUT BUTTON */
+.btn-link.nav-link {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+}
+
+.btn-link.nav-link:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* TOGGLER */
+.navbar-toggler {
+    border: none !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* MAIN CONTENT */
+.container {
+    max-width: 1400px !important;
+    padding: 2rem 1rem !important;
+    margin-top: 1rem !important;
+}
+
+main {
+    min-height: calc(100vh - 200px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    padding: 3rem;
+    transition: all 0.4s ease;
+}
+
+/* FOOTER */
+.footer {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 1px solid var(--glass-border) !important;
+    margin-top: 4rem !important;
+    padding: 2rem 0 !important;
+    box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.08) !important;
+}
+
+.footer a {
+    color: #3B82F6 !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.footer a:hover {
+    color: #1D4ED8 !important;
+    text-decoration: underline !important;
+}
+
+
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.125rem 0 !important;
+        border-radius: 8px !important;
+    }
+    
+    main {
+        padding: 2rem 1.5rem !important;
+        border-radius: 16px !important;
+        margin: 1rem !important;
+    }
+    
+    .container {
+        padding: 1rem !important;
+    }
+}
+
+/* SCROLL ANIMATIONS */
+.navbar {
+    animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+
+/* LOADING OVERLAY */
+.k-loading-mask {
+    background: rgba(248, 250, 252, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* NOTIFICATION */
+.k-notification {
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+</style>
+
+</head>
+
+<body>
+<header>
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" id="mainNavbar">
+    <div class="container-fluid">
+        <!-- LOGO -->
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+            🚀 QMS
+        </a>
+
+        <!-- TOGGLER -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <!-- MAIN NAV -->
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link @(Context.Request.Path.Value == "/" || Context.Request.Path.Value == "/Home" || Context.Request.Path.Value == "/Home/Index" ? "active" : "")" 
+                       asp-controller="Home" asp-action="Index">
+                        🏠 Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Context.Request.Path.Value.Contains("/Privacy") ? "active" : "")" 
+                       asp-controller="Home" asp-action="Privacy">
+                        🔒 Privacy
+                    </a>
+                </li>
+
+                @if (Context.Session.GetString("empid") is not null)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Path.Value.Contains("/Dashboard") ? "active" : "")" 
+                           asp-controller="Employee" asp-action="Dashboard">
+                            📊 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Path.Value.Contains("/MyQueries") ? "active" : "")" 
+                           asp-controller="Employee" asp-action="MyQueries">
+                            📋 My Queries
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <!-- USER ACTIONS -->
+            <ul class="navbar-nav">
+                @if (Context.Session.GetString("empid") is null)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Login">
+                            👤 Login
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item d-flex align-items-center me-2 text-dark">
+                        👋 Hello, <strong>@Context.Session.GetString("empname")</strong>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-controller="Home" asp-action="Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-link nav-link text-dark p-0">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </div>
+</nav>
+</header>
+
+<!-- ENHANCED MAIN CONTENT -->
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<!-- PREMIUM FOOTER -->
+@* <footer class="border-top footer text-muted">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <span>&copy; 2026 - 🚀 MVC Enterprise</span>
+            <div>
+                <a asp-controller="Home" asp-action="Privacy" class="me-3">🔒 Privacy</a>
+                <a href="#" class="me-3">📧 Support</a>
+                <a href="#">📱 API</a>
+            </div>
+        </div>
+    </div>
+</footer> *@
+
+<!-- SCRIPTS -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+<!-- NAVBAR SCROLL EFFECT -->
+<script>
+$(window).scroll(function() {
+    if ($(this).scrollTop() > 50) {
+        $('#mainNavbar').addClass('scrolled');
+    } else {
+        $('#mainNavbar').removeClass('scrolled');
+    }
+});
+
+// Smooth scroll for anchor links
+$(document).ready(function() {
+    $("a[href^='#']").on('click', function(event) {
+        var target = $(this.getAttribute('href'));
+        if (target.length) {
+            event.preventDefault();
+            $('html, body').stop().animate({
+                scrollTop: target.offset().top - 80
+            }, 1000);
+        }
+    });
+});
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

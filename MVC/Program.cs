@@ -1,8 +1,17 @@
+using System.ComponentModel;
+using MVC;
+using MVC.Filters;
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<EmployeeRoleFilter>();
+builder.Services.AddScoped<AdminFilter>();
+builder.Services.AddScoped<IEmployeeInterface, EmployeeRepository>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<NpgsqlConnection>(sp =>
 {
@@ -39,8 +48,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
 app.UseSession();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

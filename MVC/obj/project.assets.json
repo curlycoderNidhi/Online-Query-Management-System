@@ -249,34 +249,19 @@
     ]
   },
   "packageFolders": {
-<<<<<<< HEAD
     "C:\\Users\\ppate\\.nuget\\packages\\": {}
-=======
-    "C:\\Users\\Dell\\.nuget\\packages\\": {}
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj",
+      "projectUniqueName": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\mvc\\MVC.csproj",
       "projectName": "MVC",
-      "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\MVC.csproj",
+      "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\mvc\\MVC.csproj",
       "packagesPath": "C:\\Users\\ppate\\.nuget\\packages\\",
-      "outputPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\MVC\\obj\\",
+      "outputPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\mvc\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
-=======
-      "projectUniqueName": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
-      "projectName": "MVC",
-      "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
-      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-      "outputPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\obj\\",
-      "projectStyle": "PackageReference",
-      "configFilePaths": [
-        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -288,13 +273,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-<<<<<<< HEAD
             "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj": {
               "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj"
-=======
-            "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj": {
-              "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj"
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
             }
           }
         }

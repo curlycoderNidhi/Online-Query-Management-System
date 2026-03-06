@@ -1,0 +1,332 @@
+@model Repository.Models.Query
+
+<div class="query-update-modal">
+    <!-- Header -->
+    <div class="query-header">
+        <div class="query-badge">
+            <span class="badge-icon">📋</span>
+            Query [#@Model.QueryId]
+        </div>
+        <h3 class="query-title">@Model.Title</h3>
+    </div>
+
+    <!-- Form -->
+    <form id="updateForm" class="update-form">
+        <input type="hidden" name="queryId" value="@Model.QueryId" />
+
+        <!-- Status Field -->
+        <div class="form-group status-group">
+            <label class="form-label">
+                <span class="label-icon">📊</span>
+                Status
+            </label>
+            <select name="status" id="status" class="status-select">
+                <option value="InProgress" selected="@(Model.Status.ToString() == "InProgress" ? "selected" : null)">
+                    ⏳ In Progress
+                </option>
+                <option value="Solved" selected="@(Model.Status.ToString() == "Solved" ? "selected" : null)">
+                    ✅ Solved
+                </option>
+            </select>
+        </div>
+
+        <!-- Comments Field -->
+        <div class="form-group comments-group">
+            <label class="form-label">
+                <span class="label-icon">💬</span>
+                Comments
+            </label>
+            <textarea name="comments" class="comments-textarea" rows="4">@Model.Comments</textarea>
+            <div class="char-counter">
+                <span id="charCount">@(Model.Comments?.Length ?? 0)</span> / 500
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button type="button" class="k-button k-button-outline js-close-update cancel-btn">
+                <span class="btn-icon">✕</span>
+                Cancel
+            </button>
+            <button type="button" class="k-button k-primary js-update-query save-btn">
+                <span class="btn-icon">✓</span>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* ===========================================
+   ELITE UPDATE FORM - PERFECT MODAL UI
+============================================= */
+
+/* Root Container */
+.query-update-modal {
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
+    backdrop-filter: blur(24px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    border: 1px solid rgba(226,232,240,0.8);
+    box-shadow: 0 32px 96px rgba(15,23,42,0.25);
+    max-width: 580px;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.query-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 3px solid rgba(59,130,246,0.15);
+}
+
+.query-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: white;
+    padding: 1rem 1.75rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 12px 36px rgba(59,130,246,0.35);
+    margin-bottom: 1.25rem;
+    backdrop-filter: blur(12px);
+}
+
+.badge-icon {
+    font-size: 1.3rem;
+}
+
+.query-title {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.025em;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 2.25rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 0.025em;
+}
+
+.label-icon {
+    font-size: 1.125rem;
+    opacity: 0.85;
+    width: 20px;
+}
+
+/* Status Select */
+.status-select {
+    width: 100%;
+    min-height: 60px;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid rgba(226,232,240,0.7);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.9);
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em;
+    padding-right: 3rem;
+}
+
+.status-select:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 16px 45px rgba(59,130,246,0.15);
+    transform: translateY(-2px);
+}
+
+.status-select:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 20px 60px rgba(59,130,246,0.25);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* Comments Textarea */
+.comments-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 1.5rem;
+    border: 2px solid rgba(226,232,240,0.7);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.9);
+    font-family: inherit;
+    font-size: 0.975rem;
+    line-height: 1.65;
+    color: #374151;
+    resize: vertical;
+    backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.comments-textarea:hover {
+    border-color: #3B82F6;
+}
+
+.comments-textarea:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 20px 60px rgba(59,130,246,0.25);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+/* Character Counter */
+.char-counter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+#charCount {
+    font-weight: 800;
+    color: #3B82F6;
+    min-width: 3ch;
+    text-align: right;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.25rem;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 3px solid rgba(59,130,246,0.15);
+}
+
+/* Cancel Button */
+.cancel-btn {
+    padding: 1rem 2.25rem !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(107,114,128,0.3) !important;
+    background: transparent !important;
+    color: #6b7280 !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+    min-height: 56px !important;
+}
+
+.cancel-btn:hover {
+    background: rgba(107,114,128,0.1) !important;
+    border-color: #6b7280 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 20px 50px rgba(107,114,128,0.25) !important;
+}
+
+/* Save Button */
+.save-btn {
+    padding: 1rem 2.75rem !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8) !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 0.975rem !important;
+    box-shadow: 0 16px 48px rgba(59,130,246,0.4) !important;
+    min-height: 56px !important;
+    transition: all 0.4s cubic-bezier(0.4,0,0.2,1) !important;
+}
+
+.save-btn:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 28px 72px rgba(59,130,246,0.5) !important;
+}
+
+.save-btn:active {
+    transform: translateY(-2px) scale(0.98) !important;
+}
+
+/* Button Icons */
+.btn-icon {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .query-title {
+        font-size: 1.5rem;
+    }
+    
+    .status-select {
+        padding: 1rem;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+    }
+}
+
+/* Character counter animations */
+#charCount.warning {
+    color: #EF4444 !important;
+    animation: pulse 1s infinite;
+}
+
+
+</style>
+
+<script>
+$(document).ready(function() {
+    // Character counter
+    const textarea = $('.comments-textarea');
+    const charCount = $('#charCount');
+    const maxLength = 500;
+    
+    textarea.on('input', function() {
+        let length = $(this).val().length;
+        charCount.text(length);
+        
+        // Color feedback
+        charCount.removeClass('warning');
+        if (length > maxLength * 0.9) {
+            charCount.addClass('warning').css('color', '#EF4444');
+        } else if (length > maxLength * 0.7) {
+            charCount.css('color', '#F59E0B');
+        } else {
+            charCount.css('color', '#3B82F6');
+        }
+        
+        // Auto-resize
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    }).trigger('input');
+    
+    // Status select enhancement
+    $('#status').on('change', function() {
+        $(this).addClass('selected');
+    });
+});
+</script>

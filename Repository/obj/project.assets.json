@@ -231,16 +231,11 @@
     ]
   },
   "packageFolders": {
-<<<<<<< HEAD
     "C:\\Users\\ppate\\.nuget\\packages\\": {}
-=======
-    "C:\\Users\\Dell\\.nuget\\packages\\": {}
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
       "projectUniqueName": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj",
       "projectName": "Repository",
       "projectPath": "D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\Repository.csproj",
@@ -249,16 +244,6 @@
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ppate\\AppData\\Roaming\\NuGet\\NuGet.Config"
-=======
-      "projectUniqueName": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj",
-      "projectName": "Repository",
-      "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj",
-      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-      "outputPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\obj\\",
-      "projectStyle": "PackageReference",
-      "configFilePaths": [
-        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -311,5 +296,13 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file D:\\Internship\\New\\Project\\Online-Query-Management-System\\Repository\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }

@@ -8,10 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Repository
-<<<<<<< HEAD
 build_property.ProjectDir = D:\Internship\New\Project\Online-Query-Management-System\Repository\
-=======
-build_property.ProjectDir = E:\Casepoint_Assignment\Kendo\MyProject\Online-Query-Management-System\Repository\
->>>>>>> d6dae07899328cdab252174ede1262c102f6ee8b
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
