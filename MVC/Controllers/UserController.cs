@@ -10,11 +10,14 @@ namespace MVC.Controllers
     [ServiceFilter(typeof(UserActionFilter))]
     public class UserController : Controller
     {
-        private readonly IUserRepository _repo;
+        private readonly IUserRepository _userrepo;
+        private readonly IQueryRepository _queryrepo;
 
-        public UserController(IUserRepository repo)
+
+        public UserController(IUserRepository repo, IQueryRepository queryRepo)
         {
-            _repo = repo;
+            _userrepo = repo;
+            _queryrepo = queryRepo;
         }
 
         // ---------------- REGISTER ----------------
@@ -31,7 +34,7 @@ namespace MVC.Controllers
             if (!ModelState.IsValid)
                 return View(user);
 
-            int userId = await _repo.Register(user);
+            int userId = await _userrepo.Register(user);
 
             if (userId > 0)
             {
@@ -58,7 +61,7 @@ namespace MVC.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _repo.Login(model);
+            var user = await _userrepo.Login(model);
 
             if (user != null)
             {
@@ -84,7 +87,7 @@ namespace MVC.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "User");
 
-            var queries = await _repo.GetUserQueries(userId.Value);
+            var queries = await _queryrepo.GetByUserId(userId.Value);
 
             return View(queries);
         }
@@ -108,7 +111,7 @@ namespace MVC.Controllers
 
             query.UserId = userId.Value;
 
-            int id = await _repo.SubmitQuery(query);
+            int id = await _queryrepo.Create(query);
 
             if (id > 0)
             {
@@ -131,7 +134,7 @@ namespace MVC.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "User");
 
-            var queries = await _repo.GetUserQueries(userId.Value);
+            var queries = await _queryrepo.GetByUserId(userId.Value);
 
             var query = queries.FirstOrDefault(q => q.QueryId == id);
 
@@ -141,10 +144,10 @@ namespace MVC.Controllers
             return View(query);
         }
 
-        [HttpPost("edit-query")]
+        // [HttpPost("edit-query")]
         public async Task<IActionResult> EditQuery(Query query)
         {
-            bool updated = await _repo.UpdateQuery(query);
+            bool updated = await _queryrepo.Update(query);
 
             if (updated)
             {
@@ -157,12 +160,12 @@ namespace MVC.Controllers
         }
 
 
-        // ---------------- DELETE QUERY ----------------
+        // // ---------------- DELETE QUERY ----------------
 
         [HttpPost("delete-query/{id}")]
         public async Task<IActionResult> DeleteQuery(int id)
         {
-            bool deleted = await _repo.DeleteQuery(id);
+            bool deleted = await _queryrepo.Delete(id);
 
             if (deleted)
                 TempData["Success"] = "Query Deleted";

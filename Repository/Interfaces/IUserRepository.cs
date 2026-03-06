@@ -8,12 +8,12 @@ namespace Repository.Interfaces
 
         Task<User?> Login(LoginModel model);
 
-        Task<int> SubmitQuery(Query query);
+        // Task<int> SubmitQuery(Query query);
 
-        Task<List<Query>> GetUserQueries(int userId);
+        // Task<List<Query>> GetUserQueries(int userId);
 
-        Task<bool> UpdateQuery(Query query);
+        // Task<bool> UpdateQuery(Query query);
 
-        Task<bool> DeleteQuery(int queryId);
+        // Task<bool> DeleteQuery(int queryId);
     }
 }

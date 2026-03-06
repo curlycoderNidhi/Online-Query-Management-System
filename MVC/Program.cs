@@ -21,6 +21,7 @@ builder.Services.AddScoped<NpgsqlConnection>(sp =>
 );
 builder.Services.AddScoped<UserActionFilter>();
 builder.Services.AddScoped<IUserRepository,UserRepository>();
+builder.Services.AddScoped<IQueryRepository, QueryRepository>();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
