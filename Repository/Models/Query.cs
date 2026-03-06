@@ -1,31 +1,34 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using Repository.Models.Enums;
-
-namespace Repository.Models
+namespace querymanagment.Models;
+public class Query
 {
-    public class Query
-    {
-        public int QueryId { get; set; }
+    [Key]
+    public int QueryId { get; set; }
 
-        [Required]
-        public int UserId { get; set; }
+    [Required]
+    public int UserId { get; set; }
 
-        [Required]
-        [StringLength(200)]
-        public string Title { get; set; } = "";
+    [Required(ErrorMessage = "Title is required")]
+    [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
+    public string Title { get; set; }
 
-        public string? Description { get; set; }
+    [StringLength(2000)]
+    public string? Description { get; set; }
 
-        [Required]
-        public Priority Priority { get; set; }
+    [Required(ErrorMessage = "Priority is required")]
+    [RegularExpression("Low|Medium|High", ErrorMessage = "Priority must be Low, Medium, or High")]
+    public string Priority { get; set; }
 
-        public DateTime QueryDate { get; set; }
+//when query is created
+    public DateTime QueryDate { get; set; } = DateTime.Now;
 
-        public int? EmpId { get; set; }
+//assign by admin
+    public int? EmpId { get; set; }
 
-        public QueryStatus Status { get; set; } = QueryStatus.Open;
+    [RegularExpression("Open|In Progress|Solved", ErrorMessage = "Invalid status")]
+    public string Status { get; set; } = "Open";
 
-        public string? Comments { get; set; }
-    }
+//add by employee after solving query
+    public string? Comments { get; set; }
 }

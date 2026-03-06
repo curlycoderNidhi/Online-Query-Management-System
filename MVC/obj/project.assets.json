@@ -249,19 +249,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Dell\\.nuget\\packages\\": {}
+    "C:\\Users\\HP\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
+      "projectUniqueName": "C:\\Users\\HP\\OneDrive\\Desktop\\abc\\Online-Query-Management-System\\MVC\\MVC.csproj",
       "projectName": "MVC",
-      "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\MVC.csproj",
-      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-      "outputPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\MVC\\obj\\",
+      "projectPath": "C:\\Users\\HP\\OneDrive\\Desktop\\abc\\Online-Query-Management-System\\MVC\\MVC.csproj",
+      "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\HP\\OneDrive\\Desktop\\abc\\Online-Query-Management-System\\MVC\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -273,8 +273,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj": {
-              "projectPath": "E:\\Casepoint_Assignment\\Kendo\\MyProject\\Online-Query-Management-System\\Repository\\Repository.csproj"
+            "C:\\Users\\HP\\OneDrive\\Desktop\\abc\\Online-Query-Management-System\\Repository\\Repository.csproj": {
+              "projectPath": "C:\\Users\\HP\\OneDrive\\Desktop\\abc\\Online-Query-Management-System\\Repository\\Repository.csproj"
             }
           }
         }
@@ -288,7 +288,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -304,6 +305,24 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.24, 8.0.24]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[8.0.24, 8.0.24]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.24, 8.0.24]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.24, 8.0.24]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -312,7 +331,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
