@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Repository.Interfaces;
 using Repository.Models;
 
+
 namespace MVC.Controllers
 {
     [Route("user")]
+    [ServiceFilter(typeof(UserActionFilter))]
     public class UserController : Controller
     {
         private readonly IUserRepository _repo;
@@ -62,6 +64,7 @@ namespace MVC.Controllers
             {
                 HttpContext.Session.SetInt32("UserId", user.UserId);
                 HttpContext.Session.SetString("CompanyName", user.CompanyName);
+                HttpContext.Session.SetString("Role", "User");
 
                 return RedirectToAction("Dashboard", "User");
             }

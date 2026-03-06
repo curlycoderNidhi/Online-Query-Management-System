@@ -8,7 +8,7 @@ namespace Repository.Implementations
     public class UserRepository : IUserRepository
     {
         private readonly NpgsqlConnection _connection;
-
+        
         public UserRepository(NpgsqlConnection connection)
         {
             _connection = connection;

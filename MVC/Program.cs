@@ -1,3 +1,4 @@
+using MVC;
 using Npgsql;
 using Repository.Implementations;
 using Repository.Interfaces;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<NpgsqlConnection>(sp =>
 
 }
 );
+builder.Services.AddScoped<UserActionFilter>();
 builder.Services.AddScoped<IUserRepository,UserRepository>();
 builder.Services.AddSession(options =>
 {
