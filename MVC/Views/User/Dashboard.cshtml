@@ -1,0 +1,57 @@
+@model IEnumerable<Repository.Models.Query>
+
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h2>User Dashboard</h2>
+
+<a href="/user/create-query" class="k-button k-primary">Create Query</a>
+
+<br /><br />
+
+<div id="grid"></div>
+
+<script>
+
+var queries = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+$(document).ready(function(){
+
+    $("#grid").kendoGrid({
+
+        dataSource:{
+            data:queries,
+            pageSize:5
+        },
+
+        height:450,
+        sortable:true,
+        pageable:true,
+        filterable:true,
+
+        columns:[
+            { field:"QueryId", title:"ID", width:80 },
+            { field:"Title", title:"Title" },
+            { field:"Description", title:"Description" },
+            { field:"Priority", title:"Priority" },
+            { field:"Status", title:"Status" },
+
+            {
+                title:"Edit",
+                template:"<a class='k-button k-warning' href='/user/edit-query/#=QueryId#'>Edit</a>",
+                width:100
+            },
+
+            {
+                title:"Delete",
+                template:"<form method='post' action='/user/delete-query/#=QueryId#'><button class='k-button k-danger'>Delete</button></form>",
+                width:100
+            }
+        ]
+
+    });
+
+});
+
+</script>

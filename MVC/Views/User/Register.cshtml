@@ -1,0 +1,268 @@
+    @model dynamic
+
+<div class="page-bg">
+
+    <div class="login-card">
+
+        <h2 class="login-title">User Registration</h2>
+
+        <div id="notification"></div>
+
+        <form id="registerForm" method="post" action="/user/register"></form>
+
+        <div class="login-link">
+            Already have an account? 
+            <a href="/user/login">Login</a>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
+
+<style>
+
+body{
+    background: linear-gradient(135deg,#fafeff,#faf1e1);
+}
+
+.page-bg{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.login-card{
+    width:400px;
+    background:white;
+    padding:40px;
+    border-radius:15px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    transition:0.3s;
+}
+
+.login-card:hover{
+    transform:translateY(-5px);
+}
+
+.login-title{
+    text-align:center;
+    margin-bottom:30px;
+    font-weight:600;
+    color:#333;
+}
+
+.k-form-field{
+    margin-bottom:20px;
+}
+
+.k-form-error{
+    color:red !important;
+    font-size:13px;
+}
+
+.k-invalid{
+    border:2px solid red !important;
+}
+
+.k-form-buttons{
+    display:flex;
+    gap:10px;
+   
+    margin-top:15px;
+
+}
+
+.k-button{
+    width:100%;
+    border-radius:8px;
+}
+
+.k-primary{
+    background: transparent !important;
+}
+
+.k-primary:hover{
+    background: orangered !important;
+}
+
+.login-link{
+    text-align:center;
+    margin-top:20px;
+    font-size:14px;
+}
+
+.login-link a{
+    color:#2193b0;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.login-link a:hover{
+    text-decoration:underline;
+}
+
+.k-textbox{
+    border-radius:10px !important;
+    border:2px solid #e0e0e0 !important;
+    padding:12px !important;
+    width:100%;
+    font-size:14px;
+    transition: all 0.3s ease;
+}
+
+.k-textbox:focus{
+    border-color:#2193b0 !important;
+    box-shadow:0 0 8px rgba(33,147,176,0.3);
+}
+
+.k-textbox:hover{
+    border-color:#6dd5ed !important;
+}
+
+.k-form-field label{
+    font-weight:600;
+    color:#444;
+}
+
+.input-icon{
+    position:relative;
+}
+
+.input-icon i{
+    position:absolute !important;
+    top:50%;
+    left:12px;
+    transform:translateY(-50%);
+    color:#999;
+}
+
+.input-icon input{
+    padding-left:35px !important;
+}
+
+
+/* keep icon fixed */
+.input-icon{
+    position: relative;
+}
+
+.input-icon{
+    position:relative;
+}
+
+.input-icon i{
+    position:absolute;
+    top:24px;      /* fixed position instead of 50% */
+    left:12px;
+    color:#999;
+    pointer-events:none;
+}
+
+.input-icon input{
+    padding-left:38px !important;
+}
+.k-button{
+    width:100%;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+   
+    gap:10px;
+}.k-form-error{
+    color:red !important;
+    font-size:13px;
+}.k-form-error{
+    color:red !important;
+    font-size:13px;
+    margin-top:5px;
+    display:block;
+}
+.k-primary,.reset{
+    width: 148px;
+    height: 40px;
+    padding-left: 30px;
+    text-align: center;
+}
+</style>
+
+<script>
+
+$(document).ready(function () {
+
+    var form = $("#registerForm").kendoForm({
+
+        formData: {
+            CompanyName: "",
+            Email: "",
+            Password: ""
+        },
+
+        items: [
+
+        {
+            field: "CompanyName",
+            label: "Company Name",
+            editor: function(container, options){
+                $('<div class="input-icon">'+
+                  '<i class="fa fa-building"></i>'+
+                  '<input required data-required-msg="Company Name is required" class="k-textbox" name="'+options.field+'" placeholder="Enter Company Name"/>'+
+                  '</div>').appendTo(container);
+            }
+        },
+
+        {
+            field: "Email",
+            label: "Email",
+            editor: function(container, options){
+                $('<div class="input-icon">'+
+                  '<i class="fa fa-envelope"></i>'+
+                  '<input required type="email" data-required-msg="Email is required" data-email-msg="Enter valid email" class="k-textbox" name="'+options.field+'" placeholder="Enter Email"/>'+
+                  '</div>').appendTo(container);
+            }
+        },
+
+        {
+            field: "Password",
+            label: "Password",
+            editor: function(container, options){
+                $('<div class="input-icon">'+
+                  '<i class="fa fa-lock"></i>'+
+                  '<input required data-required-msg="Password is required" type="password" class="k-textbox" name="'+options.field+'" placeholder="Enter Password"/>'+
+                  '</div>').appendTo(container);
+            }
+        }
+
+        ],
+
+        buttonsTemplate:
+        '<div class="k-form-buttons">'+
+        '<button class="k-button k-primary" type="submit"><i class="fa fa-user-plus"></i> Register</button>'+
+        '<button class="k-button reset" type="reset"><i class="fa fa-rotate-left"></i> Reset</button>'+
+        '</div>'
+
+    }).data("kendoForm");
+
+
+    // PREVENT PAGE RELOAD IF VALIDATION FAILS
+    $("#registerForm").on("submit", function(e){
+
+        if(!form.validate()){
+            e.preventDefault();
+        }
+
+    });
+
+});
+
+</script>
+
+}
