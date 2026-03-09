@@ -1,0 +1,352 @@
+@model dynamic
+@{
+    ViewData["Title"] = "User Login";
+}
+
+<style>
+/* ===========================================
+   ELITE USER LOGIN - SAME CSS AS EMPLOYEE LOGIN
+   Kendo Form Structure PRESERVED
+============================================= */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(32px);
+    border-radius: 28px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 32px 96px rgba(15, 23, 42, 0.20);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 1rem;
+}
+
+.login-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 48px 120px rgba(15, 23, 42, 0.28);
+}
+
+.login-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    color: white;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.login-card:hover .login-header::before {
+    opacity: 1;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.logo-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.4);
+}
+
+.login-title {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    opacity: 0.95;
+}
+
+.login-body {
+    padding: 2.5rem 2.5rem 2.75rem;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.login-link a {
+    color: #3B82F6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.login-link a:hover {
+    color: #1D4ED8;
+    text-decoration: underline;
+}
+
+/* KENDO FORM ENHANCEMENTS - ELITE STYLING */
+.k-form-field {
+    margin-bottom: 1.9rem;
+}
+
+.k-form-field label {
+    display: block;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+/* Input Icon Styling */
+.input-icon {
+    position: relative;
+}
+
+.input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.1rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.input-icon input.k-textbox {
+    padding-left: 3rem !important;
+}
+
+/* Kendo TextBox - ELITE STYLING */
+.k-textbox,
+.k-textbox .k-input-inner {
+    width: 100% !important;
+    height: 56px !important;
+    border-radius: 20px !important;
+    background: rgba(255,255,255,0.85) !important;
+    border: 2px solid rgba(226,232,240,0.7) !important;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: all .3s ease !important;
+    font-size: 1rem !important;
+    color: #374151 !important;
+    padding: 0 1rem !important;
+}
+
+.k-textbox:hover,
+.k-textbox .k-input-inner:hover {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 16px 45px rgba(59,130,246,.15);
+}
+
+.k-textbox:focus,
+.k-textbox.k-focus,
+.k-textbox.k-focus .k-input-inner {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 20px 60px rgba(59,130,246,.25);
+}
+
+/* Clear Button */
+.k-input-inner-clear,
+.k-clear-button {
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    background: rgba(107, 114, 128, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.k-input-inner-clear:hover,
+.k-clear-button:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Kendo Form Error - ELITE STYLING */
+.k-form-error,
+.field-validation-error {
+    display: block !important;
+    margin-top: 10px !important;
+    padding: 6px 10px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #ef4444 !important;
+    background: rgba(239,68,68,.08) !important;
+    border-left: 4px solid #ef4444 !important;
+    border-radius: 8px !important;
+    animation: fadeIn .2s ease !important;
+}
+
+
+
+/* Kendo Form Buttons - ELITE STYLING */
+.k-form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.k-button.k-primary {
+    flex: 1;
+    height: 60px !important;
+    border-radius: 20px !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
+.k-button.k-primary:hover:not(.k-state-disabled) {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 28px 72px rgba(59, 130, 246, 0.5) !important;
+}
+
+.k-button.k-primary:active:not(.k-state-disabled) {
+    transform: translateY(-2px) scale(0.98) !important;
+}
+
+.k-button.reset {
+    height: 60px !important;
+    border-radius: 20px !important;
+    border: 2px solid rgba(226,232,240,0.7) !important;
+    background: transparent !important;
+    color: #374151 !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+}
+
+.k-button.reset:hover:not(.k-state-disabled) {
+    background: rgba(107, 114, 128, 0.1) !important;
+    border-color: #3B82F6 !important;
+    color: #3B82F6 !important;
+}
+
+/* Notification */
+#notification {
+    min-height: 20px;
+    margin-bottom: 1rem;
+}
+</style>
+
+<div class="login-container">
+    <div class="login-card" id="loginCard">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="logo-container">
+                <div class="logo-icon">👤</div>
+            </div>
+            <h1 class="login-title">User Portal</h1>
+            <p class="login-subtitle">Secure Login Required</p>
+        </div>
+
+        <!-- Form Body -->
+        <div class="login-body">
+            <div id="notification"></div>
+            
+            <!-- Kendo Form - UNCHANGED STRUCTURE -->
+            <form id="loginForm" method="post" action="/user/login"></form>
+            
+            <div class="login-link">
+                Don't have an account? 
+                <a href="/user/register">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    
+    <script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
+
+    <!-- YOUR ORIGINAL KENDO FORM SCRIPT - UNCHANGED -->
+    <script>
+    $(document).ready(function () {
+        var form = $("#loginForm").kendoForm({
+            formData: {
+                Email: "",
+                Password: ""
+            },
+            items: [
+                {
+                    field: "Email",
+                    label: "Email",
+                    editor: function(container, options){
+                        $('<div class="input-icon">'+
+                          '<i class="fa fa-envelope"></i>'+
+                          '<input required type="email" data-required-msg="Email is required" data-email-msg="Enter valid email" class="k-textbox" name="'+options.field+'" placeholder="Enter Email"/>'+
+                          '</div>').appendTo(container);
+                    }
+                },
+                {
+                    field: "Password",
+                    label: "Password",
+                    editor: function(container, options){
+                        $('<div class="input-icon">'+
+                          '<i class="fa fa-lock"></i>'+
+                          '<input required data-required-msg="Password is required" type="password" class="k-textbox" name="'+options.field+'" placeholder="Enter Password"/>'+
+                          '</div>').appendTo(container);
+                    }
+                }
+            ],
+            buttonsTemplate:
+            '<div class="k-form-buttons">'+
+            '<button class="k-button k-primary" type="submit"><i class="fa fa-user-plus"></i> Login</button>'+
+            '<button class="k-button reset" type="reset"><i class="fa fa-rotate-left"></i> Reset</button>'+
+            '</div>'
+        }).data("kendoForm");
+
+        $("#loginForm").on("submit", function(e){
+            if(!form.validate()){
+                e.preventDefault();
+            }
+        });
+    });
+    </script>
+}

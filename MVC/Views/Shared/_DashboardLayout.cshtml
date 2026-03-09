@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom">
+
+<div class="container-fluid">
+
+<a class="navbar-brand">Query System</a>
+
+<ul class="navbar-nav">
+
+  <li>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Logout</a>
+                        </li>
+
+</ul>
+
+</div>
+
+</nav>
+
+</header>
+
+<div class="container mt-4">
+
+@RenderBody()
+
+</div>
+
+</body>
+
+</html>

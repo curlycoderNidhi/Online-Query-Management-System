@@ -1,0 +1,357 @@
+@{
+    Layout = "_EmpLayout";
+    ViewData["Title"] = "Employee Dashboard";
+}
+
+<!-- Premium Kendo UI AppBar -->
+<div class="k-appbar k-appbar-stretch k-rounded-top dashboard-appbar" style="margin: -1.5rem -1.5rem 2rem -1.5rem;">
+    <div class="k-appbar-section k-appbar-section-start">
+        <h2 class="k-text-white mb-0 dashboard-title" style="text-align:center;" >Employee Dashboard</h2>
+    </div>
+    <div class="k-appbar-section k-appbar-section-end dashboard-logout-wrap">
+        <form method="post" action="/Logout" style="margin:0;">
+            <button type="submit" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base dashboard-logout-btn">Logout</button>
+        </form>
+    </div>
+</div>
+<a class="nav-button" 
+        style="display: inline-block; 
+               padding: 12px 24px; 
+               margin: 8px; 
+               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+               color: white; 
+               border: none; 
+               border-radius: 8px; 
+               font-size: 16px; 
+               font-weight: 500; 
+               text-decoration: none; 
+               cursor: pointer; 
+               box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); 
+               transition: all 0.3s ease; 
+               text-align: center; 
+               min-width: 140px;"
+        asp-area="" 
+        asp-controller="Employee" 
+        asp-action="MyQueries"
+        title="View My Queries">
+    <i class="fas fa-sign-in-alt" 
+       style="margin-right: 8px; font-size: 18px;"></i>
+    My Queries
+</a>
+
+<div class="dashboard-container">
+    <!-- Elite Stats Grid -->
+    <div class="stats-grid-container">
+        <div class="stats-grid">
+            <!-- Total Resolved - Primary Blue -->
+            <div class="metric-card primary-card hover-card">
+                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
+                    <div class="metric-icon primary-icon">✓</div>
+                    <div class="metric-title">Total Resolved</div>
+                    <div class="metric-value">@ViewBag.Resolved</div>
+                </div>
+            </div>
+
+            <!-- Today Resolved - Success Green -->
+            <div class="metric-card success-card hover-card">
+                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
+                    <div class="metric-icon success-icon">📅</div>
+                    <div class="metric-title">Today Resolved</div>
+                    <div class="metric-value">@ViewBag.TodayResolved</div>
+                </div>
+            </div>
+
+            <!-- Pending Queries - Warning Orange -->
+            <div class="metric-card warning-card hover-card">
+                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
+                    <div class="metric-icon warning-icon">⏰</div>
+                    <div class="metric-title">Pending Queries</div>
+                    <div class="metric-value">@ViewBag.Pending</div>
+                </div>
+            </div>
+
+            <!-- Total Queries - Info Cyan -->
+            <div class="metric-card info-card hover-card">
+                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
+                    <div class="metric-icon info-icon">📋</div>
+                    <div class="metric-title">Total Queries</div>
+                    <div class="metric-value">@ViewBag.Assigned</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ultimate Performance Card -->
+    <div class="performance-card">
+        <div class="performance-header">
+            <div class="performance-left">
+                <div class="performance-label" style="text-align:center; font-weight:bold;">
+                    Performance Score
+                </div>
+
+                <div class="performance-score" style="text-align:center;">
+                    @ViewBag.PerformancePercent%
+                </div>
+            </div>
+            @* <div class="performance-ratio">@ViewBag.Resolved / @ViewBag.Assigned</div> *@
+        </div>
+        
+        @* <div id="performanceProgress" class="performance-progress"></div>
+        <div id="sparklineChart" class="sparkline-preview"></div> *@
+    </div>
+
+    <!-- Professional Activity Grid -->
+    @* <div class="activity-section">
+        <div class="activity-header">
+            <h3 class="activity-title">Recent Activity</h3>
+        </div>
+        <div id="activityGrid" class="activity-grid"></div>
+    </div> *@
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Premium ProgressBar
+    $("#performanceProgress").kendoProgressBar({
+        value: @Html.Raw(Json.Serialize(ViewBag.PerformancePercent ?? 0)),
+        themeColor: "success",
+        animation: { duration: 2000 }
+    });
+
+    // Elegant Sparkline
+    $("#sparklineChart").kendoSparkline({
+        type: "line",
+        data: [25, 45, 32, 67, @Html.Raw(Json.Serialize(ViewBag.PerformancePercent ?? 0))],
+        line: { color: "#10B981", width: 3 },
+        markers: { size: 3, background: "#10B981" }
+    });
+
+    // Pro Activity Grid
+    $("#activityGrid").kendoGrid({
+        dataSource: {
+            data: [
+                { id: 1, title: "Login Issue", status: "Solved", priority: "High", time: "2 min ago" },
+                { id: 2, title: "Report Error", status: "In Progress", priority: "Medium", time: "1 hr ago" },
+                { id: 3, title: "Data Export", status: "Solved", priority: "Low", time: "3 hrs ago" }
+            ]
+        },
+        height: 400,
+        scrollable: true,
+        sortable: true,
+        columns: [
+            { field: "id", title: "ID", width: 60 },
+            { field: "title", title: "Activity" },
+            { field: "status", title: "Status", width: 110, template: "#= statusTemplate(data.status) #" },
+            { field: "priority", title: "Priority", width: 100 },
+            { field: "time", title: "Time", width: 110 }
+        ]
+    });
+
+    // Elite Hover Effects
+    $(".hover-card").hover(
+        function() { 
+            $(this).addClass("elevated").css({ 
+                transform: "translateY(-15px) scale(1.03)",
+                boxShadow: "0 35px 70px rgba(0,0,0,0.3)"
+            }); 
+        },
+        function() { 
+            $(this).removeClass("elevated").css({ 
+                transform: "none", 
+                boxShadow: "0 15px 35px rgba(0,0,0,0.12)"
+            }); 
+        }
+    );
+});
+
+function statusTemplate(status) {
+    const colors = { "Solved": "success", "In Progress": "warning" };
+    return `<span class="status-chip ${colors[status] || 'info'}">${status}</span>`;
+}
+</script>
+}
+
+<style>
+/* ===========================================
+   ELITE DASHBOARD CSS - PROFESSIONAL GRADE
+============================================= */
+
+/* Root Variables for Perfect Colors */
+:root {
+    --primary: #3B82F6;
+    --primary-dark: #1D4ED8;
+    --success: #10B981;
+    --success-dark: #059669;
+    --warning: #F59E0B;
+    --warning-dark: #D97706;
+    --info: #0EA5E9;
+    --info-dark: #0284C7;
+    --secondary: #64748B;
+    --shadow: rgba(0,0,0,0.12);
+    --shadow-hover: rgba(0,0,0,0.25);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* AppBar - Perfect Gradient */
+.dashboard-appbar{
+    background: linear-gradient(to right, #b39fff, #4300af); /* Blue → Purple */
+    padding: 12px 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-logout-wrap {
+    margin-left: auto;
+}
+
+.dashboard-logout-btn {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #d1d5db !important;
+    font-weight: 600 !important;
+}
+
+/* Stats Grid - Perfect Layout */
+.stats-grid-container {
+    position: relative;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards - Elite Design */
+.metric-card {
+    background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+    border: 2px solid transparent;
+    border-radius: 2rem;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 15px 35px var(--shadow);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    opacity: 0;
+    transition: all 0.5s ease;
+    z-index: 1;
+}
+
+.metric-card:hover::before {
+    opacity: 1;
+}
+
+/* Card Content */
+.metric-card .k-card-body {
+    position: relative;
+    z-index: 2;
+    padding: 3rem 2rem !important;
+}
+
+/* Metric Icons - Perfect Colors */
+.metric-icon {
+    font-size: 4rem;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.primary-icon { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+.success-icon { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; }
+.warning-icon { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); color: white; }
+.info-icon { background: linear-gradient(135deg, var(--info), var(--info-dark)); color: white; }
+
+/* Metric Typography */
+.metric-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1rem;
+    opacity: 0.85;
+}
+
+.metric-value {
+    font-size: 3.8rem;
+    font-weight: 900;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Performance Card - Ultimate Design */
+.performance-card {
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+    border: 2px solid rgba(59,130,246,0.2);
+    border-radius: 2.5rem;
+    box-shadow: 0 25px 60px var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.performance-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(16,185,129,0.1), transparent);
+    border-radius: 50%;
+}
+
+/* Performance Header */
+.performance-header {
+    position: relative;
+    z-index: 2;
+}
+
+.performance-score {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--info));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Grid Styling */
+.activity-grid .k-grid-header {
+    background: linear-gradient(90deg, #F1F5F9, #E2E8F0);
+    border-bottom: 3px solid var(--primary);
+}
+
+.activity-grid .k-grid tr:hover {
+    background: linear-gradient(90deg, rgba(59,130,246,0.08), rgba(16,185,129,0.08));
+}
+
+/* Hover States */
+.hover-card.elevated {
+    border-color: rgba(59,130,246,0.4) !important;
+    transform: translateY(-15px) scale(1.03) !important;
+}
+
+</style>

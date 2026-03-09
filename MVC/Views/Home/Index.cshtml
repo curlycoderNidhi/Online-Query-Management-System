@@ -1,0 +1,236 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+/* ===========================================
+   ELITE HOMEPAGE - MATCHING LOGIN DESIGN SYSTEM
+============================================= */
+
+.hero-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(59,130,246,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(16,185,129,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(236,72,153,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-card {
+    width: 100%;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(32px);
+    border-radius: 28px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 32px 96px rgba(15, 23, 42, 0.20);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
+}
+
+.hero-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 48px 120px rgba(15, 23, 42, 0.28);
+}
+
+.hero-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    color: white;
+    padding: 4rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.hero-card:hover .hero-header::before {
+    opacity: 1;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.logo-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4);
+    animation: pulse 2s infinite;
+}
+
+
+.hero-title {
+    margin: 0;
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    opacity: 0.98;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    margin: 1.5rem 0 0;
+    font-size: 1.3rem;
+    opacity: 0.85;
+    font-weight: 400;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+.hero-body {
+    padding: 4rem 3rem 4.5rem;
+    text-align: center;
+}
+
+/* Navigation Buttons Grid */
+.nav-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 3rem auto 2rem;
+    max-width: 600px;
+}
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    position: relative;
+    overflow: hidden;
+    height: 72px;
+    justify-content: center;
+}
+
+.nav-button:nth-child(2) {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    box-shadow: 0 16px 48px rgba(16, 185, 129, 0.4);
+}
+
+.nav-button:nth-child(2):hover {
+    box-shadow: 0 28px 72px rgba(16, 185, 129, 0.5);
+}
+
+.nav-button:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 28px 72px rgba(59, 130, 246, 0.5);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-button:active {
+    transform: translateY(-3px) scale(0.99);
+}
+
+.nav-button i {
+    font-size: 1.25rem;
+}
+
+
+    
+    .hero-body {
+        padding: 2.5rem 2rem 3rem;
+    }
+    
+    .hero-header {
+        padding: 3rem 2rem;
+    }
+    
+    .nav-buttons-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        max-width: 100%;
+    }
+    
+    .nav-button {
+        padding: 1.125rem 1.5rem;
+        height: 64px;
+        font-size: 1rem;
+    }
+}
+</style>
+
+<div class="hero-container">
+    <div class="hero-card">
+        <!-- Header -->
+        <div class="hero-header">
+            <div class="logo-container">
+                <div class="logo-icon">🚀</div>
+            </div>
+            <h1 class="hero-title">Welcome Query Portal</h1>
+            <p class="hero-subtitle">Your gateway to seamless employee and user management</p>
+        </div>
+
+        <!-- Body -->
+        <div class="hero-body">
+            <div class="nav-buttons-grid">
+                <a class="nav-button" asp-area="" asp-controller="User" asp-action="Login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    User Login
+                </a>
+                <a class="nav-button" asp-area="" asp-controller="Employee" asp-action="Login">
+                    <i class="fas fa-user-tie"></i>
+                    Employee Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+}

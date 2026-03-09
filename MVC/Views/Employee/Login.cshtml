@@ -1,0 +1,386 @@
+@model Repository.Models.EmployeeLoginModel
+@{
+    ViewData["Title"] = "Employee Login";
+}
+
+<style>
+/* ===========================================
+   ELITE EMPLOYEE LOGIN - FIXED & PERFECTED
+============================================= */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(32px);
+    border-radius: 28px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 32px 96px rgba(15, 23, 42, 0.20);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 48px 120px rgba(15, 23, 42, 0.28);
+}
+
+.login-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    color: white;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.login-card:hover .login-header::before {
+    opacity: 1;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.logo-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.4);
+}
+
+.login-title {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    opacity: 0.95;
+}
+
+.login-subtitle {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.login-body {
+    padding: 2.5rem 2.5rem 2.75rem;
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+
+.k-textbox {
+    width: 100% !important;
+    height: 56px !important;
+    border-radius: 20px !important;
+    background: rgba(255,255,255,0.85) !important;
+    border: 2px solid rgba(226,232,240,0.7) !important;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: all .3s ease;
+}
+
+.k-textbox .k-input-inner {
+    border: none !important;
+    background: transparent !important;
+    height: 100% !important;
+    padding: 0 1rem !important;
+    font-size: 1rem !important;
+    color: #374151 !important;
+    box-shadow: none !important;
+}
+
+.k-textbox:hover {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 16px 45px rgba(59,130,246,.15);
+}
+
+.k-textbox.k-focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 20px 60px rgba(59,130,246,.25);
+}
+
+/* Clear Button Fix */
+.k-input-inner-clear,
+.k-clear-button {
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    background: rgba(107, 114, 128, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.k-input-inner-clear:hover,
+.k-clear-button:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Validation Error */
+/* Validation Error Styling */
+/* validation container spacing */
+.form-group {
+    margin-bottom: 1.9rem;
+}
+
+/* error message */
+.field-validation-error {
+    display: block;
+    margin-top: 10px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ef4444;
+    background: rgba(239,68,68,.08);
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+}
+
+/* hide when no error */
+.field-validation-valid {
+    display: none;
+}
+
+.field-validation-error{
+    animation: fadeIn .2s ease;
+}
+
+@@keyframes fadeIn{
+    from{opacity:0;transform:translateY(-4px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+/* FIXED Login Button */
+#loginBtn.k-button {
+    width: 100% !important;
+    height: 60px !important;
+    border-radius: 20px !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+#loginBtn.k-button:hover:not(.k-state-disabled) {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 28px 72px rgba(59, 130, 246, 0.5) !important;
+}
+
+#loginBtn.k-button:active:not(.k-state-disabled) {
+    transform: translateY(-2px) scale(0.98) !important;
+}
+
+/* Loading State */
+#loginBtn.k-state-disabled,
+#loginBtn[data-loading] {
+    opacity: 0.8 !important;
+    cursor: not-allowed !important;
+}
+
+/* Validation Summary */
+.validation-summary-errors ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.validation-summary-errors ul li {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #EF4444;
+    font-weight: 600;
+}
+
+
+    
+    .login-card {
+        margin: 1rem;
+        border-radius: 20px;
+    }
+    
+    .login-body {
+        padding: 2rem 1.75rem;
+    }
+}
+</style>
+
+<div class="login-container">
+    <div class="login-card" id="loginCard">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="logo-container">
+                <div class="logo-icon">👤</div>
+            </div>
+            <h1 class="login-title">Employee Portal</h1>
+            <p class="login-subtitle">Secure Login Required</p>
+        </div>
+
+        <!-- Form -->
+        <div class="login-body">
+            <form asp-action="Login" asp-controller="Employee" method="post" id="loginForm">
+                @Html.AntiForgeryToken()
+                
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors k-text-error"></div>
+                
+                <!-- Employee Name -->
+                <div class="form-group">
+                    <label asp-for="EmpName" class="form-label"></label>
+                    <input asp-for="EmpName" 
+                           id="empNameInput" 
+                           placeholder="Enter your full name" 
+                           autocomplete="name"
+                           class="k-textbox" />
+                    <span asp-validation-for="EmpName" class="field-validation-error"></span>
+                </div>
+                
+                <!-- Password -->
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" 
+                           id="passwordInput" 
+                           type="password" 
+                           placeholder="Enter your password"
+                           autocomplete="current-password"
+                           class="k-textbox" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+                
+                <!-- Login Button -->
+                <button id="loginBtn" 
+                        type="submit" 
+                        class="k-button k-button-primary k-button-stretch">
+                    <span class="login-text">Log In</span>
+                    <span class="login-loading" style="display: none;">Loging In...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+<script>
+$(function () {
+
+    // Disable validation on page load
+    $("#loginForm").removeData("validator");
+    $("#loginForm").removeData("unobtrusiveValidation");
+    $.validator.unobtrusive.parse("#loginForm");
+
+    // Keep server-side login errors visible after a failed submit
+    if ($(".validation-summary-errors li").length === 0) {
+        $(".validation-summary-errors").hide();
+    }
+
+    // Kendo TextBox
+    $("#empNameInput").kendoTextBox({
+        clearButton: true,
+        placeholder: "Enter your full name"
+    });
+
+    $("#passwordInput").kendoTextBox({
+        clearButton: true
+    });
+
+    // Kendo Button
+    $("#loginBtn").kendoButton({
+        themeColor: "primary",
+        size: "large"
+    });
+
+    // Show validation only after submit
+    $("#loginForm").on("submit", function () {
+
+        $(".field-validation-error").show();
+        $(".validation-summary-errors").show();
+
+        var btn = $("#loginBtn").data("kendoButton");
+
+        if (btn) {
+            btn.enable(false);
+            $(".login-text").hide();
+            $(".login-loading").show();
+        }
+
+        setTimeout(function () {
+            if (btn) {
+                btn.enable(true);
+                $(".login-text").show();
+                $(".login-loading").hide();
+            }
+        }, 5000);
+    });
+
+    // Enter key login
+    $("#empNameInput, #passwordInput").on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#loginForm").submit();
+        }
+    });
+
+    // Autofocus
+    $("#empNameInput").focus();
+
+});
+</script>
+}

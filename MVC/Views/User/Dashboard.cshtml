@@ -1,0 +1,293 @@
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@model IEnumerable<Repository.Models.Query>
+
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    ViewData["Title"] = "User Dashboard";
+}
+
+<!-- KENDO UI 2021 CDN -->
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css"/>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css"/>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
+
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+
+:root{
+--bg:#f8fafc;
+--card:#ffffff;
+--accent:#2563eb;
+--accent2:#1d4ed8;
+--success:#10b981;
+--warning:#f59e0b;
+--danger:#ef4444;
+--text:#0f172a;
+--soft:#64748b;
+--border:#e2e8f0;
+--shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* DASHBOARD STATS */
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:20px;
+margin-bottom:30px;
+}
+
+.stat-card{
+background:var(--card);
+border-radius:20px;
+padding:30px;
+box-shadow:var(--shadow);
+border:1px solid var(--border);
+text-align:center;
+transition:.3s;
+}
+
+.stat-card:hover{
+transform:translateY(-6px);
+box-shadow:0 20px 40px rgba(0,0,0,.12);
+}
+
+.stat-icon{
+font-size:42px;
+margin-bottom:10px;
+}
+
+.stat-number{
+font-size:38px;
+font-weight:800;
+color:var(--accent);
+}
+
+/* BUTTON */
+
+.k-primary{
+background:linear-gradient(135deg,var(--accent),var(--accent2))!important;
+border:none!important;
+color:white!important;
+border-radius:12px!important;
+padding:10px 22px!important;
+font-weight:600!important;
+}
+
+.k-primary:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(37,99,235,.35);
+}
+
+/* GRID */
+
+.k-grid{
+border-radius:16px!important;
+overflow:hidden!important;
+border:1px solid var(--border)!important;
+box-shadow:var(--shadow)!important;
+}
+
+.k-grid-header{
+background:#f1f5f9!important;
+border-bottom:2px solid var(--border)!important;
+}
+
+.k-grid th{
+font-size:12px!important;
+font-weight:700!important;
+letter-spacing:.08em!important;
+text-transform:uppercase!important;
+color:var(--soft)!important;
+}
+
+.k-grid td{
+padding:14px!important;
+}
+
+.k-grid tr:nth-child(even){
+background:#fafafa!important;
+}
+
+.k-grid tr:hover{
+background:#eff6ff!important;
+}
+
+/* BUTTONS */
+
+.k-warning{
+background:#f59e0b!important;
+border:none!important;
+color:white!important;
+border-radius:8px!important;
+}
+
+.k-danger{
+background:#ef4444!important;
+border:none!important;
+color:white!important;
+border-radius:8px!important;
+}
+
+/* PAGER */
+
+.k-pager-wrap{
+background:#f8fafc!important;
+border-top:1px solid var(--border)!important;
+}
+
+.k-pager-numbers .k-state-selected{
+background:var(--accent)!important;
+color:white!important;
+border-radius:6px!important;
+}
+
+</style>
+
+<div class="dash-shell">
+
+<div class="content-area">
+
+@{
+    var totalQueries = Model.Count();
+    var solvedQueries = Model.Count(q => q.Status == Repository.Models.Enums.QueryStatus.Solved);
+    var pendingQueries = Model.Count(q => q.Status != Repository.Models.Enums.QueryStatus.Solved);
+}
+
+<h2>User Dashboard</h2>
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<div class="stat-icon">📋</div>
+<div class="stat-number">@totalQueries</div>
+<div>Total Queries</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-icon">✅</div>
+<div class="stat-number">@solvedQueries</div>
+<div>Solved</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-icon">⏳</div>
+<div class="stat-number">@pendingQueries</div>
+<div>Pending</div>
+</div>
+
+</div>
+
+<a href="/user/create-query" class="k-button k-primary">
+Create New Query
+</a>
+
+<br/><br/>
+
+<div id="grid"></div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+var queries = @Html.Raw(JsonSerializer.Serialize(
+    Model,
+    new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } }
+));
+
+$(document).ready(function(){
+
+$("#grid").kendoGrid({
+
+dataSource:{
+data:queries,
+pageSize:5
+},
+
+height:450,
+sortable:true,
+pageable:true,
+
+columns:[
+{ field:"QueryId", title:"ID", width:80 },
+{ field:"Title", title:"Title" },
+{ field:"Description", title:"Description" },
+{ field:"Priority", title:"Priority" },
+{ field:"Status", title:"Status" },
+
+{
+title:"Edit",
+template:"<a class='k-button k-warning' href='/user/edit-query/#=QueryId#'>Edit</a>",
+width:100
+},
+
+{
+title:"Delete",
+template:"<button class='k-button k-danger delete-btn' data-id='#=QueryId#'>Delete</button>",
+width:100
+}
+
+]
+
+});
+
+$(document).on('click','.delete-btn',function(e){
+
+e.preventDefault();
+
+var queryId=$(this).data('id');
+
+Swal.fire({
+title:'Confirm Delete',
+text:'This action cannot be undone!',
+icon:'warning',
+showCancelButton:true,
+confirmButtonText:'Delete',
+confirmButtonColor:'#ef4444'
+}).then((result)=>{
+
+if(result.isConfirmed){
+
+$.ajax({
+
+url:`/user/delete-query/${queryId}`,
+type:'POST',
+
+success:function(){
+
+Swal.fire({
+icon:'success',
+title:'Deleted',
+timer:1500,
+showConfirmButton:false
+});
+
+setTimeout(()=>location.reload(),800)
+
+},
+
+error:function(){
+
+Swal.fire({
+icon:'error',
+title:'Delete failed'
+});
+
+}
+
+})
+
+}
+
+})
+
+});
+
+});
+</script>
