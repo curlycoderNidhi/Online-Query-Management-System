@@ -35,3 +35,4 @@ C:\Users\daksh\Desktop\Casepoint\QueryMangmentSystem\MVC\obj\Debug\net8.0\refint
 C:\Users\daksh\Desktop\Casepoint\QueryMangmentSystem\MVC\obj\Debug\net8.0\MVC.pdb
 C:\Users\daksh\Desktop\Casepoint\QueryMangmentSystem\MVC\obj\Debug\net8.0\MVC.genruntimeconfig.cache
 C:\Users\daksh\Desktop\Casepoint\QueryMangmentSystem\MVC\obj\Debug\net8.0\ref\MVC.dll
+C:\Users\daksh\Desktop\Casepoint\QueryMangmentSystem\MVC\bin\Debug\net8.0\BCrypt.Net-Next.dll

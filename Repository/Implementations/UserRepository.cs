@@ -1,3 +1,4 @@
+using BCrypt.Net;
 using Npgsql;
 using Repository.Interfaces;
 using Repository.Models;
@@ -8,14 +9,13 @@ namespace Repository.Implementations
     public class UserRepository : IUserRepository
     {
         private readonly NpgsqlConnection _connection;
-        
+
         public UserRepository(NpgsqlConnection connection)
         {
             _connection = connection;
         }
 
         // ---------------- REGISTER ----------------
-
         public async Task<int> Register(User user)
         {
             try
@@ -25,13 +25,16 @@ namespace Repository.Implementations
                                 VALUES (@CompanyName, @Email, @Password)
                                 RETURNING c_userid";
 
+                // 🔐 HASH PASSWORD
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
                 await _connection.OpenAsync();
 
                 using var cmd = new NpgsqlCommand(query, _connection);
 
                 cmd.Parameters.AddWithValue("@CompanyName", user.CompanyName);
                 cmd.Parameters.AddWithValue("@Email", user.Email);
-                cmd.Parameters.AddWithValue("@Password", user.Password);
+                cmd.Parameters.AddWithValue("@Password", hashedPassword);
 
                 int userId = (int)await cmd.ExecuteScalarAsync();
 
@@ -54,21 +57,28 @@ namespace Repository.Implementations
         {
             try
             {
-                string query = @"SELECT c_userid, c_companyname, c_email
+                string query = @"SELECT c_userid, c_companyname, c_email, c_password
                                  FROM t_users
-                                 WHERE c_email = @Email AND c_password = @Password";
+                                 WHERE c_email = @Email";
 
                 await _connection.OpenAsync();
 
                 using var cmd = new NpgsqlCommand(query, _connection);
 
                 cmd.Parameters.AddWithValue("@Email", model.Email);
-                cmd.Parameters.AddWithValue("@Password", model.Password);
 
                 using var reader = await cmd.ExecuteReaderAsync();
 
                 if (await reader.ReadAsync())
                 {
+                    string hashedPassword = reader.GetString(3);
+
+                    // 🔐 VERIFY PASSWORD
+                    bool isValid = BCrypt.Net.BCrypt.Verify(model.Password, hashedPassword);
+
+                    if (!isValid)
+                        return null;
+
                     return new User
                     {
                         UserId = reader.GetInt32(0),
