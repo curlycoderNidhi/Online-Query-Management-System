@@ -1,0 +1,72 @@
+@using System.Linq
+@model List<Repository.Models.AdminQuery>
+
+@{
+    var queries = Model ?? new List<Repository.Models.AdminQuery>();
+}
+
+<div class="card-body">
+    @if (ViewBag.SearchError is string searchError && !string.IsNullOrWhiteSpace(searchError))
+    {
+        <div class="alert alert-danger mb-0">@searchError</div>
+    }
+    else if (!queries.Any())
+    {
+        <div class="alert alert-info mb-0">No queries matched the selected filters.</div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Search Results</h5>
+            <span class="badge bg-primary">@queries.Count result(s)</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Employee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var query in queries)
+                {
+                    var statusLabel = query.Status == Repository.Models.Enums.QueryStatus.InProgress
+                        ? "In Progress"
+                        : query.Status.ToString();
+
+                    var priorityClass = query.Priority == Repository.Models.Enums.Priority.High
+                        ? "bg-danger"
+                        : query.Priority == Repository.Models.Enums.Priority.Medium
+                            ? "bg-warning text-dark"
+                            : "bg-success";
+
+                    var statusClass = query.Status == Repository.Models.Enums.QueryStatus.Solved
+                        ? "bg-success"
+                        : query.Status == Repository.Models.Enums.QueryStatus.InProgress
+                            ? "bg-info text-dark"
+                            : "bg-secondary";
+
+                    <tr>
+                        <td>@query.QueryId</td>
+                        <td class="fw-semibold">@query.Title</td>
+                        <td>@(string.IsNullOrWhiteSpace(query.Description) ? "-" : query.Description)</td>
+                        <td><span class="badge @priorityClass">@query.Priority</span></td>
+                        <td><span class="badge @statusClass">@statusLabel</span></td>
+                        <td>@query.QueryDate.ToString("dd MMM yyyy")</td>
+                        <td>@(string.IsNullOrWhiteSpace(query.Username) ? query.UserId.ToString() : query.Username)</td>
+                        <td>@(string.IsNullOrWhiteSpace(query.EmployeeName) ? "Unassigned" : query.EmployeeName)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

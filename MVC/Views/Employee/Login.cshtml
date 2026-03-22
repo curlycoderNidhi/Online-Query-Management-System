@@ -1,386 +1,455 @@
 @model Repository.Models.EmployeeLoginModel
 @{
     ViewData["Title"] = "Employee Login";
+    Layout = null;
 }
 
-<style>
-/* ===========================================
-   ELITE EMPLOYEE LOGIN - FIXED & PERFECTED
-============================================= */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Login</title>
 
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+    <!-- jQuery (required by Kendo) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-.login-card {
-    width: 100%;
-    max-width: 420px;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(32px);
-    border-radius: 28px;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    box-shadow: 0 32px 96px rgba(15, 23, 42, 0.20);
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    <!-- Kendo UI -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" />
+    <script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
 
-.login-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 48px 120px rgba(15, 23, 42, 0.28);
-}
+    <!-- Font Awesome for field icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-.login-header {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-    color: white;
-    padding: 2.5rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
 
-.login-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-.login-card:hover .login-header::before {
-    opacity: 1;
-}
+        /* ── Card ── */
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            margin: 1.5rem;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0,0,0,.30);
+            overflow: hidden;
+        }
 
-.logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
+        /* ── Header banner ── */
+        .login-header {
+            background: #fff;
+            padding: 2.2rem 2rem 1.8rem;
+            text-align: center;
+            color: #1e293b;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .login-header .logo-icon {
+            font-size: 2.4rem;
+            margin-bottom: .5rem;
+            color: #0d6efd;
+        }
+        .login-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            color: #1e293b;
+        }
+        .login-header p {
+            margin: .3rem 0 0;
+            font-size: .9rem;
+            color: #6c757d;
+        }
+        .login-hero {
+            padding: 1rem 1.5rem 0;
+            background: #fff;
+            text-align: center;
+        }
+        .login-hero img {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            display: inline-block;
+        }
 
-.logo-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.4);
-}
+        /* ── Body ── */
+        .login-body {
+            padding: 2rem 2.2rem 2.2rem;
+        }
 
-.login-title {
-    margin: 0;
-    font-size: 1.875rem;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    opacity: 0.95;
-}
+        /* ── Icon wrapper around Kendo TextBox ── */
+        .input-icon {
+            position: relative;
+        }
+        .input-icon .fa {
+            position: absolute;
+            top: 24px; /* half of input height (48px) */
+            left: 1rem;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            font-size: 1rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .input-icon .k-textbox,
+        .input-icon .k-input {
+            padding-left: 2.8rem !important;
+        }
+        .input-icon .k-input-inner {
+            padding-left: 2.8rem !important;
+        }
 
-.login-subtitle {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
-    opacity: 0.8;
-    font-weight: 400;
-}
+        /* ── Eye-toggle wrapper (password field) ── */
+        .pwd-wrap {
+            position: relative;
+        }
+        .pwd-wrap .fa-lock {
+            position: absolute;
+            top: 24px; /* half of input height (48px) */
+            left: 1rem;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            font-size: 1rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .pwd-wrap .k-textbox,
+        .pwd-wrap .k-input {
+            padding-left: 2.8rem !important;
+            padding-right: 3rem  !important;
+        }
+        .pwd-wrap .k-input-inner {
+            padding-left: 2.8rem !important;
+            padding-right: 3rem  !important;
+        }
+        #eyeToggle {
+            position: absolute;
+            right: .6rem;
+            top: 24px; /* half of input height (48px) */
+            transform: translateY(-50%);
+            z-index: 10;
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: .25rem .4rem;
+            border-radius: 6px;
+            transition: color .2s;
+        }
+        #eyeToggle:hover { color: #0d6efd; }
 
-.login-body {
-    padding: 2.5rem 2.5rem 2.75rem;
-}
+        /* ── Kendo TextBox global overrides ── */
+        .k-textbox,
+        .k-input {
+            width: 100% !important;
+            height: 48px !important;
+            border-radius: 10px !important;
+            border: 2px solid #dee2e6 !important;
+            background: #f8f9ff !important;
+            font-size: .97rem !important;
+            color: #212529 !important;
+            transition: border-color .2s, box-shadow .2s !important;
+        }
+        .k-textbox:hover,
+        .k-input:hover {
+            border-color: #0d6efd !important;
+        }
+        .k-textbox.k-focus,
+        .k-input.k-focus,
+        .k-textbox:focus-within,
+        .k-input:focus-within {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 .2rem rgba(13,110,253,.15) !important;
+            background: #fff !important;
+        }
+        .k-input-inner {
+            background: transparent !important;
+            border: none !important;
+            height: 100% !important;
+            font-size: .97rem !important;
+        }
 
-.form-group {
-    margin-bottom: 1.75rem;
-    position: relative;
-}
+        /* ── Kendo Form field spacing ── */
+        .k-form .k-form-field {
+            margin-bottom: 1.4rem;
+        }
+        .k-form .k-label,
+        .k-form .k-form-label {
+            font-weight: 700;
+            font-size: .85rem;
+            color: #1e293b;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            margin-bottom: .5rem;
+        }
 
-.form-label {
-    display: block;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 0.75rem;
-    font-size: 0.95rem;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-    opacity: 0.9;
-}
+        /* ── Kendo validation error ── */
+        .k-form-error,
+        .field-validation-error {
+            display: block !important;
+            margin-top: 6px !important;
+            padding: 5px 10px !important;
+            font-size: .82rem !important;
+            font-weight: 600 !important;
+            color: #dc3545 !important;
+            background: rgba(220,53,69,.08) !important;
+            border-left: 4px solid #dc3545 !important;
+            border-radius: 6px !important;
+            animation: fadeIn .2s ease !important;
+        }
+        .field-validation-valid { display: none !important; }
 
+        /* server-side summary */
+        .validation-summary-errors ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem;
+        }
+        .validation-summary-errors li {
+            padding: 6px 10px;
+            font-size: .83rem;
+            font-weight: 600;
+            color: #dc3545;
+            background: rgba(220,53,69,.08);
+            border-left: 4px solid #dc3545;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
 
-.k-textbox {
-    width: 100% !important;
-    height: 56px !important;
-    border-radius: 20px !important;
-    background: rgba(255,255,255,0.85) !important;
-    border: 2px solid rgba(226,232,240,0.7) !important;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    transition: all .3s ease;
-}
+        /* ── Sign-In Kendo Button ── */
+        #loginBtn.k-button {
+            width: 100% !important;
+            height: 50px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            background: linear-gradient(135deg, #0d6efd 0%, #084298 100%) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            letter-spacing: .04em !important;
+            box-shadow: 0 8px 24px rgba(13,110,253,.35) !important;
+            transition: all .25s !important;
+            margin-top: .5rem;
+        }
+        #loginBtn.k-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 14px 32px rgba(13,110,253,.45) !important;
+        }
+        #loginBtn.k-button:active {
+            transform: translateY(0) !important;
+        }
 
-.k-textbox .k-input-inner {
-    border: none !important;
-    background: transparent !important;
-    height: 100% !important;
-    padding: 0 1rem !important;
-    font-size: 1rem !important;
-    color: #374151 !important;
-    box-shadow: none !important;
-}
+        /* ── Register link ── */
+        .register-link {
+            text-align: center;
+            margin-top: 1.1rem;
+            font-size: .88rem;
+            color: #6c757d;
+        }
+        .register-link a {
+            color: #0d6efd;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .register-link a:hover { text-decoration: underline; }
 
-.k-textbox:hover {
-    border-color: #3B82F6 !important;
-    box-shadow: 0 16px 45px rgba(59,130,246,.15);
-}
+        /* ── Register link ── */
+        .register-link {
+            text-align: center;
+            margin-top: 1.1rem;
+            font-size: .88rem;
+            color: #6c757d;
+        }
+        .register-link a {
+            color: #0d6efd;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .register-link a:hover { text-decoration: underline; }
 
-.k-textbox.k-focus {
-    border-color: #3B82F6 !important;
-    box-shadow: 0 20px 60px rgba(59,130,246,.25);
-}
+        /* ── Back to User Login link ── */
+        .user-link-wrap {
+            margin-top: 1.4rem;
+        }
+        .user-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .user-divider hr {
+            flex: 1;
+            margin: 0;
+            border-color: #dee2e6;
+        }
+        .user-divider span {
+            font-size: .8rem;
+            color: #adb5bd;
+            white-space: nowrap;
+        }
+        .btn-user {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 11px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            font-size: .92rem;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-user:hover {
+            background: #eef2ff;
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
 
-/* Clear Button Fix */
-.k-input-inner-clear,
-.k-clear-button {
-    right: 1rem !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 50% !important;
-    background: rgba(107, 114, 128, 0.2) !important;
-    transition: all 0.2s ease !important;
-}
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-3px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
 
-.k-input-inner-clear:hover,
-.k-clear-button:hover {
-    background: rgba(239, 68, 68, 0.2) !important;
-}
+<div class="login-card">
 
-/* Validation Error */
-/* Validation Error Styling */
-/* validation container spacing */
-.form-group {
-    margin-bottom: 1.9rem;
-}
-
-/* error message */
-.field-validation-error {
-    display: block;
-    margin-top: 10px;
-    padding: 6px 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #ef4444;
-    background: rgba(239,68,68,.08);
-    border-left: 4px solid #ef4444;
-    border-radius: 8px;
-}
-
-/* hide when no error */
-.field-validation-valid {
-    display: none;
-}
-
-.field-validation-error{
-    animation: fadeIn .2s ease;
-}
-
-@@keyframes fadeIn{
-    from{opacity:0;transform:translateY(-4px);}
-    to{opacity:1;transform:translateY(0);}
-}
-
-/* FIXED Login Button */
-#loginBtn.k-button {
-    width: 100% !important;
-    height: 60px !important;
-    border-radius: 20px !important;
-    border: none !important;
-    font-weight: 800 !important;
-    font-size: 1.1rem !important;
-    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
-    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4) !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-#loginBtn.k-button:hover:not(.k-state-disabled) {
-    transform: translateY(-4px) scale(1.02) !important;
-    box-shadow: 0 28px 72px rgba(59, 130, 246, 0.5) !important;
-}
-
-#loginBtn.k-button:active:not(.k-state-disabled) {
-    transform: translateY(-2px) scale(0.98) !important;
-}
-
-/* Loading State */
-#loginBtn.k-state-disabled,
-#loginBtn[data-loading] {
-    opacity: 0.8 !important;
-    cursor: not-allowed !important;
-}
-
-/* Validation Summary */
-.validation-summary-errors ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.validation-summary-errors ul li {
-    background: rgba(239, 68, 68, 0.15);
-    color: #EF4444;
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    border-radius: 12px;
-    border-left: 4px solid #EF4444;
-    font-weight: 600;
-}
-
-
-    
-    .login-card {
-        margin: 1rem;
-        border-radius: 20px;
-    }
-    
-    .login-body {
-        padding: 2rem 1.75rem;
-    }
-}
-</style>
-
-<div class="login-container">
-    <div class="login-card" id="loginCard">
-        <!-- Header -->
-        <div class="login-header">
-            <div class="logo-container">
-                <div class="logo-icon">👤</div>
-            </div>
-            <h1 class="login-title">Employee Portal</h1>
-            <p class="login-subtitle">Secure Login Required</p>
-        </div>
-
-        <!-- Form -->
-        <div class="login-body">
-            <form asp-action="Login" asp-controller="Employee" method="post" id="loginForm">
-                @Html.AntiForgeryToken()
-                
-                <!-- Validation Summary -->
-                <div asp-validation-summary="ModelOnly" class="validation-summary-errors k-text-error"></div>
-                
-                <!-- Employee Name -->
-                <div class="form-group">
-                    <label asp-for="EmpName" class="form-label"></label>
-                    <input asp-for="EmpName" 
-                           id="empNameInput" 
-                           placeholder="Enter your full name" 
-                           autocomplete="name"
-                           class="k-textbox" />
-                    <span asp-validation-for="EmpName" class="field-validation-error"></span>
-                </div>
-                
-                <!-- Password -->
-                <div class="form-group">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" 
-                           id="passwordInput" 
-                           type="password" 
-                           placeholder="Enter your password"
-                           autocomplete="current-password"
-                           class="k-textbox" />
-                    <span asp-validation-for="Password" class="field-validation-error"></span>
-                </div>
-                
-                <!-- Login Button -->
-                <button id="loginBtn" 
-                        type="submit" 
-                        class="k-button k-button-primary k-button-stretch">
-                    <span class="login-text">Log In</span>
-                    <span class="login-loading" style="display: none;">Loging In...</span>
-                </button>
-            </form>
+    <!-- Header -->
+    <div class="login-header">
+        <div class="logo-icon"><i class="fa fa-headset"></i></div>
+        <h2>Query Management</h2>
+        <p>Sign in to continue</p>
+        <div style="display:inline-block;margin-top:.75rem;background:#eef2ff;border:1.5px solid #0d6efd;border-radius:20px;padding:.3rem 1.1rem;font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0d6efd;">
+            <i class="fa fa-user-tie me-1"></i>Login as Employee / Admin
         </div>
     </div>
-</div>
+    <div class="login-hero">
+        <img src="~/images/AdminQuery.png" alt="Employee login illustration" />
+    </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <!-- Body -->
+    <div class="login-body">
+
+        <!-- Server-side validation summary -->
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <!-- Kendo Form -->
+        <form id="loginForm" method="post" asp-action="Login" asp-controller="Employee">
+            @Html.AntiForgeryToken()
+        </form>
+
+
+        <!-- Back to User login -->
+        <div class="user-link-wrap">
+            <div class="user-divider">
+                <hr /><span>or</span><hr />
+            </div>
+            <a href="/user/login" class="btn-user">
+                <i class="fa fa-user"></i>
+                Login as User
+            </a>
+        </div>
+
+    </div><!-- /login-body -->
+</div><!-- /login-card -->
 
 <script>
-$(function () {
+$(document).ready(function () {
 
-    // Disable validation on page load
-    $("#loginForm").removeData("validator");
-    $("#loginForm").removeData("unobtrusiveValidation");
-    $.validator.unobtrusive.parse("#loginForm");
-
-    // Keep server-side login errors visible after a failed submit
-    if ($(".validation-summary-errors li").length === 0) {
-        $(".validation-summary-errors").hide();
-    }
-
-    // Kendo TextBox
-    $("#empNameInput").kendoTextBox({
-        clearButton: true,
-        placeholder: "Enter your full name"
-    });
-
-    $("#passwordInput").kendoTextBox({
-        clearButton: true
-    });
-
-    // Kendo Button
-    $("#loginBtn").kendoButton({
-        themeColor: "primary",
-        size: "large"
-    });
-
-    // Show validation only after submit
-    $("#loginForm").on("submit", function () {
-
-        $(".field-validation-error").show();
-        $(".validation-summary-errors").show();
-
-        var btn = $("#loginBtn").data("kendoButton");
-
-        if (btn) {
-            btn.enable(false);
-            $(".login-text").hide();
-            $(".login-loading").show();
-        }
-
-        setTimeout(function () {
-            if (btn) {
-                btn.enable(true);
-                $(".login-text").show();
-                $(".login-loading").hide();
+    // ── Build Kendo Form ──
+    var form = $("#loginForm").kendoForm({
+        formData: {
+            EmpName:  "",
+            Password: ""
+        },
+        items: [
+            {
+                field: "EmpName",
+                label: "Employee / Admin Name",
+                editor: function (container, options) {
+                    $('<div class="input-icon">' +
+                        '<i class="fa fa-user-tie"></i>' +
+                        '<input required ' +
+                               'type="text" ' +
+                               'data-required-msg="Name is required" ' +
+                               'class="k-textbox" ' +
+                               'name="' + options.field + '" ' +
+                               'id="empNameInput" ' +
+                               'placeholder="Enter your full name" ' +
+                               'autocomplete="name" />' +
+                      '</div>').appendTo(container);
+                }
+            },
+            {
+                field: "Password",
+                label: "Password",
+                editor: function (container, options) {
+                    $('<div class="pwd-wrap">' +
+                        '<i class="fa fa-lock"></i>' +
+                        '<input required ' +
+                               'type="password" ' +
+                               'data-required-msg="Password is required" ' +
+                               'class="k-textbox" ' +
+                               'name="' + options.field + '" ' +
+                               'id="pwdInput" ' +
+                               'placeholder="Enter your password" ' +
+                               'autocomplete="current-password" />' +
+                        '<button type="button" id="eyeToggle" title="Show / hide password">' +
+                            '<i class="fa fa-eye" id="eyeIcon"></i>' +
+                        '</button>' +
+                      '</div>').appendTo(container);
+                }
             }
-        }, 5000);
-    });
+        ],
+        buttonsTemplate:
+            '<div style="margin-top:.25rem">' +
+                '<button id="loginBtn" type="submit" class="k-button">' +
+                    '<i class="fa fa-arrow-right-to-bracket"></i>&nbsp; Sign In as Employee / Admin' +
+                '</button>' +
+            '</div>'
+    }).data("kendoForm");
 
-    // Enter key login
-    $("#empNameInput, #passwordInput").on("keypress", function (e) {
-        if (e.which === 13) {
-            $("#loginForm").submit();
+    // ── Kendo Button widget ──
+    $("#loginBtn").kendoButton({ themeColor: "primary" });
+
+    // ── Eye toggle ──
+    $(document).on("click", "#eyeToggle", function () {
+        var pwd  = $("#pwdInput");
+        var icon = $("#eyeIcon");
+        if (pwd.attr("type") === "password") {
+            pwd.attr("type", "text");
+            icon.removeClass("fa-eye").addClass("fa-eye-slash");
+        } else {
+            pwd.attr("type", "password");
+            icon.removeClass("fa-eye-slash").addClass("fa-eye");
         }
     });
 
-    // Autofocus
-    $("#empNameInput").focus();
+    // ── Submit: validate before post ──
+    $("#loginForm").on("submit", function (e) {
+        if (!form.validate()) {
+            e.preventDefault();
+        }
+    });
 
+    // ── Auto-focus ──
+    setTimeout(function () { $("#empNameInput").focus(); }, 150);
 });
 </script>
-}
+</body>
+</html>

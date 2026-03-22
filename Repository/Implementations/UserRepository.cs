@@ -71,10 +71,18 @@ namespace Repository.Implementations
 
                 if (await reader.ReadAsync())
                 {
-                    string hashedPassword = reader.GetString(3);
-
-                    // 🔐 VERIFY PASSWORD
-                    bool isValid = BCrypt.Net.BCrypt.Verify(model.Password, hashedPassword);
+                    string storedPassword = reader.GetString(3);
+                    bool isValid = false;
+                    try
+                    {
+                        // Try BCrypt first
+                        isValid = BCrypt.Net.BCrypt.Verify(model.Password, storedPassword);
+                    }
+                    catch (SaltParseException)
+                    {
+                        // Fallback to plain-text equality for legacy rows
+                        isValid = string.Equals(model.Password ?? string.Empty, storedPassword, StringComparison.Ordinal);
+                    }
 
                     if (!isValid)
                         return null;
@@ -95,6 +103,69 @@ namespace Repository.Implementations
             }
         }
 
+
+public async Task<User> GetByEmail(string email)
+{
+    
+    string query = "SELECT * FROM t_users WHERE c_email=@Email";
+
+    NpgsqlCommand cmd = new NpgsqlCommand(query, _connection);
+    cmd.Parameters.AddWithValue("@Email", email);
+
+    await _connection.OpenAsync();
+    var reader = await cmd.ExecuteReaderAsync();
+
+    if (reader.Read())
+    {
+        return new User
+        {
+            UserId = (int)reader["c_userid"],
+            Email = reader["c_email"].ToString(),
+            CompanyName = reader["c_companyname"].ToString()
+        };
+    }
+
+    return null;
+}
+
+public async Task UpdatePassword(string email, string password)
+{
+    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+    using NpgsqlCommand cmd = new NpgsqlCommand(
+        "UPDATE t_users SET c_password=@Password WHERE c_email=@Email",
+        _connection
+    );
+
+    cmd.Parameters.AddWithValue("@Password", hashedPassword);
+    cmd.Parameters.AddWithValue("@Email", email);
+
+    await _connection.OpenAsync();
+    await cmd.ExecuteNonQueryAsync();
+}
+
+        public async Task<User?> GetById(int userId)
+        {
+            string query = "SELECT * FROM t_users WHERE c_userid=@UserId";
+
+            NpgsqlCommand cmd = new NpgsqlCommand(query, _connection);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            await _connection.OpenAsync();
+            var reader = await cmd.ExecuteReaderAsync();
+
+            if (reader.Read())
+            {
+                return new User
+                {
+                    UserId = (int)reader["c_userid"],
+                    Email = reader["c_email"].ToString(),
+                    CompanyName = reader["c_companyname"].ToString()
+                };
+            }
+
+            return null;
+        }
 
         // ---------------- SUBMIT QUERY ----------------
 

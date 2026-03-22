@@ -3,1008 +3,413 @@
 }
 
 <style>
-/* ===========================================
-   ELITE KENDO UI "MY QUERIES" - ENHANCED
-============================================= */
+    /* ── Badges ── */
+    .b { display: inline-flex; align-items: center; padding: 0.18rem 0.5rem; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .b-danger  { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+    .b-warn    { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .b-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .b-muted   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .b-blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 
-.myq-wrap {
-    margin-top: 1rem;
-    padding: 1.75rem;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #fffaf1 0%, #f5fbff 100%);
-    border: 1px solid rgba(230, 230, 214, 0.6);
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
-}
+    /* ── Section card ── */
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden;
+    }
+    .section-card-header {
+        padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    }
+    .section-card-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .section-card-sub   { font-size: 0.73rem; color: #94a3b8; margin-top: 1px; }
+    .section-card-body  { padding: 1.25rem 1.4rem; }
 
-.myq-panel {
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(230, 237, 245, 0.8);
-    border-radius: 18px;
-    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
-    padding: 1.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    /* ── Stat pills ── */
+    .stat-pill {
+        font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.7rem;
+        border-radius: 20px; background: #f1f5f9; color: #475569;
+        border: 1px solid #e2e8f0;
+    }
 
-.myq-panel:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
-}
+    /* ── Grid ── */
+    .k-grid { border-radius: 8px; border: 1px solid #e8edf3; font-size: 0.83rem; }
+    .k-grid-header th { font-weight: 700; background: #f8fafc; color: #374151; border-bottom-color: #e8edf3 !important; }
+    .k-grid-content tr:hover td { background: #f8fafc; }
+    .k-grid td { padding: 0.5rem 0.75rem; vertical-align: middle; }
 
-/* Premium Header */
-.myq-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 2px solid rgba(59, 130, 246, 0.12);
-}
+    /* ── Search ── */
+    .es-search-box {
+        display: flex; align-items: center; gap: 10px;
+        max-width: 420px; width: 100%; height: 40px; padding: 0 14px;
+        background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px;
+        transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .es-search-box:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); background: #fff; }
+    .es-icon { flex-shrink: 0; color: #94a3b8; }
+    .es-input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 0.85rem; color: #0f172a; }
+    .es-input::placeholder { color: #94a3b8; }
+    .es-clear {
+        display: flex; align-items: center; justify-content: center;
+        width: 20px; height: 20px; padding: 0; border: none; border-radius: 50%;
+        background: #e2e8f0; color: #475569; cursor: pointer; flex-shrink: 0;
+    }
+    .es-clear:hover { background: #cbd5e1; }
+    .search-bar-wrap-inner { position: relative; flex: 1; }
+    .search-bar-wrap-inner .search-icon {
+        position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
+        color: #94a3b8; font-size: 0.85rem; pointer-events: none;
+    }
+    .search-bar-input {
+        width: 100%;
+        padding: 0.5rem 0.85rem 0.5rem 2.4rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background: #f8fafc;
+        color: #0f172a;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-bar-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        background: #fff;
+    }
+    .emp-filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.1rem;
+    }
+    .emp-filter-search {
+        position: relative;
+        flex: 1 1 280px;
+        min-width: 240px;
+    }
+    .emp-filter-select,
+    .emp-filter-date {
+        padding: 0.48rem 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.83rem;
+        background: #f8fafc;
+        color: #374151;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .emp-filter-select {
+        min-width: 150px;
+        cursor: pointer;
+    }
+    .emp-filter-dates {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex: 0 0 auto;
+    }
+    .emp-filter-date { min-width: 160px; }
+    .emp-filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+    .emp-filter-status {
+        font-size: 0.75rem;
+        color: #64748b;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    @@media (max-width: 992px) {
+        .emp-filter-bar {
+            flex-wrap: wrap;
+            overflow-x: visible;
+        }
+        .emp-filter-search,
+        .emp-filter-dates,
+        .emp-filter-actions {
+            width: 100%;
+        }
+    }
 
-.myq-title {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-}
-
-/* Elite Stats Chips */
-.myq-stats {
-    display: flex;
-    gap: 0.875rem;
-    flex-wrap: wrap;
-}
-
-.myq-chip {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    border: 2px solid rgba(223, 229, 239, 0.6);
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    color: #334155;
-    border-radius: 50px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    padding: 0.625rem 1.125rem;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(12px);
-}
-
-.myq-chip:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
-}
-
-/* ENHANCED Kendo Grid */
-#grid {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
-    border: none !important;
-}
-
-#grid .k-grid-header {
-    background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
-    border-bottom: 4px solid #3B82F6 !important;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-#grid .k-grid-header .k-table-th {
-    padding: 1.25rem 1rem !important;
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    font-size: 0.85rem !important;
-    color: #1e293b !important;
-    border: none !important;
-    background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(248,250,252,0.85)) !important;
-    box-shadow: inset 0 -1px 0 rgba(226,232,240,0.8);
-}
-
-#grid .k-grid-content {
-    background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
-}
-
-#grid .k-grid-content tr {
-    height: 68px !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
-}
-
-#grid .k-grid-content tr:hover {
-    background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(16,185,129,0.08)) !important;
-    transform: translateX(8px) !important;
-    box-shadow: 0 12px 36px rgba(59,130,246,0.2) !important;
-}
-
-#grid .k-grid-content .k-table-td {
-    padding: 1rem 1rem !important;
-    vertical-align: middle !important;
-}
-
-#grid .k-grid-norecords {
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 40px 0;
-    color: #6b7280;
-}
-
-/* ELITE Badges */
-.myq-badge {
-    border-radius: 24px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    padding: 0.5rem 1.125rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    border: 2px solid rgba(255,255,255,0.6);
-    backdrop-filter: blur(12px);
-    transition: all 0.3s ease;
-}
-
-.myq-priority-high { 
-    background: linear-gradient(135deg, #fee2e2, #fecaca) !important; 
-    color: #dc2626 !important;
-    animation: pulse-high 2s infinite;
-}
-
-
-.myq-priority-medium { 
-    background: linear-gradient(135deg, #fef3c7, #fde68a) !important; 
-    color: #d97706 !important;
-}
-.myq-priority-low { 
-    background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important; 
-    color: #15803d !important;
-}
-.myq-status-open { 
-    background: linear-gradient(135deg, #e2e8f0, #f1f5f9) !important; 
-    color: #1e293b !important;
-}
-.myq-status-progress { 
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important; 
-    color: #1d4ed8 !important;
-}
-.myq-status-solved { 
-    background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important; 
-    color: #15803d !important;
-}
-
-/* Premium Comments */
-.myq-comments {
-    color: #4300af!important;
-    font-size: 0.9rem !important;
-    max-width: 320px;
-    display: inline-block;
-    padding: 0.75rem 1rem;
-    background: #efeaff;
-    border-radius: 12px;
-    border-left: 4px solid #efeaff;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
-
-}
-
-/* ELITE Action Button */
-.k-grid .k-button.k-primary {
-    border-radius: 14px !important;
-    padding: 0.875rem 1.75rem !important;
-    font-weight: 800 !important;
-    background: linear-gradient(135deg, #3B82F6, #1D4ED8) !important;
-    border: none !important;
-    box-shadow: 0 12px 36px rgba(59,130,246,0.4) !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    min-height: 48px;
-    font-size: 0.9rem !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.k-grid .k-button.k-primary:hover {
-    transform: translateY(-4px) scale(1.05) !important;
-    box-shadow: 0 24px 64px rgba(59,130,246,0.5) !important;
-}
-
-/* PREMIUM PAGINATION */
-#grid .k-pager {
-    background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9)) !important;
-    border-top: 3px solid rgba(59,130,246,0.15) !important;
-    border-radius: 0 0 18px 18px !important;
-    backdrop-filter: blur(16px);
-}
-
-#grid .k-pager-wrap {
-    padding: 1.25rem 1.75rem !important;
-}
-
-/* NO RECORDS */
-#grid .k-no-records {
-    padding: 6rem 3rem !important;
-    text-align: center;
-    color: #64748b;
-    font-size: 1.1rem;
-}
-
-#grid .k-no-records::before {
-    content: "📋✨";
-    display: block;
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.6;
-}
-
-/* BOOTSTRAP MODAL ENHANCEMENT */
-.myq-modal-content {
-    border: none !important;
-    border-radius: 24px !important;
-    overflow: hidden !important;
-    box-shadow: 0 32px 96px rgba(15,23,42,0.28) !important;
-    background: rgba(255,255,255,0.98) !important;
-    backdrop-filter: blur(24px) !important;
-}
-
-.myq-modal-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-    color: white !important;
-    border-bottom: none !important;
-    padding: 1.5rem 2rem !important;
-    border-radius: 24px 24px 0 0 !important;
-}
-
-.myq-modal-body {
-    background: linear-gradient(135deg, #f8fbff 0%, #f1f5f9 100%) !important;
-    padding: 2rem !important;
-    border-radius: 0 0 24px 24px !important;
-}
-/* FIX MODAL Z-INDEX CONFLICT WITH KENDO */
-/* FIX BOOTSTRAP MODAL + KENDO CONFLICT */
-
-
-
-.modal-backdrop {
-    z-index: 1040 !important;
-}
-
-.modal {
-    z-index: 1050 !important;
-}
-
-.modal-dialog {
-    z-index: 1060 !important;
-}
-
-.modal-content {
-    z-index: 1070 !important;
-}
-
-
+    /* ── Modal ── */
+    .modal-header-custom { background: #2563eb; padding: 1.1rem 1.4rem; border-bottom: none; border-radius: 14px 14px 0 0; }
+    .modal-header-custom .modal-title { color: #fff; font-weight: 700; font-size: 0.95rem; }
+    .modal-header-custom .btn-close { filter: invert(1) brightness(2); opacity: 0.8; }
 </style>
 
-<div class="myq-wrap">
-    <div class="myq-panel">
-        <div class="myq-header">
-            <h3 class="myq-title">My Queries</h3>
-            <div class="myq-stats">
-                <span class="myq-chip" style="color:red;">Total: <span id="totalCount">0</span></span>
-                <span class="myq-chip" style="color:rgb(178, 178, 1);">In Progress: <span id="progressCount">0</span></span>
+<!-- Page heading -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-ticket-perforated me-2 text-primary"></i>My Queries</h4>
+        <p class="text-muted mb-0 small">Assigned queries and their latest status</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <span class="stat-pill">Total: <span id="totalCount" class="text-primary">0</span></span>
+        <span class="stat-pill">In Progress: <span id="progressCount" class="text-primary">0</span></span>
+        <span class="stat-pill">Solved: <span id="solvedCount" class="text-success">0</span></span>
+    </div>
+</div>
+
+<div class="section-card">
+    <div class="section-card-body">
+        <div class="emp-filter-bar mb-3">
+            <div class="search-bar-wrap-inner emp-filter-search">
+                <i class="bi bi-search search-icon"></i>
+                <input id="querySearchInput" class="search-bar-input" type="text"
+                       placeholder="Search queries by title, priority, status…" autocomplete="off" />
             </div>
+
+            <select id="myFilterStatus" class="emp-filter-select">
+                <option value="">All Statuses</option>
+                <option value="InProgress">In Progress</option>
+                <option value="Solved">Solved</option>
+            </select>
+
+            <div class="emp-filter-dates">
+                <input type="date" id="myFromDate" aria-label="From date" title="From date" class="emp-filter-date" />
+                <span style="font-size:0.83rem;color:#64748b;font-weight:600;">to</span>
+                <input type="date" id="myToDate" aria-label="To date" title="To date" class="emp-filter-date" />
+            </div>
+
+            <div class="emp-filter-actions">
+                <button id="myApplyFilterBtn" style="padding:0.48rem 1rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#2563eb;color:#fff;border:none;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+                    <i class="bi bi-funnel-fill"></i> Filter
+                </button>
+                <button id="myResetFilterBtn" style="padding:0.48rem 0.85rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+                    <i class="bi bi-x-lg"></i> Reset
+                </button>
+            </div>
+
+            <span id="mySearchStatus" class="emp-filter-status"></span>
         </div>
+
         <div id="grid"></div>
-    </div>
-</div>
 
-<!-- ENHANCED Bootstrap Modal -->
-<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true" >
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content myq-modal-content">
-            <div class="modal-header myq-modal-header">
-                <h5 class="modal-title fw-bold">Update Query</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body myq-modal-body" id="updateModalBody">
-                <!-- Form loads here -->
-            </div>
+        <!-- Back to Dashboard -->
+        <div class="mt-3">
+            <a asp-controller="Employee" asp-action="Dashboard" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
         </div>
     </div>
 </div>
-@* 
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:14px; border:none; box-shadow:0 20px 60px rgba(15,23,42,0.15);">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Update Query</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="updateModalBody"></div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
-function ensureKendoReady(done) {
-    if (window.kendo && window.jQuery && window.jQuery.fn && window.jQuery.fn.kendoGrid) {
-        done();
-        return;
+    var ELASTIC_SEARCH_ENABLED = true;
+    var ELASTIC_SEARCH_URL     = "/Employee/SearchMyQueries";
+
+    function priorityMeta(v) {
+        if (v === 2 || v === "High")   return { text: "High",   cls: "b-danger" };
+        if (v === 1 || v === "Medium") return { text: "Medium", cls: "b-warn" };
+        return { text: "Low", cls: "b-success" };
+    }
+    function statusMeta(v) {
+        if (v === 2 || v === "Solved")                              return { text: "Solved",      cls: "b-success" };
+        if (v === 1 || v === "InProgress" || v === "In Progress")   return { text: "In Progress", cls: "b-blue" };
+        return { text: "Open", cls: "b-muted" };
     }
 
-    var existing = document.getElementById("kendo-fallback-script");
-    if (existing) {
-        existing.addEventListener("load", done, { once: true });
-        return;
+    function updateStats(data) {
+        $("#totalCount").text(data.length);
+        $("#progressCount").text(data.filter(function(d) { return statusMeta(d.status).text === "In Progress"; }).length);
+        $("#solvedCount").text(data.filter(function(d) { return statusMeta(d.status).text === "Solved"; }).length);
     }
 
-    var script = document.createElement("script");
-    script.id = "kendo-fallback-script";
-    script.src = "https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js";
-    script.onload = done;
-    script.onerror = function () {
-        alert("Kendo UI failed to load. Please refresh and try again.");
-    };
-    document.head.appendChild(script);
-}
-
-$(function () {
-    if (!window.jQuery) {
-        alert("jQuery failed to load. Please refresh and try again.");
-        return;
-    }
-
-    function priorityMeta(value) {
-        if (value === 2 || value === "High") return { text: "High", cls: "myq-priority-high" };
-        if (value === 1 || value === "Medium") return { text: "Medium", cls: "myq-priority-medium" };
-        return { text: "Low", cls: "myq-priority-low" };
-    }
-
-    function statusMeta(value) {
-        if (value === 2 || value === "Solved") return { text: "Solved", cls: "myq-status-solved" };
-        if (value === 1 || value === "InProgress" || value === "In Progress") return { text: "In Progress", cls: "myq-status-progress" };
-        return { text: "Open", cls: "myq-status-open" };
-    }
-
-    function updateStats(grid) {
-        var data = grid.dataSource.data();
-        var total = data.length, solved = 0, progress = 0;
-        for (var i = 0; i < total; i++) {
-            var s = statusMeta(data[i].status).text;
-            if (s === "Solved") solved++;
-            if (s === "In Progress") progress++;
-        }
-        $("#totalCount").text(total);
-        $("#progressCount").text(progress);
-        $("#solvedCount").text(solved);
-    }
-
-    ensureKendoReady(function () {
+    function renderGrid(data) {
+        updateStats(data);
+        var grid = $("#grid").data("kendoGrid");
+        if (grid) { grid.dataSource.data(data); grid.dataSource.page(1); return; }
         $("#grid").kendoGrid({
-            dataSource: {
-                transport: {
-                    read: {
-                        url: "/Employee/GetMyQueries",
-                        dataType: "json"
-                    }
-                },
-                pageSize: 10
-            },
-            height: 580,
-            sortable: true,
-            filterable: false,
-            resizable: true,
-            pageable: {
-                refresh: true,
-                pageSizes: [5, 10, 20, 50],
-                buttonCount: 5
-            },
-            noRecords: {
-                template: "No assigned queries found."
-            },
-            dataBound: function () {
-                updateStats(this);
-            },
+            dataSource: { data: data, pageSize: 10 },
+            sortable:   true,
+            scrollable: false,
+            pageable:   { pageSizes: [5, 10, 15], refresh: true },
+            noRecords:  { template: "No queries found." },
+            dataBound:  function () { updateStats(this.dataSource.data()); },
             columns: [
-                { field: "queryId", title: "ID", width: 80 },
-                { field: "title", title: "Title", width: 260 },
-                {
-                    field: "priority",
-                    title: "Priority",
-                    width: 130,
-                    template: function (d) {
-                        var m = priorityMeta(d.priority);
-                        return `<span class='myq-badge ${m.cls}'>${m.text}</span>`;
-                    }
-                },
-                {
-                    field: "status",
-                    title: "Status",
-                    width: 150,
-                    template: function (d) {
-                        var m = statusMeta(d.status);
-                        return `<span class='myq-badge ${m.cls}'>${m.text}</span>`;
-                    }
-                },
-                {
-                    field: "comments",
-                    title: "Comments",
-                    width: 300,
-                    template: function (d) {
-                        var c = d.comments || "-";
-                        return `<span class='myq-comments' title='${kendo.htmlEncode(c)}'>${kendo.htmlEncode(c)}</span>`;
-                    }
-                },
-                {
-                    title: "Action",
-                    width: 120,
-                    sortable: false,
-                    filterable: false,
-                    template: "<button class='k-button k-primary' onclick='openUpdate(#=queryId#)'>Update</button>"
-                }
+                { field: "queryId",  title: "ID",       width: 80 },
+                { field: "title",    title: "Title",    minWidth: 200 },
+                { field: "priority", title: "Priority", width: 110,
+                  template: function(d) { var m = priorityMeta(d.priority); return "<span class='b " + m.cls + "'>" + m.text + "</span>"; }},
+                { field: "status",   title: "Status",   width: 130,
+                  template: function(d) { var m = statusMeta(d.status); return "<span class='b " + m.cls + "'>" + m.text + "</span>"; }},
+                { field: "comments", title: "Comments", minWidth: 200,
+                  template: function(d) { return kendo.htmlEncode(d.comments || "\u2014"); }},
+                { title: "Action", width: 110,
+                  template: function(d) {
+                      // Only show Update button for In Progress queries
+                      if (statusMeta(d.status).text === "Solved") {
+                          return "<span class='text-muted small'>—</span>";
+                      }
+                      return "<button type='button' class='btn btn-sm btn-outline-primary' onclick='openUpdate(" + d.queryId + ")'>Update</button>";
+                  }}
             ]
         });
-    });
-});
+    }
 
-// Enhanced Update Modal
-function openUpdate(id) {
-    kendo.ui.progress($("#grid"), true);
-    $.get("/Employee/UpdateQuery", { id: id })
-        .done(function (html) {
-            $("#updateModalBody").html(html);
-            var modal = new bootstrap.Modal(document.getElementById('updateModal'), {
-                backdrop: 'static',
-                keyboard: false
+    var allData = [], searchTimer = null, activeMyRequest = null;
+
+    function setMySearchBusy(busy) {
+        $("#myApplyFilterBtn").prop("disabled", busy).html(
+            busy ? '<span class="spinner-border spinner-border-sm me-1"></span>Searching…'
+                 : '<i class="bi bi-funnel-fill"></i> Filter'
+        );
+    }
+
+    function updateMySearchStatus(count) {
+        $("#mySearchStatus").text(count === null ? "" : count + " result" + (count !== 1 ? "s" : ""));
+    }
+
+    function runMyElasticSearch() {
+        var q        = $("#querySearchInput").val().trim();
+        var status   = $("#myFilterStatus").val();
+        var fromDate = $("#myFromDate").val();
+        var toDate   = $("#myToDate").val();
+
+        if (!q && !status && !fromDate && !toDate) {
+            renderGrid(allData);
+            updateMySearchStatus(null);
+            setMySearchBusy(false);
+            return;
+        }
+
+        if (activeMyRequest) { activeMyRequest.abort(); activeMyRequest = null; }
+
+        setMySearchBusy(true);
+        $("#mySearchStatus").text("Searching…");
+
+        var params = {};
+        if (q)        params.q        = q;
+        if (status)   params.status   = status;
+        if (fromDate) params.fromDate = fromDate;
+        if (toDate)   params.toDate   = toDate;
+
+        activeMyRequest = $.get("/Employee/SearchMyQueries", params)
+            .done(function (results) {
+                activeMyRequest = null;
+
+                if (results && results.error) {
+                    setMySearchBusy(false);
+                    updateMySearchStatus(null);
+                    return;
+                }
+
+                var mapped = (results || []).map(function(r) {
+                    return {
+                        queryId:   r.queryId,
+                        title:     r.title     || "",
+                        priority:  r.priority  || "",
+                        status:    r.status    || "",
+                        queryDate: r.queryDate ? new Date(r.queryDate) : new Date(),
+                        comments:  r.comments  || ""
+                    };
+                });
+
+                renderGrid(mapped);
+                updateMySearchStatus(mapped.length);
+                setMySearchBusy(false);
+            })
+            .fail(function (xhr) {
+                activeMyRequest = null;
+                if (xhr.statusText === "abort") return;
+                setMySearchBusy(false);
+                updateMySearchStatus(null);
             });
-            modal.show();
-        })
-        .fail(function (xhr) {
-            kendo.alert(xhr.responseText || "Failed to open update popup.");
-        })
-        .always(function() {
-            kendo.ui.progress($("#grid"), false);
-        });
-}
+    }
 
-$(document).on("click", ".js-close-update", function () {
-    var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-    if (modal) modal.hide();
-});
-
-$(document).on("click", ".js-update-query", function () {
-    kendo.ui.progress($("#updateModal"), true);
-    $.ajax({
-        url: "/Employee/UpdateQueryStatus",
-        type: "POST",
-        data: $("#updateForm").serialize(),
-        success: function (res) {
-            if (res && res.success) {
-                var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-                if (modal) modal.hide();
-                $("#grid").data("kendoGrid").dataSource.read();
-                kendo.notify("✅ Query updated successfully!", { type: "success" });
-                return;
-            }
-            kendo.alert(res.message || "Failed to update query.");
-        },
-        error: function (xhr) {
-            var message = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Failed to update query.";
-            kendo.alert(message);
-        }
-    }).always(function() {
-        kendo.ui.progress($("#updateModal"), false);
+    $("#querySearchInput").on("input", function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(runMyElasticSearch, 350);
     });
-});
-</script>
-} *@
 
-@* 
-@section Scripts {
-<script>
+    $("#myApplyFilterBtn")
+        .hover(
+            function() { $(this).css("background", "#1d4ed8"); },
+            function() { $(this).css("background", "#2563eb"); })
+        .on("click", function () {
+            clearTimeout(searchTimer);
+            runMyElasticSearch();
+        });
 
-function ensureKendoReady(done) {
-    if (window.kendo && window.jQuery && window.jQuery.fn.kendoGrid) {
-        done();
-        return;
+    $("#myResetFilterBtn")
+        .hover(
+            function() { $(this).css("background", "#f1f5f9"); },
+            function() { $(this).css("background", "#f8fafc"); })
+        .on("click", function () {
+            clearTimeout(searchTimer);
+            if (activeMyRequest) { activeMyRequest.abort(); activeMyRequest = null; }
+            $("#querySearchInput").val("");
+            $("#myFilterStatus").val("");
+            $("#myFromDate").val("");
+            $("#myToDate").val("");
+            updateMySearchStatus(null);
+            setMySearchBusy(false);
+            renderGrid(allData);
+        });
+
+    $("#myFilterStatus, #myFromDate, #myToDate").on("focus", function() {
+        $(this).css({ "border-color": "#3b82f6", "box-shadow": "0 0 0 3px rgba(59,130,246,0.12)", "background": "#fff" });
+    }).on("blur", function() {
+        $(this).css({ "border-color": "#e2e8f0", "box-shadow": "none", "background": "#f8fafc" });
+    });
+
+    $(function () {
+        $.getJSON("/Employee/GetMyQueries")
+            .done(function(data) { allData = data; renderGrid(data); })
+            .fail(function() { $("#grid").text("Failed to load queries."); });
+    });
+
+    function openUpdate(id) {
+        kendo.ui.progress($("#grid"), true);
+        $.get("/Employee/UpdateQuery", { id: id })
+            .done(function(html) {
+                $("#updateModalBody").html(html);
+                new bootstrap.Modal(document.getElementById("updateModal"), { backdrop: "static" }).show();
+            })
+            .fail(function(xhr) { alert(xhr.responseText || "Failed to open update form."); })
+            .always(function() { kendo.ui.progress($("#grid"), false); });
     }
 
-    var script = document.createElement("script");
-    script.src = "https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js";
-    script.onload = done;
-    document.head.appendChild(script);
-}
-
-$(function () {
-
-    function priorityMeta(value) {
-        if (value === 2 || value === "High") return { text: "High", cls: "myq-priority-high" };
-        if (value === 1 || value === "Medium") return { text: "Medium", cls: "myq-priority-medium" };
-        return { text: "Low", cls: "myq-priority-low" };
-    }
-
-    function statusMeta(value) {
-        if (value === 2 || value === "Solved") return { text: "Solved", cls: "myq-status-solved" };
-        if (value === 1 || value === "InProgress" || value === "In Progress") return { text: "In Progress", cls: "myq-status-progress" };
-        return { text: "Open", cls: "myq-status-open" };
-    }
-
-    function updateStats(grid) {
-
-        var data = grid.dataSource.data();
-
-        var total = data.length;
-        var solved = 0;
-        var progress = 0;
-
-        for (var i = 0; i < total; i++) {
-
-            var s = statusMeta(data[i].status).text;
-
-            if (s === "Solved") solved++;
-            if (s === "In Progress") progress++;
-        }
-
-        $("#totalCount").text(total);
-        $("#progressCount").text(progress);
-        $("#solvedCount").text(solved);
-    }
-
-    ensureKendoReady(function () {
-
-        $("#grid").kendoGrid({
-
-            dataSource: {
-                transport: {
-                    read: {
-                        url: "/Employee/GetMyQueries",
-                        dataType: "json"
-                    }
-                },
-                pageSize: 10
-            },
-
-            height: 580,
-            sortable: true,
-            pageable: {
-                refresh: true,
-                pageSizes: [5,10,20,50]
-            },
-
-            dataBound: function () {
-                updateStats(this);
-            },
-
-            noRecords: {
-                template: "No assigned queries found."
-            },
-
-            columns: [
-
-                { field: "queryId", title: "ID", width: 80 },
-
-                { field: "title", title: "Title", width: 260 },
-
-                {
-                    field: "priority",
-                    title: "Priority",
-                    width: 120,
-                    template: function(d){
-
-                        var m = priorityMeta(d.priority);
-
-                        return "<span class='myq-badge "+m.cls+"'>"+m.text+"</span>";
-                    }
-                },
-
-                {
-                    field: "status",
-                    title: "Status",
-                    width: 140,
-                    template: function(d){
-
-                        var m = statusMeta(d.status);
-
-                        return "<span class='myq-badge "+m.cls+"'>"+m.text+"</span>";
-                    }
-                },
-
-                {
-                    field: "comments",
-                    title: "Comments",
-                    width: 280,
-                    template: function(d){
-
-                        var c = d.comments || "-";
-
-                        return "<span class='myq-comments'>"+kendo.htmlEncode(c)+"</span>";
-                    }
-                },
-
-                {
-                    title: "Action",
-                    width: 120,
-                    template: "<button class='k-button k-primary' onclick='openUpdate(#=queryId#)'>Update</button>"
+    $(document).on("click", ".js-close-update", function () {
+        var m = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
+        if (m) m.hide();
+    });
+    $(document).on("click", ".js-update-query", function () {
+        kendo.ui.progress($("#updateModal"), true);
+        $.ajax({
+            url: "/Employee/UpdateQueryStatus", type: "POST", data: $("#updateForm").serialize(),
+            success: function(res) {
+                if (res && res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById("updateModal")).hide();
+                    $.getJSON("/Employee/GetMyQueries").done(function(data) {
+                        allData = data;
+                        runMyElasticSearch();
+                    });
+                    return;
                 }
-
-            ]
-
+                alert(res.message || "Failed to update query.");
+            },
+            error: function(xhr) { alert((xhr.responseJSON && xhr.responseJSON.message) || "Failed to update query."); },
+            complete: function() { kendo.ui.progress($("#updateModal"), false); }
         });
-
     });
-
-});
-
-
-/* ---------------------------
-   OPEN UPDATE MODAL
----------------------------- */
-
-function openUpdate(id){
-
-    kendo.ui.progress($("#grid"), true);
-
-    $.get("/Employee/UpdateQuery",{id:id})
-
-    .done(function(html){
-
-        $("#updateModalBody").html(html);
-
-        var modalEl = document.getElementById("updateModal");
-
-        var modal = bootstrap.Modal.getInstance(modalEl);
-
-        if(!modal){
-            modal = new bootstrap.Modal(modalEl);
-        }
-
-        modal.show();
-    })
-
-    .fail(function(){
-        alert("Failed to open update form");
-    })
-
-    .always(function(){
-        kendo.ui.progress($("#grid"), false);
-    });
-}
-
-
-
-/* ---------------------------
-   CLOSE MODAL
----------------------------- */
-
-function cleanupModal(){
-
-    $(".modal-backdrop").remove();
-    $(".k-loading-mask").remove();
-
-    $("body").removeClass("modal-open");
-    $("body").css("padding-right","");
-}
-
-$(document).on("click",".js-close-update",function(){
-
-    var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-
-    if(modal) modal.hide();
-
-    cleanupModal();
-});
-
-
-/* ---------------------------
-   UPDATE QUERY
----------------------------- */
-
-$(document).on("click",".js-update-query",function(){
-
-    kendo.ui.progress($("#updateModal"),true);
-
-    $.ajax({
-
-        url:"/Employee/UpdateQueryStatus",
-        type:"POST",
-        data:$("#updateForm").serialize(),
-
-        success:function(res){
-
-            kendo.ui.progress($("#updateModal"),false);
-
-            if(res.success){
-
-                var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-
-                if(modal) modal.hide();
-
-                cleanupModal();
-
-                $("#grid").data("kendoGrid").dataSource.read();
-
-                alert("Query updated successfully");
-
-            }else{
-
-                alert(res.message || "Update failed");
-
-            }
-
-        },
-
-        error:function(){
-
-            kendo.ui.progress($("#updateModal"),false);
-
-            cleanupModal();
-
-            alert("Server error while updating");
-
-        }
-
-    });
-
-});
-
-</script>
-} *@
-
-
-@section Scripts {
-<script>
-
-function ensureKendoReady(done) {
-    if (window.kendo && window.jQuery && window.jQuery.fn.kendoGrid) {
-        done();
-        return;
-    }
-
-    var script = document.createElement("script");
-    script.src = "https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js";
-    script.onload = done;
-    document.head.appendChild(script);
-}
-
-$(function () {
-
-    /* ---------------------------
-       CLEAN MODAL WHEN CLOSED
-    ---------------------------- */
-
-$("#updateModal").on("hidden.bs.modal", function () {
-
-    $("#updateModalBody").html("");
-
-    $(".modal-backdrop").remove();      // remove bootstrap overlay
-    $(".k-loading-mask").remove();      // remove kendo loading overlay
-
-    $("body").removeClass("modal-open");
-    $("body").css("padding-right", "");
-});
-
-    /* ---------------------------
-       GRID FUNCTIONS
-    ---------------------------- */
-
-    function priorityMeta(value) {
-        if (value === 2 || value === "High") return { text: "High", cls: "myq-priority-high" };
-        if (value === 1 || value === "Medium") return { text: "Medium", cls: "myq-priority-medium" };
-        return { text: "Low", cls: "myq-priority-low" };
-    }
-
-    function statusMeta(value) {
-        if (value === 2 || value === "Solved") return { text: "Solved", cls: "myq-status-solved" };
-        if (value === 1 || value === "InProgress" || value === "In Progress") return { text: "In Progress", cls: "myq-status-progress" };
-        return { text: "Open", cls: "myq-status-open" };
-    }
-
-    function updateStats(grid) {
-
-        var data = grid.dataSource.data();
-
-        var total = data.length;
-        var solved = 0;
-        var progress = 0;
-
-        for (var i = 0; i < total; i++) {
-
-            var s = statusMeta(data[i].status).text;
-
-            if (s === "Solved") solved++;
-            if (s === "In Progress") progress++;
-        }
-
-        $("#totalCount").text(total);
-        $("#progressCount").text(progress);
-        $("#solvedCount").text(solved);
-    }
-
-
-    /* ---------------------------
-       INIT KENDO GRID
-    ---------------------------- */
-
-    ensureKendoReady(function () {
-
-        $("#grid").kendoGrid({
-
-            dataSource: {
-                transport: {
-                    read: {
-                        url: "/Employee/GetMyQueries",
-                        dataType: "json"
-                    }
-                },
-                pageSize: 10
-            },
-
-            height: 580,
-            sortable: true,
-            pageable: {
-                refresh: true,
-                pageSizes: [5, 10, 20, 50]
-            },
-
-            noRecords: {
-                template: "No assigned queries found."
-            },
-
-            dataBound: function () {
-                updateStats(this);
-            },
-
-            columns: [
-
-                { field: "queryId", title: "ID", width: 80 },
-
-                { field: "title", title: "Title", width: 260 },
-
-                {
-                    field: "priority",
-                    title: "Priority",
-                    width: 120,
-                    template: function (d) {
-
-                        var m = priorityMeta(d.priority);
-
-                        return "<span class='myq-badge " + m.cls + "'>" + m.text + "</span>";
-                    }
-                },
-
-                {
-                    field: "status",
-                    title: "Status",
-                    width: 140,
-                    template: function (d) {
-
-                        var m = statusMeta(d.status);
-
-                        return "<span class='myq-badge " + m.cls + "'>" + m.text + "</span>";
-                    }
-                },
-
-                {
-                    field: "comments",
-                    title: "Comments",
-                    width: 280,
-                    template: function (d) {
-
-                        var c = d.comments || "-";
-
-                        return "<span class='myq-comments'>" + kendo.htmlEncode(c) + "</span>";
-                    }
-                },
-
-                {
-                    title: "Action",
-                    width: 120,
-                    template: "<button class='k-button k-primary' onclick='openUpdate(#=queryId#)'>Update</button>"
-                }
-
-            ]
-
-        });
-
-    });
-
-});
-
-
-/* ---------------------------
-   OPEN UPDATE MODAL
----------------------------- */
-
-function openUpdate(id) {
-
-    kendo.ui.progress($("#grid"), true);
-
-    $.get("/Employee/UpdateQuery", { id: id })
-        .done(function (html) {
-
-            kendo.ui.progress($("#grid"), false);
-
-            $("#updateModalBody").html(html);
-
-            var modalEl = document.getElementById("updateModal");
-
-            if (modalEl.parentElement.tagName !== "BODY") {
-                document.body.appendChild(modalEl);
-            }
-
-            var modal = new bootstrap.Modal(modalEl, {
-    backdrop: true,
-    keyboard: true
-});
-
-            modal.show();
-        })
-        .fail(function () {
-
-            kendo.ui.progress($("#grid"), false);
-            alert("Failed to load update form.");
-
-        });
-}
-
-
-/* ---------------------------
-   UPDATE QUERY
----------------------------- */
-
-$(document).on("click", ".js-update-query", function () {
-
-    kendo.ui.progress($("#updateModal"), true);
-
-    $.ajax({
-
-        url: "/Employee/UpdateQueryStatus",
-
-        type: "POST",
-
-        data: $("#updateForm").serialize(),
-
-        success: function (res) {
-
-            kendo.ui.progress($("#updateModal"), false);
-
-            if (res && res.success) {
-
-                var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-
-                if (modal) modal.hide();
-
-                $("#grid").data("kendoGrid").dataSource.read();
-
-                kendo.notify("Query updated successfully!", { type: "success" });
-
-            }
-            else {
-
-                kendo.alert(res.message || "Update failed.");
-
-            }
-
-        },
-
-        error: function () {
-
-            kendo.ui.progress($("#updateModal"), false);
-
-            kendo.alert("Server error while updating query.");
-
-        }
-
-    });
-
-});
-
-
-/* ---------------------------
-   CLOSE BUTTON
----------------------------- */
-
-$(document).on("click", ".js-close-update", function () {
-
-    var modal = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
-
-    if (modal) modal.hide();
-
-});
-
 </script>
 }

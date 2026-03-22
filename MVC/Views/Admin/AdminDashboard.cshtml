@@ -1,516 +1,1078 @@
 @using Repository.Models
 @using Repository.Models.Enums
 @using System.Text.Json
-@using System.Linq
 
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
 
-    
-    var allQueries = (ViewBag.AllQueries as List<AdminQuery>) ?? new List<AdminQuery>();
-    var solvedQueries = (ViewBag.SolvedQueries as List<AdminQuery>) ?? new List<AdminQuery>();
-    var openQueries = (ViewBag.OpenQueries as List<AdminQuery>) ?? new List<AdminQuery>();
+    var allQueries      = (ViewBag.AllQueries      as List<AdminQuery>) ?? new List<AdminQuery>();
+    var solvedQueries   = (ViewBag.SolvedQueries   as List<AdminQuery>) ?? new List<AdminQuery>();
+    var openQueries     = (ViewBag.OpenQueries     as List<AdminQuery>) ?? new List<AdminQuery>();
     var progressQueries = (ViewBag.ProgressQueries as List<AdminQuery>) ?? new List<AdminQuery>();
-    var empPerformance = (ViewBag.EmpPerformance as List<EmployeePerformance>) ?? new List<EmployeePerformance>();
-    
-    var employees = ViewBag.Employees as List<Employee> ?? new List<Employee>();
+    var empPerformance  = (ViewBag.EmpPerformance  as IEnumerable<dynamic>) ?? new List<dynamic>();
+    var users           = ViewBag.Users as List<Repository.Models.User> ?? new List<Repository.Models.User>();
 
-    var cardsSafe = new Dictionary<string, int>();
-    var cardsRaw = ViewBag.Cards;
-    
-    if (cardsRaw != null)
-    {
-        if (cardsRaw is Dictionary<string, int> intDict) { cardsSafe = intDict; }
-        else if (cardsRaw is Dictionary<string, object> objDict)
-        {
-            foreach (var kvp in objDict) { cardsSafe[kvp.Key] = SafeInt(kvp.Value); }
-        }
-        else if (cardsRaw is Dictionary<string, string> strDict)
-        {
-            foreach (var kvp in strDict) { cardsSafe[kvp.Key] = SafeInt(kvp.Value); }
-        }
-    }
+    int total        = allQueries.Count;
+    int solved       = solvedQueries.Count;
+    int pending      = progressQueries.Count;
+    int todayTotal   = ViewBag.TodayTotal   ?? 0;
+    int todaySolved  = ViewBag.TodaySolved  ?? 0;
+    int todayOpen    = ViewBag.TodayOpen    ?? 0;
+    int todayPending = ViewBag.TodayPending ?? 0;
 
-    int totalQueries = cardsSafe.GetValueOrDefault("TotalQueries", 0);
-    int todayQueries = cardsSafe.GetValueOrDefault("TodayQueries", 0);
-    int solvedAll = cardsSafe.GetValueOrDefault("SolvedQueries", 0);
-    int solvedToday = cardsSafe.GetValueOrDefault("SolvedToday", 0);
-    int openAll = cardsSafe.GetValueOrDefault("OpenQueries", 0);
-    int progressAll = cardsSafe.GetValueOrDefault("InProgressQueries", 0);
-    int pendingAll = cardsSafe.GetValueOrDefault("PendingQueries", openAll + progressAll);
-    int pendingToday = cardsSafe.GetValueOrDefault("PendingToday", 0);
+  // ... existing ViewBag variables ...
+    var notifications = (ViewBag.Notifications as List<string>) ?? new List<string>();
+    long notificationCount = ViewBag.Count ?? 0L;
 
-    @functions {
-        int SafeInt(object value) => value switch
-        {
-            int i => i, long l => (int)l,
-            string s => int.TryParse(s, out int p) ? p : 0,
-            _ => 0
-        };
-    }
 
-    string PriorityLabel(Priority p) => p switch { Priority.High => "High", Priority.Medium => "Medium", _ => "Low" };
-    string StatusLabel(QueryStatus s) => s switch { QueryStatus.Solved => "Solved", QueryStatus.InProgress => "In Progress", _ => "Open" };
 
-    var empOnly = empPerformance
-        .Where(e => !string.Equals(e.EmployeeName, "Admin", StringComparison.OrdinalIgnoreCase)
-                 && !string.Equals(e.EmployeeName, "admin", StringComparison.OrdinalIgnoreCase))
-        .ToList();
+    // ── include empId so assigned dropdown survives refresh ──
+    var chartData = allQueries.Select(q => new {
+        queryId     = q.QueryId,
+        title       = q.Title       ?? "",
+        companyName = q.Username    ?? "",
+        priority    = q.Priority.ToString(),
+        status      = q.Status.ToString(),
+        queryDate   = q.QueryDate,
+        empId       = q.EmpId ?? 0,
+        assignedTo  = q.EmployeeName ?? "",
+        comments    = q.Comments    ?? ""
+    }).ToList();
 
-    int maxResolved = empOnly.Any() ? empOnly.Max(e => e.ResolvedQueries) : 1;
-    if (maxResolved == 0) maxResolved = 1;
-
-    var allJson = allQueries.Select(q => new {
-        queryId = q.QueryId, username = q.Username ?? "", title = q.Title ?? "",
-        priorityLabel = PriorityLabel(q.Priority), statusLabel = StatusLabel(q.Status),
-        employeeName = q.EmployeeName ?? "", comments = q.Comments ?? ""
-    });
-    var assignableEmployees = employees
-        .Where(e => !string.Equals(e.EmpName, "Admin", StringComparison.OrdinalIgnoreCase))
-        .ToList();
-
-    var jsonOpts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var usersJson = users.Select(u => new {
+        userId      = u.UserId,
+        companyName = u.CompanyName ?? "",
+        email       = u.Email       ?? ""
+    }).ToList();
 }
 
-<!-- Kendo CDN -->
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
-
-<!-- 🔥 SMOOTH DASHBOARD CSS - PERFECT FOR KENDO -->
 <style>
-
-    .dashboard-appbar{
-    background: linear-gradient(to right, #b39fff, #4300af); /* Blue → Purple */
-    padding: 12px 20px;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    @@keyframes bellBlink {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.45; transform: scale(1.08); }
+    }
+    #notificationBell i {
+        animation: bellBlink 1.2s infinite;
+    }
+    .notification-item.unread {
+    background: linear-gradient(90deg, rgba(79,70,229,0.1) 0%, transparent 100%);
+    border-left: 4px solid #4f46e5;
 }
-
-.dashboard-logout-wrap {
-    margin-left: auto;
+.notification-item:hover {
+    background-color: #f8fafc !important;
 }
-
-.dashboard-logout-btn {
-    background: #ffffff !important;
-    color: #1f2937 !important;
-    border: 1px solid #d1d5db !important;
-    font-weight: 600 !important;
+.notification-time {
+    font-size: 0.75rem;
+    color: #6b7280;
 }
-/* Smooth Modern Dashboard */
-:root {
-    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --card-bg: rgba(255, 255, 255, 0.95);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
-    --primary: #3b82f6;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-}
+    .dash-page { padding: 1.75rem 1.5rem 3rem; }
 
-body {
-    background: var(--bg-gradient);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding-top: 80px;
-}
+   .dash-page { padding: 1.75rem 1.5rem 3rem; }
 
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1030;
-}
+    /* ── Page heading ─────────────────────────────────── */
+    .dash-heading {
+        display: flex; align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 1.75rem; gap: 1rem;
+    }
+    .dash-heading-left h4 {
+        font-size: 1.35rem; font-weight: 700;
+        color: #0f172a; margin-bottom: 0; letter-spacing: -0.2px;
+    }
+    .dash-heading-left p { font-size: 0.82rem; color: #64748b; margin: 0; }
+    .dash-heading-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
-/* 🔥 PERFECT HEADER */
-.dashboard-header {
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    border-radius: 0 0 24px 24px;
-    box-shadow: var(--shadow);
-    padding: 2rem;
-    margin-bottom: 2rem;
-}
+    /* ── Stat cards ───────────────────────────────────── */
+    .stat-card {
+        background: #fff; border-radius: 16px;
+        padding: 1.35rem 1.4rem 1.2rem;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+        transition: box-shadow 0.2s, transform 0.2s;
+        position: relative; overflow: hidden;
+    }
+    .stat-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,0.1); transform: translateY(-2px); }
+    .stat-card::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 4px; border-radius: 16px 16px 0 0;
+    }
+    .stat-card.c-blue::after  { background: linear-gradient(90deg,#3b82f6,#6366f1); }
+    .stat-card.c-green::after { background: linear-gradient(90deg,#10b981,#34d399); }
+    .stat-card.c-red::after   { background: linear-gradient(90deg,#f43f5e,#fb923c); }
+    .stat-card.c-cyan::after  { background: linear-gradient(90deg,#06b6d4,#3b82f6); }
 
-.header-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--primary), #1d4ed8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-}
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.9rem; }
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; flex-shrink: 0;
+    }
+    .c-blue  .stat-icon { background: #eff6ff; color: #3b82f6; }
+    .c-green .stat-icon { background: #ecfdf5; color: #10b981; }
+    .c-red   .stat-icon { background: #fff1f2; color: #f43f5e; }
+    .c-cyan  .stat-icon { background: #ecfeff; color: #06b6d4; }
 
-/* 🔥 STATS CARDS - SMOOTH */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-}
+    .stat-label {
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.7px; color: #94a3b8; margin-bottom: 0.3rem;
+    }
+    .stat-value { font-size: 2.2rem; font-weight: 800; line-height: 1; color: #0f172a; }
+    .stat-footer {
+        margin-top: 0.9rem; padding-top: 0.75rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .stat-footer-label { font-size: 0.75rem; color: #94a3b8; }
+    .stat-today-pill { font-size: 0.7rem; font-weight: 700; padding: 0.18rem 0.55rem; border-radius: 20px; }
+    .c-blue  .stat-today-pill { background: #eff6ff; color: #2563eb; }
+    .c-green .stat-today-pill { background: #ecfdf5; color: #059669; }
+    .c-red   .stat-today-pill { background: #fff1f2; color: #e11d48; }
+    .c-cyan  .stat-today-pill { background: #ecfeff; color: #0891b2; }
 
-.stat-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    overflow: hidden;
-}
+    /* ── Section cards ────────────────────────────────── */
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden;
+    }
+    .section-card-header {
+        padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    }
+    .section-card-header-left { display: flex; align-items: center; gap: 0.6rem; }
+    .section-card-icon {
+        width: 30px; height: 30px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; background: #f8fafc;
+        border: 1px solid #e2e8f0; color: #475569; flex-shrink: 0;
+    }
+    .section-card-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .section-card-sub   { font-size: 0.73rem; color: #94a3b8; margin-top: 1px; }
+    .section-count-badge {
+        font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.6rem;
+        border-radius: 20px; background: #f1f5f9; color: #475569;
+        border: 1px solid #e2e8f0; white-space: nowrap;
+    }
+    .section-card-body { padding: 1.25rem 1.4rem; }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), #60a5fa);
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
-}
+    /* ── Search bar ───────────────────────────────────── */
+    .search-bar-wrap {
+        display: flex; gap: 0.6rem; align-items: center;
+        margin-bottom: 1rem;
+    }
+    .search-bar-input {
+        flex: 1; max-width: 420px;
+        padding: 0.5rem 0.85rem 0.5rem 2.4rem;
+        border: 1px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.85rem; background: #f8fafc;
+        color: #0f172a; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-bar-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        background: #fff;
+    }
+    .search-bar-wrap-inner { position: relative; flex: 1; max-width: 420px; }
+    .search-bar-wrap-inner .search-icon {
+        position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
+        color: #94a3b8; font-size: 0.85rem; pointer-events: none;
+    }
+    .search-bar-input { width: 100%; max-width: unset; }
+    .search-status {
+        font-size: 0.75rem; color: #64748b;
+        white-space: nowrap;
+    }
+    .search-clear-btn {
+        padding: 0.45rem 0.85rem; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 600;
+        border: 1px solid #e2e8f0; background: #f8fafc;
+        color: #475569; cursor: pointer;
+        transition: background 0.15s;
+        display: none;
+    }
+    .search-clear-btn:hover { background: #f1f5f9; }
 
-.stat-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-hover);
-}
+    /* ── Grid tweaks ──────────────────────────────────── */
+    .k-grid { border-radius: 8px; border: 1px solid #e8edf3; font-size: 0.83rem; }
+    .k-grid-header th { font-weight: 700; background: #f8fafc; color: #374151; letter-spacing: 0.2px; border-bottom-color: #e8edf3 !important; }
+    .k-grid-content tr { transition: background 0.1s; }
+    .k-grid-content tr:hover td { background: #f8fafc; }
+    .k-grid td { padding: 0.5rem 0.75rem; vertical-align: middle; }
 
-.stat-card:hover::before {
-    transform: scaleX(1);
-}
+    /* ── Badges ───────────────────────────────────────── */
+    .b { display: inline-flex; align-items: center; padding: 0.18rem 0.5rem; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .b-danger  { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+    .b-warn    { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .b-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .b-muted   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .b-blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 
-.stat-icon {
-    font-size: 3rem;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
+    /* ── Assign container ─────────────────────────────── */
+    .assign-container { display: flex; align-items: center; gap: 0.5rem; }
+    .assign-ddl { flex: 1; }
 
-.stat-primary .stat-icon { background: linear-gradient(135deg, var(--primary), #60a5fa); color: white; }
-.stat-success .stat-icon { background: linear-gradient(135deg, var(--success), #34d399); color: white; }
-.stat-warning .stat-icon { background: linear-gradient(135deg, var(--warning), #fbbf24); color: white; }
-.stat-info .stat-icon { background: linear-gradient(135deg, #06b6d4, #0ea5e9); color: white; }
+    /* ── Chart legend strip ───────────────────────────── */
+    .chart-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; padding: 0.75rem 0 0; }
+    .legend-item  { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #475569; font-weight: 500; }
+    .legend-dot   { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
 
-.stat-number {
-    font-size: 2.8rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    line-height: 1;
-}
-
-.stat-primary .stat-number { color: var(--primary); }
-.stat-success .stat-number { color: var(--success); }
-.stat-warning .stat-number { color: var(--warning); }
-.stat-info .stat-number { color: #06b6d4; }
-
-.stat-label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    opacity: 0.8;
-}
-
-/* 🔥 GRID CONTAINER */
-.grid-container {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* 🔥 KENDO GRID ENHANCEMENTS */
-#queryGrid {
-    border-radius: 20px !important;
-    overflow: hidden !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
-}
-
-.k-grid-header {
-    background: linear-gradient(135deg, var(--primary), #1d4ed8) !important;
-    color: white !important;
-}
-
-.k-grid-header th {
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    padding: 1.2rem 1rem !important;
-}
-
-.k-grid tr:hover td {
-    background: rgba(59, 130, 246, 0.08) !important;
-}
-
-/* 🔥 ASSIGN CONTROLS - SMOOTH */
-.assign-wrap {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    padding: 12px !important;
-    background: rgba(255, 255, 255, 0.8) !important;
-    border-radius: 16px !important;
-    transition: all 0.3s ease !important;
-}
-
-.assign-wrap:hover {
-    background: rgba(255, 255, 255, 1) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
-}
-
-.assign-select {
-    flex: 1 !important;
-    padding: 10px 14px !important;
-    border: 2px solid rgba(59, 130, 246, 0.2) !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
-    background: white !important;
-    transition: all 0.3s ease !important;
-}
-
-.assign-select:focus {
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-}
-
-.assign-btn {
-    padding: 10px 18px !important;
-    border-radius: 12px !important;
-    background: linear-gradient(135deg, var(--primary), #1d4ed8) !important;
-    color: white !important;
-    border: none !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-}
-
-.assign-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
-}
-
-/* 🔥 BADGES - SMOOTH */
-.badge {
-    padding: 6px 14px !important;
-    border-radius: 20px !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-}
-
-.badge-open { 
-    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
-    color: #92400e !important;
-    border: 1px solid #fcd34d !important;
-}
-
-.badge-progress { 
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
-    color: #1e40af !important;
-    border: 1px solid #93c5fd !important;
-}
-
-.badge-solved { 
-    background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
-    color: #065f46 !important;
-    border: 1px solid #86efac !important;
-}
-
-.pri-high { color: var(--danger) !important; font-weight: 900 !important; }
-.pri-medium { color: var(--warning) !important; font-weight: 700 !important; }
-.pri-low { color: var(--success) !important; font-weight: 700 !important; }
-
-/* 🔥 NOTIFICATION */
-#notification {
-    position: fixed !important;
-    bottom: 2rem !important;
-    right: 2rem !important;
-    z-index: 9999 !important;
-}
+  /* ── Notification ─────────────────────────────────── */
+    #notification { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 9999; }
 </style>
 
-@* <!-- 🔥 SMOOTH DASHBOARD LAYOUT -->
-<div class="dashboard-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="header-title">
-                    <i class="fas fa-tachometer-alt me-3"></i>
-                    Admin Dashboard
-                </h1>
-              
+<div class="dash-page">
+
+    <!-- Page Heading -->
+    <div class="dash-heading">
+        <div class="dash-heading-left">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <h4 style="margin:0;"><i class="bi bi-speedometer2 me-2 text-primary"></i>Admin Dashboard</h4>
+            </div>
+            <p>System-wide query statistics, performance overview and user management</p>
+        </div>
+        <div class="dash-heading-actions" style="--manage-bell-gap:0.75rem;align-items:center;gap:var(--manage-bell-gap);">
+            <div class="position-relative d-inline-block" style="z-index:1200;">
+    <button class="btn btn-sm position-relative p-2" id="notificationBell" style="border-radius: 50%; width: 60px; height: 60px; border: 1px solid rgba(255,255,255,0.92); background: radial-gradient(circle at 30% 28%, #ffffff 0%, #fef9c3 14%, #eff6ff 34%, #bfdbfe 64%, #60a5fa 100%); box-shadow: 0 0 0 4px rgba(255,255,255,0.38), 0 14px 30px rgba(37,99,235,0.26), 0 0 22px rgba(250,204,21,0.32), inset 0 1px 0 rgba(255,255,255,0.98); color: #1d4ed8;">
+        <i class="bi bi-bell-fill fs-2" style="filter: drop-shadow(0 0 8px rgba(250,204,21,0.7)) drop-shadow(0 5px 12px rgba(37,99,235,0.28));"></i>
+        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+            <span id="notificationCount">0</span>
+        </span>
+    </button>
+    
+    <div id="notificationDropdown" class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="width: 420px; max-height: 520px; overflow-y: auto; display: none; right: 0; left: auto; top: 100%; margin-top: 0.45rem; z-index: 1300;">
+        <div class="px-3 py-2 border-bottom bg-light">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div>
+                    <h6 class="mb-0 fw-bold text-primary">
+                        <i class="bi bi-bell me-1"></i>Notifications 
+                        <span id="totalNotifications" class="badge bg-primary ms-1">0</span>
+                    </h6>
+                    <small class="text-muted">All notifications in one place</small>
+                </div>
+                <button type="button" id="clearAllNotificationsBtn" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i>Clear All
+                </button>
             </div>
         </div>
-    </div>
-</div> *@
-
-<div class="k-appbar k-appbar-stretch k-rounded-top dashboard-appbar" style="margin: -1.5rem -1.5rem 2rem -1.5rem;">
-    <div class="k-appbar-section k-appbar-section-start">
-        <h2 class="k-text-white mb-0 dashboard-title" style="text-align:center;" >Admin Dashboard</h2>
-    </div>
-    <div class="k-appbar-section k-appbar-section-end dashboard-logout-wrap">
-        <form method="post" action="/Logout" style="margin:0;">
-            <button type="submit" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base dashboard-logout-btn">Logout</button>
-        </form>
+        
+        <div id="notificationList" class="p-0">
+        </div>
     </div>
 </div>
-
-<div class="container-fluid px-4">
-    <!-- 🔥 SMOOTH STATS GRID -->
-    <div class="stats-grid">
-        <!-- Total Queries -->
-        <div class="stat-card stat-primary">
-            <div class="stat-icon">📋</div>
-            <div class="stat-number">@totalQueries</div>
-            <div class="stat-label">Total Queries</div>
-        </div>
-
-        <!-- Solved Queries -->
-        <div class="stat-card stat-success">
-            <div class="stat-icon">✅</div>
-            <div class="stat-number">@solvedAll</div>
-            <div class="stat-label">Solved</div>
-        </div>
-
-        <!-- Pending Queries -->
-        <div class="stat-card stat-warning">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-number">@pendingAll</div>
-            <div class="stat-label">Pending</div>
-        </div>
-
-        <!-- Today Activity -->
-        <div class="stat-card stat-info">
-            <div class="stat-icon">📊</div>
-            <div class="stat-number">@todayQueries</div>
-            <div class="stat-label">Today</div>
+            <a class="btn btn-sm btn-outline-secondary" asp-controller="Admin" asp-action="Employees">
+                <i class="bi bi-people me-1"></i>Manage Employees
+            </a>
         </div>
     </div>
 
-    <!-- 🔥 MAIN GRID CONTAINER -->
-    <div class="grid-container">
-        <div class="row mb-3">
-            <div class="col">
-                <h3 class="mb-1">
-                    <i class="fas fa-table me-2 text-primary"></i>
-                    All Queries (@allQueries.Count records)
-                </h3>
-                @* <p class="text-muted mb-0">Click Assign to update employee allocation instantly</p> *@
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="stat-card c-blue">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-label">Total Queries</div>
+                        <div class="stat-value">@total</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-journal-text"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-footer-label">Submitted today</span>
+                    <span class="stat-today-pill">+@todayTotal today</span>
+                </div>
             </div>
         </div>
-        <div id="queryGrid"></div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card c-green">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-label">Solved</div>
+                        <div class="stat-value">@solved</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-footer-label">Resolved today</span>
+                    <span class="stat-today-pill">+@todaySolved today</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card c-red">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value">@pending</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-footer-label">New pending today</span>
+                    <span class="stat-today-pill">+@todayPending today</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card c-cyan">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-label">Open</div>
+                        <div class="stat-value">@openQueries.Count</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-envelope-open"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-footer-label">Opened today</span>
+                    <span class="stat-today-pill">+@todayOpen today</span>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+
+        <!-- Pie Chart -->
+        <div class="col-lg-5">
+            <div class="section-card h-100">
+                <div class="section-card-header">
+                    <div class="section-card-header-left">
+                        <div class="section-card-icon"><i class="bi bi-pie-chart-fill"></i></div>
+                        <div>
+                            <div class="section-card-title">Query Status Distribution</div>
+                            <div class="section-card-sub">All-time breakdown by status</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-card-body">
+                    <div id="statusChart" class="chart-wrap" style="height:270px; " style="height:320px; overflow:visible;"></div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div>Solved (@solved)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#f43f5e;"></div>Pending (@pending)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#06b6d4;"></div>Open (@openQueries.Count)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Performance Bar -->
+        <div class="col-lg-7">
+            <div class="section-card h-100">
+                <div class="section-card-header">
+                    <div class="section-card-header-left">
+                        <div class="section-card-icon"><i class="bi bi-bar-chart-fill"></i></div>
+                        <div>
+                            <div class="section-card-title">Employee Performance</div>
+                            <div class="section-card-sub">Total assigned vs. solved per employee</div>
+                        </div>
+                    </div>
+                    <!-- Sort toggle button -->
+                    <button id="empSortBtn" class="btn btn-sm btn-outline-secondary" title="Toggle sort order">
+                        <i class="bi bi-sort-down me-1" id="empSortIcon"></i>
+                        <span id="empSortLabel">Highest First</span>
+                    </button>
+                </div>
+                <div class="section-card-body">
+                    <div id="empChart" class="chart-wrap" style="height:300px;"></div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#93c5fd;"></div>Total Assigned</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div>Solved</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- All Queries Grid -->
+    <div class="section-card mb-4">
+        <div class="section-card-header">
+            <div class="section-card-header-left">
+                <div class="section-card-icon"><i class="bi bi-table"></i></div>
+                <div>
+                    <div class="section-card-title">All Queries</div>
+                    <div class="section-card-sub">Sortable, filterable — assign employees inline</div>
+                </div>
+            </div>
+            <span class="section-count-badge">@allQueries.Count total</span>
+        </div>
+        <div class="section-card-body" style="padding-top:1rem;">
+
+            <!-- Search bar -->
+            <!-- Search bar -->
+<div class="search-bar-wrap" style="flex-wrap:wrap;gap:0.5rem;">
+
+    <div class="search-bar-wrap-inner">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" id="querySearch"
+               class="search-bar-input"
+               placeholder="Search by title, company, status, priority…"
+               autocomplete="off" />
+    </div>
+
+    <select id="filterStatus" style="padding:0.48rem 0.85rem;border:1px solid #e2e8f0;border-radius:8px;font-size:0.83rem;background:#f8fafc;color:#374151;outline:none;cursor:pointer;transition:border-color 0.15s;">
+        <option value="">All Statuses</option>
+        <option value="Open">Open</option>
+        <option value="InProgress">In Progress</option>
+        <option value="Solved">Solved</option>
+    </select>
+
+    <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+        <input type="date" id="fromDate" aria-label="From date" title="From date" style="padding:0.48rem 0.85rem;border:1px solid #e2e8f0;border-radius:8px;font-size:0.83rem;background:#f8fafc;color:#374151;outline:none;transition:border-color 0.15s;" />
+        <span style="font-size:0.83rem;color:#64748b;font-weight:600;">to</span>
+        <input type="date" id="toDate" aria-label="To date" title="To date" style="padding:0.48rem 0.85rem;border:1px solid #e2e8f0;border-radius:8px;font-size:0.83rem;background:#f8fafc;color:#374151;outline:none;transition:border-color 0.15s;" />
+    </div>
+
+    <button id="applyFilterBtn" style="padding:0.48rem 1rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#2563eb;color:#fff;border:none;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+        <i class="bi bi-funnel-fill"></i> Filter
+    </button>
+
+    <button id="resetFilterBtn" style="padding:0.48rem 0.85rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+        <i class="bi bi-x-lg"></i> Reset
+    </button>
+
+    <span class="search-status" id="searchStatus"></span>
+    <button class="search-clear-btn" id="searchClear">
+        <i class="bi bi-x me-1"></i>Clear
+    </button>
+
+</div>
+
+            <div id="recentGrid"></div>
+        </div>
+    </div>
+
+    <!-- Registered Users Grid -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <div class="section-card-header-left">
+                <div class="section-card-icon"><i class="bi bi-people"></i></div>
+                <div>
+                    <div class="section-card-title">Registered Users</div>
+                    <div class="section-card-sub">All companies registered in the system</div>
+                </div>
+            </div>
+            <span class="section-count-badge">@users.Count users</span>
+        </div>
+        <div class="section-card-body" style="padding-top:1rem;">
+            <div id="usersGrid"></div>
+        </div>
+    </div>
+
 </div>
 
 <div id="notification"></div>
 
-<!-- 🔥 YOUR KENDO CODE - 100% UNCHANGED -->
+
 @section Scripts {
-<script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var allData = @Html.Raw(JsonSerializer.Serialize(allJson, jsonOpts));
-    var employeeList = [
-        { empId: 0, empName: "— Unassign —" },
-        @foreach (var emp in assignableEmployees) { <text>{ empId: @emp.EmpId, empName: "@emp.EmpName" },</text> }
-    ];
+ // Notification System
+    let notifications = @Html.Raw(JsonSerializer.Serialize(notifications));
+    let notificationCount = @notificationCount;
 
-    $(document).ready(function () {
-        var notification = $("#notification").kendoNotification({
-            position: { bottom: 24, right: 24 }, autoHideAfter: 3500
-        }).data("kendoNotification");
+    function escHtml(s) {
+        return String(s ?? "")
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
-        var statusTpl = "# var sc = statusLabel==='Solved'?'badge-solved':statusLabel==='In Progress'?'badge-progress':'badge-open'; #<span class='badge #= sc #'>#= statusLabel #</span>";
-        var priorityTpl = "# var pc = priorityLabel==='High'?'pri-high':priorityLabel==='Medium'?'pri-medium':'pri-low'; #<span class='#= pc #'>#= priorityLabel #</span>";
+    function loadNotifications() {
+        const count = notificationCount;
 
-        function assignTemplate(dataItem) {
-            var opts = employeeList.map(function(e) {
-                var sel = (dataItem.employeeName && e.empName === dataItem.employeeName) ? ' selected' : '';
-                return '<option value="' + e.empId + '"' + sel + '>' + kendo.htmlEncode(e.empName) + '</option>';
-            }).join('');
-            return '<div class="assign-wrap">' +
-                '<select class="assign-select" data-queryid="' + dataItem.queryId + '">' + opts + '</select>' +
-                '<button class="assign-btn k-button" onclick="doAssign(' + dataItem.queryId + ', this)">Assign</button>' +
-                '</div>';
+        document.getElementById('notificationCount').textContent = count > 99 ? '99+' : count;
+        document.getElementById('totalNotifications').textContent = count;
+        document.getElementById('notificationBadge').style.display = count > 0 ? 'block' : 'none';
+
+        renderNotificationList();
+    }
+
+    function renderNotificationList() {
+        const list = document.getElementById('notificationList');
+
+        if (!notifications || notifications.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-bell-slash fs-1 mb-2 opacity-50"></i>
+                    <p class="mb-0">No notifications</p>
+                </div>
+            `;
+            return;
         }
 
-        // Main Query Grid - Full Width
-        $("#queryGrid").kendoGrid({
-            dataSource: { data: allData, pageSize: 12, sort: { field: "queryId", dir: "desc" } },
-            pageable: { pageSizes: [12, 24, 50, "all"] },
-            sortable: true, 
+        list.innerHTML = notifications.map((n, index) => `
+            <div class="dropdown-item p-3 notification-item unread" data-id="${index}">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-bell text-primary fs-6"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-dark">Notification</div>
+                        <div class="small text-muted">${escHtml(n)}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function playBellSound() {
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            const audioCtx = new AudioContextClass();
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+            masterGain.gain.exponentialRampToValueAtTime(0.32, audioCtx.currentTime + 0.02);
+            masterGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.6);
+            masterGain.connect(audioCtx.destination);
+
+            const tones = [
+                { freq: 1320.00, type: 'triangle', start: 0.00, stop: 0.22, gain: 1.00 },
+                { freq: 1661.22, type: 'sine',     start: 0.00, stop: 0.22, gain: 0.42 },
+                { freq: 1320.00, type: 'triangle', start: 0.32, stop: 0.54, gain: 1.00 },
+                { freq: 1661.22, type: 'sine',     start: 0.32, stop: 0.54, gain: 0.42 },
+                { freq: 1481.66, type: 'triangle', start: 0.86, stop: 1.12, gain: 0.92 },
+                { freq: 1977.77, type: 'sine',     start: 0.86, stop: 1.12, gain: 0.35 }
+            ];
+
+            tones.forEach(function(t) {
+                const oscillator = audioCtx.createOscillator();
+                const toneGain = audioCtx.createGain();
+                oscillator.type = t.type;
+                oscillator.frequency.setValueAtTime(t.freq, audioCtx.currentTime + t.start);
+                oscillator.frequency.exponentialRampToValueAtTime(t.freq * 0.998, audioCtx.currentTime + t.stop);
+                toneGain.gain.setValueAtTime(0.0001, audioCtx.currentTime + t.start);
+                toneGain.gain.exponentialRampToValueAtTime(0.24 * t.gain, audioCtx.currentTime + t.start + 0.02);
+                toneGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + t.stop);
+                oscillator.connect(toneGain);
+                toneGain.connect(masterGain);
+                oscillator.start(audioCtx.currentTime + t.start);
+                oscillator.stop(audioCtx.currentTime + t.stop);
+            });
+
+            setTimeout(function() { audioCtx.close(); }, 1700);
+        } catch (e) { }
+    }
+
+    // Notification bell toggle
+    document.getElementById('notificationBell').addEventListener('click', function(e) {
+        e.stopPropagation();
+        playBellSound();
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        document.getElementById('notificationDropdown').style.display = 'none';
+    });
+
+    document.getElementById('notificationDropdown').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    document.getElementById('clearAllNotificationsBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const result = await Swal.fire({
+            title: 'Delete all notifications?',
+            text: 'This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, clear all',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/Notification/Clear', { method: 'POST' });
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = '/Admin/AdminDashboard';
+            }
+        } catch (err) {
+            console.error('Clear notification error:', err);
+            window.location.reload();
+        }
+    });
+    
+    async function fetchNotifications() {
+        try {
+            const [listRes, countRes] = await Promise.all([
+                fetch('/Notification/GetAll'),
+                fetch('/Notification/Count')
+            ]);
+
+            if (listRes.ok) {
+                notifications = await listRes.json();
+            }
+
+            if (countRes.ok) {
+                const countData = await countRes.json();
+                notificationCount = countData.count || 0;
+            } else {
+                notificationCount = notifications.length;
+            }
+
+            loadNotifications();
+        } catch (err) {
+            console.error('Notification fetch error:', err);
+        }
+    }
+
+    loadNotifications();
+
+    setInterval(fetchNotifications, 30000);
+    // ── Data ──────────────────────────────────────────────────
+    var recent = @Html.Raw(JsonSerializer.Serialize(chartData.Select(q => new {
+        queryId     = q.queryId,
+        title       = q.title,
+        companyName = q.companyName,
+        priority    = q.priority,
+        status      = q.status,
+        queryDate   = q.queryDate,
+        empId       = q.empId,                                       // numeric id — survives refresh
+        assignedTo  = string.IsNullOrEmpty(q.assignedTo) ? "Unassigned" : q.assignedTo,
+        comments    = q.comments
+    })));
+
+    var usersData = @Html.Raw(JsonSerializer.Serialize(usersJson));
+
+    var empStats = @Html.Raw(JsonSerializer.Serialize(empPerformance.Select(e => new {
+        empName     = (string)e.EmpName,
+        solvedCount = (int)e.Solved,
+        totalCount  = (int)e.Total
+    })));
+
+    var employees = [
+        { text: "Unassigned", value: 0 },
+        @foreach (var emp in (ViewBag.Employees as List<Repository.Models.Employee> ?? new List<Repository.Models.Employee>())
+                  .Where(e => !string.Equals(e.EmpName, "Admin", StringComparison.OrdinalIgnoreCase)))
+        {
+            <text>{ text: "@Html.Raw(emp.EmpName ?? "")", value: @emp.EmpId },</text>
+        }
+    ];
+    var employeeLookup = {};
+    employees.forEach(function(e) { employeeLookup[e.value] = e.text; });
+
+    // ─────────────────────────────────────────────────────────
+    $(document).ready(function () {
+
+        var notification = $("#notification").kendoNotification({
+            position: { bottom: 20, right: 20 },
+            autoHideAfter: 3500
+        }).data("kendoNotification");
+   /* ── Pie chart ── */
+        $("#statusChart").kendoChart({
+            legend: { visible: false },
+            chartArea: { background: "transparent", margin: { top: 30, bottom: 10, left: 10, right: 10 } },
+            series: [{
+                type: "pie",
+                data: [
+                    { category: "Solved",  value: @solved,            color: "#10b981" },
+                    { category: "Pending", value: @pending,           color: "#f43f5e" },
+                    { category: "Open",    value: @openQueries.Count, color: "#06b6d4" }
+                ],
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #\n#= kendo.toString(percentage, 'p0') #",
+                    font: "600 12px 'Segoe UI'"
+                },
+                border: { width: 2, color: "#fff" },
+                padding: 10
+            }],
+            tooltip: {
+                visible: true,
+                background: "#0f172a",
+                color: "#fff",
+                template: "#= category #: #= value # queries (#= kendo.toString(percentage,'p0') #)"
+            }
+        });
+          /* ── Employee bar chart (horizontal) ── */
+        var empSortAsc = false; // default: highest first (descending)
+
+        function getSortedEmpStats() {
+            return empStats.slice().sort(function(a, b) {
+                return empSortAsc
+                    ? a.totalCount - b.totalCount   // lowest first
+                    : b.totalCount - a.totalCount;  // highest first
+            });
+        }
+
+        function buildEmpChart() {
+            var sorted = getSortedEmpStats();
+            var chart  = $("#empChart").data("kendoChart");
+
+            var options = {
+                dataSource: { data: sorted },
+                chartArea:  { background: "transparent" },
+                series: [
+                    { type: "column", field: "totalCount", name: "Total Assigned", color: "#93c5fd", border: { width: 0 } },
+                    { type: "column", field: "solvedCount", name: "Solved",        color: "#2563eb", border: { width: 0 } }
+                ],
+                categoryAxis: {
+                    field: "empName",
+                    labels: { font: "600 12px 'Segoe UI'", color: "#374151" },
+                    majorGridLines: { visible: false }
+                },
+                valueAxis: {
+                    title: { text: "Queries", font: "12px 'Segoe UI'", color: "#94a3b8" },
+                    min: 0,
+                    labels: { font: "12px 'Segoe UI'", color: "#94a3b8" },
+                    majorGridLines: { color: "#f1f5f9" }
+                },
+                legend: { visible: false },
+                tooltip: {
+                    visible: true, background: "#0f172a", color: "#fff",
+                    template: "#= series.name #: #= value #"
+                }
+            };
+
+            if (chart) {
+                // Re-use existing widget — just swap data and redraw
+                chart.dataSource.data(sorted);
+                chart.refresh();
+            } else {
+                $("#empChart").kendoChart(options);
+            }
+        }
+
+        buildEmpChart();
+
+        // Sort toggle button
+        $("#empSortBtn").on("click", function () {
+            empSortAsc = !empSortAsc;
+            $("#empSortLabel").text(empSortAsc ? "Lowest First" : "Highest First");
+            $("#empSortIcon")
+                .toggleClass("bi-sort-down",  !empSortAsc)
+                .toggleClass("bi-sort-up",     empSortAsc);
+            buildEmpChart();
+        });
+
+/* ── Badge templates ── */
+        function priTpl(d) {
+            var cls = d.priority === "High" ? "b-danger" : d.priority === "Medium" ? "b-warn" : "b-success";
+            return "<span class='b " + cls + "'>" + d.priority + "</span>";
+        }
+        function staTpl(d) {
+            var label = d.status === "InProgress" ? "In Progress" : d.status;
+            var cls   = d.status === "Solved" ? "b-success" : d.status === "InProgress" ? "b-blue" : "b-muted";
+            return "<span class='b " + cls + "'>" + label + "</span>";
+        }
+
+        /* ── Queries Grid ── */
+        var queryDS = new kendo.data.DataSource({
+            data: recent,
+            pageSize: 5,
+            schema: { model: { id: "queryId" } }
+        });
+
+        $("#recentGrid").kendoGrid({
+            dataSource: queryDS,
+            pageable:   { pageSizes: [5, 10, 15] },
+            sortable:   true,
+            filterable: true,
             scrollable: true,
-            height: 700,
-            toolbar: [{ template: '<span style="font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;color:Black(255,255,255,0.9);padding:8px 12px;font-weight:700;background:rgba(255,255,255,0.2);border-radius:8px;">All Queries - Live Management</span>' }],
+            height: 480,
+            dataBound: initAssignDropdowns,
             columns: [
-                { field: "queryId", title: "ID", width: 70 },
-                { field: "username", title: "Company", width: 180 },
-                { field: "title", title: "Title", width: 280 },
-                { field: "priorityLabel", title: "Priority", width: 120, template: priorityTpl },
-                { field: "statusLabel", title: "Status", width: 140, template: statusTpl },
-                { field: "employeeName", title: "Assigned To", width: 150 },
-                { field: "comments", title: "Comments", width: 200 },
-                { title: "Actions", width: 260, template: assignTemplate }
+                { field: "queryId",     title: "ID",       width: 70 },
+                { field: "title",       title: "Title",    width: 200 },
+                { field: "companyName", title: "Company",  width: 150 },
+                { field: "priority",    title: "Priority", width: 100, template: priTpl },
+                { field: "status",      title: "Status",   width: 130, template: staTpl },
+                { field: "queryDate",   title: "Date",     width: 110,
+                  template: function(d) {
+                      var dt = new Date(d.queryDate);
+                      return isNaN(dt.getTime()) ? "" : kendo.toString(dt, "yyyy-MM-dd");
+                  }
+                },
+                { field: "comments",   title: "Comments", width: 180,
+                  template: function(d) {
+                      if (!d.comments) return "<span class='text-muted'>—</span>";
+                      var t = d.comments.length > 45 ? d.comments.substring(0, 45) + "…" : d.comments;
+                      return "<span title='" + kendo.htmlEncode(d.comments) + "'>" + kendo.htmlEncode(t) + "</span>";
+                  }
+                },
+                { field: "assignedTo", title: "Assign To", width: 240,
+                  filterable: false, sortable: false,
+                  template: function(d) {
+                      var val      = (d.empId || 0).toString();
+                      var status   = (d.status || "").toString().toLowerCase();
+                      var isSolved = status === "solved";
+                      // Button is enabled only when nothing is yet assigned and query is not solved
+                      var canAssign = !isSolved && val === "0";
+                      return "<div class='assign-container'>" +
+                                 "<input class='assign-ddl' data-query='" + d.queryId +
+                                        "' data-current='" + val +
+                                        "' data-status='" + d.status + "' />" +
+                                 "<button type='button' class='btn btn-sm btn-outline-primary assign-btn'" +
+                                         " data-query='" + d.queryId + "'" +
+                                         (canAssign ? "" : " disabled") + ">Assign</button>" +
+                             "</div>";
+                  }
+                }
             ]
         });
 
-        // Elite Hover Effects
-        $(".stat-card").hover(
-            function() { 
-                $(this).css({ 
-                    transform: "translateY(-8px)",
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
-                }); 
-            },
-            function() { 
-                $(this).css({ 
-                    transform: "translateY(0)", 
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
-                }); 
-            }
-        );
+        /* ── Users Grid ── */
+        $("#usersGrid").kendoGrid({
+            dataSource: { data: usersData, pageSize: 10 },
+            pageable:   { pageSizes: [10, 25, 50, "all"] },
+            sortable:   true,
+            filterable: true,
+            scrollable: false,
+            columns: [
+                { field: "userId",      title: "ID",           width: 80 },
+                { field: "companyName", title: "Company Name", width: 280 },
+                { field: "email",       title: "Email",        minWidth: 200 }
+            ]
+        });
 
-        notification.show("Admin Dashboard loaded successfully!", "success");
+        /* ── Search bar logic ── */
+        /* ══════════════════════════════════════════════════════
+   ELASTICSEARCH-BACKED SEARCH BAR
+══════════════════════════════════════════════════════ */
+
+var searchTimer   = null;
+var activeRequest = null;
+
+function setSearchBusy(busy) {
+    $("#applyFilterBtn").prop("disabled", busy).html(
+        busy ? '<span class="spinner-border spinner-border-sm me-1"></span>Searching…'
+             : '<i class="bi bi-funnel-fill"></i> Filter'
+    );
+}
+
+function updateSearchStatus(count) {
+    $("#searchStatus").text(count === null ? "" : count + " result" + (count !== 1 ? "s" : ""));
+}
+
+function runElasticSearch() {
+    var q        = $("#querySearch").val().trim();
+    var status   = $("#filterStatus").val();
+    var fromDate = $("#fromDate").val();
+    var toDate   = $("#toDate").val();
+
+    if (!q && !status && !fromDate && !toDate) {
+        queryDS.data(recent);
+        updateSearchStatus(null);
+        $("#searchClear").hide();
+        setSearchBusy(false);
+        return;
+    }
+
+    if (activeRequest) { activeRequest.abort(); activeRequest = null; }
+
+    setSearchBusy(true);
+    $("#searchStatus").text("Searching…");
+
+    var params = {};
+    if (q)        params.q        = q;
+    if (status)   params.status   = status;
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate)   params.toDate   = toDate;
+
+    activeRequest = $.get("/Admin/SearchQueries", params)
+        .done(function (results) {
+            activeRequest = null;
+
+            if (results && results.error) {
+                notification.show("Search error: " + results.error, "error");
+                setSearchBusy(false);
+                updateSearchStatus(null);
+                return;
+            }
+
+            var mapped = (results || []).map(function(r) {
+                return {
+                    queryId:     r.queryId,
+                    title:       r.title       || "",
+                    companyName: r.companyName || "",
+                    priority:    r.priority    || "",
+                    status:      r.status      || "",
+                    queryDate:   r.queryDate   ? new Date(r.queryDate) : new Date(),
+                    empId:       r.empId       || 0,
+                    assignedTo:  r.assignedTo  || "Unassigned",
+                    comments:    r.comments    || ""
+                };
+            });
+
+            queryDS.data(mapped);
+            updateSearchStatus(mapped.length);
+            setSearchBusy(false);
+        })
+        .fail(function (xhr) {
+            activeRequest = null;
+            if (xhr.statusText === "abort") return;
+            notification.show("Search request failed.", "error");
+            setSearchBusy(false);
+            updateSearchStatus(null);
+        });
+}
+
+$("#querySearch").on("input", function () {
+    clearTimeout(searchTimer);
+    $("#searchClear").toggle($(this).val().trim().length > 0);
+    searchTimer = setTimeout(runElasticSearch, 300);
+});
+
+$("#searchClear").on("click", function () {
+    $("#querySearch").val("").trigger("input");
+});
+
+$("#applyFilterBtn")
+    .hover(
+        function() { $(this).css("background", "#1d4ed8"); },
+        function() { $(this).css("background", "#2563eb"); })
+    .on("click", function () {
+        clearTimeout(searchTimer);
+        runElasticSearch();
     });
 
-    function doAssign(queryId, btn) {
-        var select = $(btn).closest('.assign-wrap').find('.assign-select');
-        var empId = parseInt(select.val());
-        var empName = select.find('option:selected').text();
-        var notification = $("#notification").data("kendoNotification");
+$("#resetFilterBtn")
+    .hover(
+        function() { $(this).css("background", "#f1f5f9"); },
+        function() { $(this).css("background", "#f8fafc"); })
+    .on("click", function () {
+        clearTimeout(searchTimer);
+        if (activeRequest) { activeRequest.abort(); activeRequest = null; }
+        $("#querySearch").val("");
+        $("#filterStatus").val("");
+        $("#fromDate").val("");
+        $("#toDate").val("");
+        $("#searchClear").hide();
+        updateSearchStatus(null);
+        setSearchBusy(false);
+        queryDS.data(recent);
+    });
 
-        $.post('/Admin/AssignEmployee', { queryId: queryId, empId: empId })
-            .done(function(res) {
-                if (res && res.success === false) {
-                    notification.show(res.message || "Assignment failed.", "error");
-                    return;
-                }
-                notification.show(
-                    empId === 0 ? "Employee unassigned." : empName + " assigned successfully.",
-                    "success"
-                );
-                var grid = $("#queryGrid").data("kendoGrid");
-                var item = grid.dataSource.get(queryId);
-                if (item) item.set("employeeName", empId === 0 ? "" : empName);
-            })
-            .fail(function() {
-                notification.show("Request failed.", "error");
-            });
+$("#filterStatus, #fromDate, #toDate").on("focus", function() {
+    $(this).css({ "border-color": "#3b82f6", "box-shadow": "0 0 0 3px rgba(59,130,246,0.12)", "background": "#fff" });
+}).on("blur", function() {
+    $(this).css({ "border-color": "#e2e8f0", "box-shadow": "none", "background": "#f8fafc" });
+});
+
+/* ══════════════════════════════════════════════════════ */
+
+        notification.show("Dashboard loaded successfully!", "success");
+    });
+
+    /* ── Assign dropdowns ──────────────────────────────────── */
+/* ── Assign dropdowns ──────────────────────────────────── */
+/* ── Assign dropdowns ──────────────────────────────────── */
+// Track assigned queries locally so dataBound skips them
+var assignedMap = {};
+
+// Pre-populate from existing data
+recent.forEach(function(q) {
+    if (q.empId && q.empId !== 0) {
+        assignedMap[q.queryId] = true;
     }
+});
+
+function initAssignDropdowns() {
+    this.tbody.find(".assign-container").each(function () {
+        var $container = $(this);
+        var $input     = $container.find("input.assign-ddl");
+        var $button    = $container.find("button.assign-btn");
+        var queryId    = parseInt($input.data("query"), 10);
+        var status     = ($input.data("status") || "").toString().toLowerCase().replace(/\s+/g, "");
+        var isSolved   = status === "solved";
+        var initial    = ($input.data("current") || "0").toString();
+
+        // Check our local map — if assigned after page load, use that
+        var assigned = assignedMap[queryId] === true || initial !== "0";
+
+        var dropdown = $input.kendoDropDownList({
+            dataSource:    employees,
+            dataTextField:  "text",
+            dataValueField: "value",
+            value: assigned ? initial : "0",
+            optionLabel: "Select employee"
+        }).data("kendoDropDownList");
+
+        var refreshButtonState = function () {
+            var selection = dropdown.value() || "0";
+            var enable    = !assigned && !isSolved && selection !== "0";
+            $button.prop("disabled", !enable);
+        };
+
+        dropdown.enable(!assigned && !isSolved);
+        dropdown.bind("change", refreshButtonState);
+
+        // If assigned from our map, lock the button text too
+        // Lock button text for all assigned rows (from DB or from this session)
+        if (assigned) {
+            $button.text("Assigned").prop("disabled", true);
+        } else if (isSolved) {
+            $button.text("Assign").prop("disabled", true);
+        } else {
+            refreshButtonState();
+        }
+
+        $button.off("click").on("click", function () {
+            if ($button.prop("disabled") || assigned || isSolved) return;
+
+            var newEmpId = parseInt(dropdown.value() || "0", 10);
+            if (!newEmpId) return;
+
+            $button.prop("disabled", true).text("Assigning…");
+
+            $.post("/Admin/AssignEmployee", { queryId: queryId, empId: newEmpId })
+                .done(function (res) {
+                    if (res && res.success === false) {
+                        $("#notification").data("kendoNotification")
+                            .show(res.message || "Assignment failed.", "error");
+                        $button.prop("disabled", false).text("Assign");
+                        return;
+                    }
+
+                    var empName = employeeLookup[newEmpId] || "Unassigned";
+
+                    // ── Mark as assigned in our local map ──
+                    assignedMap[queryId] = true;
+                    assigned = true;
+
+                    // ── Lock controls ──
+                    dropdown.enable(false);
+                    $button.text("Assigned").prop("disabled", true);
+
+                    // ── Update status badge via DOM ──
+                    var row = $button.closest("tr");
+                    if (row.length) {
+                        var statusCell = row.find("td").eq(4);
+                        var curText    = statusCell.find(".b").text().trim().toLowerCase();
+                        if (curText === "open") {
+                            statusCell.html("<span class='b b-blue'>In Progress</span>");
+                        }
+                    }
+
+                    $("#notification").data("kendoNotification")
+                        .show(empName + " assigned successfully.", "success");
+                })
+                .fail(function () {
+                    $button.prop("disabled", false).text("Assign");
+                    $("#notification").data("kendoNotification")
+                        .show("Request failed.", "error");
+                });
+        });
+    });
+}
 </script>
 }

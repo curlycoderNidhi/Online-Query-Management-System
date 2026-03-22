@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MVC.Filters;
+using MVC.Service;
 using Repository.Interfaces;
 using Repository.Models;
 using Repository.Models.Enums;
@@ -15,22 +16,37 @@ namespace MVC.Controllers
     [ServiceFilter(typeof(EmployeeRoleFilter))]
     public class EmployeeController : Controller
     {
-        private readonly IEmployeeInterface _employee;
+        private readonly IEmployeeInterface   _employee;
+        private readonly EmailService         _emailService;
+        private readonly EmailTemplateService _emailTemplateService;
+        private readonly IUserRepository      _userRepo;
+        private readonly IElasticSearchService _elastic;
 
-        public EmployeeController(IEmployeeInterface employee)
+        public EmployeeController(
+            IEmployeeInterface   employee,
+            EmailService         emailService,
+            EmailTemplateService emailTemplateService,
+            IUserRepository      userRepo,
+            IElasticSearchService elastic)
         {
-            _employee = employee;
+            _employee             = employee;
+            _emailService         = emailService;
+            _emailTemplateService = emailTemplateService;
+            _userRepo             = userRepo;
+            _elastic              = elastic;
         }
 
         public IActionResult Index()
         {
             return View();
         }
+
         [HttpGet("Login")]
         public IActionResult Login()
         {
             return View();
         }
+
         private int? GetCurrentEmployeeId()
         {
             if (int.TryParse(HttpContext.Session.GetString("empid"), out int empid) && empid > 0)
@@ -46,9 +62,9 @@ namespace MVC.Controllers
             if (!empid.HasValue)
                 return RedirectToAction("Login", "Employee");
 
-            ViewBag.Resolved = await _employee.GetResolvedCount(empid.Value);
-            ViewBag.Pending = await _employee.GetPendingCount(empid.Value);
-            ViewBag.Assigned = await _employee.GetAssignedCount(empid.Value);
+            ViewBag.Resolved   = await _employee.GetResolvedCount(empid.Value);
+            ViewBag.Pending    = await _employee.GetPendingCount(empid.Value);
+            ViewBag.Assigned   = await _employee.GetAssignedCount(empid.Value);
             ViewBag.TodayResolved = await _employee.GetTodayResolvedCount(empid.Value);
             ViewBag.PerformancePercent = ViewBag.Assigned > 0
                 ? Math.Round((double)ViewBag.Resolved * 100.0 / (double)ViewBag.Assigned, 2)
@@ -76,7 +92,8 @@ namespace MVC.Controllers
                 return Unauthorized("Session expired. Please login again.");
 
             var queries = await _employee.GetEmployeeQueries(empid.Value);
-            var query = queries.FirstOrDefault(q => q.QueryId == id);
+            var query   = queries.FirstOrDefault(q => q.QueryId == id);
+
             if (query is null)
                 return NotFound("Query not found.");
 
@@ -104,26 +121,42 @@ namespace MVC.Controllers
                 return Unauthorized(new { success = false, message = "Session expired. Please login again." });
 
             var updated = await _employee.UpdateQueryStatus(model);
+
             if (!updated)
                 return BadRequest(new { success = false, message = "Unable to update query." });
 
+            // Send email when query is solved
+            if (model.Status == QueryStatus.Solved)
+            {
+                try
+                {
+                    var query = await _employee.GetQueryById(model.QueryId);
+
+                    if (query != null)
+                    {
+                        var user = await _userRepo.GetById(query.UserId);
+
+                        if (user != null)
+                        {
+                            string username = user.Email.Split('@')[0];
+                            string body     = _emailTemplateService.GetQueryResolvedTemplate(username, query.Title);
+
+                            await _emailService.SendEmailAsync(
+                                user.Email,
+                                "✅ Your Query Has Been Resolved",
+                                body
+                            );
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("EMAIL ERROR: " + ex.Message);
+                }
+            }
+
             return Json(new { success = true });
         }
-
-        // [HttpGet("/Login")]
-        // public IActionResult Login()
-        // {
-        //     // if (GetCurrentEmployeeId().HasValue)
-        //     // {
-        //     //     var role = HttpContext.Session.GetString("role");
-        //     //     if (string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
-        //     //         return RedirectToAction("Dashboard", "Admin");
-        //     //     if (string.Equals(role, "employee", StringComparison.OrdinalIgnoreCase))
-        //     //         return RedirectToAction("Dashboard", "Employee");
-        //     // }
-
-        //     return View();
-        // }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(EmployeeLoginModel model)
@@ -132,15 +165,16 @@ namespace MVC.Controllers
                 return View("~/Views/Employee/Login.cshtml", model);
 
             var employee = await _employee.Login(model.EmpName, model.Password ?? string.Empty);
+
             if (employee is null)
             {
                 ModelState.AddModelError(string.Empty, "Invalid employee name or password.");
                 return View("~/Views/Employee/Login.cshtml", model);
             }
 
-            HttpContext.Session.SetString("empid", employee.EmpId.ToString());
+            HttpContext.Session.SetString("empid",   employee.EmpId.ToString());
             HttpContext.Session.SetString("empname", employee.EmpName);
-            HttpContext.Session.SetString("Role", employee.Role.ToString());
+            HttpContext.Session.SetString("Role",    employee.Role.ToString());
 
             if (employee.Role == Repository.Models.Enums.Role.admin)
                 return RedirectToAction("AdminDashboard", "Admin");
@@ -151,6 +185,59 @@ namespace MVC.Controllers
             ModelState.AddModelError(string.Empty, "Only admin and employee login is supported.");
             HttpContext.Session.Clear();
             return View(model);
+        }
+
+                [HttpGet("SearchMyQueries")]
+        [ServiceFilter(typeof(EmployeeRoleFilter))]
+        public async Task<IActionResult> SearchMyQueries(
+            string? q,
+            string? status,
+            DateTime? fromDate,
+            DateTime? toDate)
+        {
+            try
+            {
+                var empId = GetCurrentEmployeeId();
+                if (!empId.HasValue)
+                    return Unauthorized(new { success = false, message = "Session expired. Please login again." });
+
+                var results = string.IsNullOrWhiteSpace(q)
+                    ? await _employee.GetEmployeeQueries(empId.Value)
+                    : await _elastic.SearchEmployeeQueriesAsync(empId.Value, q);
+
+                var filtered = results.AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    var normalizedStatus = NormalizeStatusValue(status);
+                    filtered = filtered.Where(r => string.Equals(
+                        NormalizeStatusValue(r.Status.ToString()),
+                        normalizedStatus,
+                        StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (fromDate.HasValue)
+                    filtered = filtered.Where(r => r.QueryDate.Date >= fromDate.Value.Date);
+
+                if (toDate.HasValue)
+                    filtered = filtered.Where(r => r.QueryDate.Date <= toDate.Value.Date);
+
+                var mapped = filtered.Select(r => new
+                {
+                    queryId = r.QueryId,
+                    title = r.Title ?? "",
+                    priority = r.Priority.ToString(),
+                    status = r.Status.ToString(),
+                    queryDate = r.QueryDate,
+                    comments = r.Comments ?? ""
+                });
+
+                return Json(mapped);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
 
         [HttpPost("/Logout")]
@@ -164,6 +251,14 @@ namespace MVC.Controllers
         public IActionResult Error()
         {
             return View("Error");
+        }
+        private static string NormalizeStatusValue(string? status)
+        {
+            return (status ?? string.Empty)
+                .Replace(" ", "", StringComparison.Ordinal)
+                .Replace("_", "", StringComparison.Ordinal)
+                .Replace("-", "", StringComparison.Ordinal)
+                .Trim();
         }
     }
 }

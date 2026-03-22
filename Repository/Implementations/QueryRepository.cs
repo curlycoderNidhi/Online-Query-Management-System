@@ -12,6 +12,7 @@ namespace Repository.Implementations
     public class QueryRepository : IQueryRepository
     {
         private readonly NpgsqlConnection _conn;
+        private readonly ElasticService _elastic;
 
         private static QueryStatus ParseQueryStatus(object? statusValue)
         {
@@ -57,38 +58,53 @@ namespace Repository.Implementations
             return status == QueryStatus.InProgress ? "In Progress" : status.ToString();
         }
 
-        public QueryRepository(NpgsqlConnection conn)
+        public QueryRepository(NpgsqlConnection conn, ElasticService elastic)
         {
             _conn = conn;
+            _elastic = elastic;
         }
-        public async Task<int> Create(Query query)
-        {
-            string qry = "INSERT INTO t_queries (c_userid, c_title, c_description, c_priority) VALUES (@c_userid, @c_title, @c_description, @c_priority);";
+       public async Task<int> Create(Query query)
+{
+    string qry = "INSERT INTO t_queries (c_userid, c_title, c_description, c_priority) VALUES (@c_userid, @c_title, @c_description, @c_priority) RETURNING c_queryid";
 
+    try
+    {
+        using (NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn))
+        {
+            cmd.Parameters.AddWithValue("@c_userid", Convert.ToInt32(query.UserId));
+            cmd.Parameters.AddWithValue("@c_title", query.Title);
+            cmd.Parameters.AddWithValue("@c_description", query.Description);
+            cmd.Parameters.AddWithValue("@c_priority", query.Priority.ToString());
+
+            await _conn.OpenAsync();
+            var id = (int)await cmd.ExecuteScalarAsync();
+
+            query.QueryId = id; // 🔥 VERY IMPORTANT
+
+            // ✅ SAFE ELASTIC CALL
             try
             {
-                using (NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@c_userid", Convert.ToInt32(query.UserId));
-                    cmd.Parameters.AddWithValue("@c_title", query.Title);
-                    cmd.Parameters.AddWithValue("@c_description", query.Description);
-                    cmd.Parameters.AddWithValue("@c_priority", query.Priority.ToString());
-                    await _conn.OpenAsync();
-                    int row = await cmd.ExecuteNonQueryAsync();
+                await _elastic.UpdateQuery(query);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Elastic insert failed: " + ex.Message);
+                // ❗ DB already inserted → ignore elastic failure
+            }
 
-                    return row > 0 ? 1 : 0;
-                }
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine("Error in create query repo:" + e.Message);
-                return 0;
-            }
-            finally
-            {
-                await _conn.CloseAsync();
-            }
+            return id;
         }
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine("Error in create query repo: " + e.Message);
+        return 0;
+    }
+    finally
+    {
+        await _conn.CloseAsync();
+    }
+}
 
         public async Task<bool> Delete(int id)
         {
@@ -341,11 +357,11 @@ namespace Repository.Implementations
             try
             {
                 string sql = @"UPDATE t_queries
-                               SET c_title=@title,
-                                   c_description=@desc,
-                                   c_priority=@priority
-                               WHERE c_queryid=@id
-                               AND c_status <> 'Solved'";
+                       SET c_title=@title,
+                           c_description=@desc,
+                           c_priority=@priority
+                       WHERE c_queryid=@id
+                       AND c_status <> 'Solved'";
 
                 await _conn.OpenAsync();
 
@@ -358,11 +374,32 @@ namespace Repository.Implementations
 
                 int rows = await cmd.ExecuteNonQueryAsync();
 
+                await _conn.CloseAsync();
+
+                // 🔥 ELASTIC UPDATE ADD KARO
+                if (rows > 0)
+                {
+                    try
+                    {
+                        var updatedQuery = await GetById(query.QueryId);
+
+                        if (updatedQuery != null)
+                        {
+                            await _elastic.UpdateQuery(updatedQuery);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Elastic error: " + ex.Message);
+                    }
+                }
+
                 return rows > 0;
             }
             finally
             {
-                await _conn.CloseAsync();
+                if (_conn.State != System.Data.ConnectionState.Closed)
+                    await _conn.CloseAsync();
             }
         }
 

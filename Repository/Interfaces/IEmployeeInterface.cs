@@ -21,5 +21,6 @@ namespace Repository.Interfaces
         Task<int> GetTodayResolvedCount(int empid);
 
         Task<Employee?> Login(string empName, string password);
+        Task<Query?> GetQueryById(int queryId);
     }
 }

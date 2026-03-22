@@ -11,10 +11,12 @@ namespace Repository.Implementations
     public class EmployeeRepository : IEmployeeInterface
     {
         private readonly NpgsqlConnection _conn;
+        private readonly ElasticService _elastic;
 
-        public EmployeeRepository(NpgsqlConnection conn)
+        public EmployeeRepository(NpgsqlConnection conn, ElasticService elastic)
         {
             _conn = conn;
+            _elastic = elastic;
         }
 
         // 1️⃣ Get Unassigned Queries
@@ -26,7 +28,6 @@ namespace Repository.Implementations
             string query = @"SELECT *
                             FROM t_queries
                             WHERE c_empid = @empid
-                            AND c_status != 'Solved'
                             ORDER BY c_querydate DESC; ";
 
             try
@@ -93,7 +94,19 @@ namespace Repository.Implementations
 
                 await _conn.CloseAsync();
 
-                return rows > 0;
+                if (rows > 0)
+                {
+                    try
+                    {
+                        var updatedQuery = await GetQueryById(model.QueryId);
+                        await _elastic.UpdateQuery(updatedQuery);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Elastic update failed: {ex.Message}");
+                    }
+                }
+                 return rows > 0;
             }
         }
 
@@ -222,6 +235,49 @@ namespace Repository.Implementations
                     await _conn.CloseAsync();
             }
         }
+        public async Task<Query?> GetQueryById(int queryId)
+        {
+            Query? query = null;
+
+            string sql = "SELECT * FROM t_queries WHERE c_queryid = @id";
+
+            try
+            {
+                await _conn.OpenAsync();
+
+                using (var cmd = new NpgsqlCommand(sql, _conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", queryId);
+
+                    using (var dr = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await dr.ReadAsync())
+                        {
+                            query = new Query
+                            {
+                                QueryId = Convert.ToInt32(dr["c_queryid"]),
+                                UserId = Convert.ToInt32(dr["c_userid"]),
+                                Title = dr["c_title"].ToString(),
+                                Description = dr["c_description"].ToString(),
+                                Priority = Enum.Parse<Priority>(dr["c_priority"].ToString()),
+                                QueryDate = Convert.ToDateTime(dr["c_querydate"]),
+                                EmpId = dr["c_empid"] == DBNull.Value ? null : Convert.ToInt32(dr["c_empid"]),
+                                Status = Enum.Parse<QueryStatus>((dr["c_status"]?.ToString() ?? "Open").Replace(" ", ""), true),
+                                Comments = dr["c_comments"]?.ToString()
+                            };
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (_conn.State != System.Data.ConnectionState.Closed)
+                    await _conn.CloseAsync();
+            }
+
+            return query;
+        }
     }
 }
+
 

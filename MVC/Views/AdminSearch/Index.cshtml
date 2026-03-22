@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Admin Search Panel";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+            <div>
+                <h2 class="mb-1">Admin Search Panel</h2>
+                <p class="text-muted mb-0">Search indexed queries by title, status, and date range using Elasticsearch.</p>
+            </div>
+            <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="AdminDashboard">Back to Dashboard</a>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <form id="searchForm" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="keyword" class="form-label fw-semibold">Keyword</label>
+                        <input id="keyword" name="keyword" class="form-control" placeholder="Search by query title" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="status" class="form-label fw-semibold">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="">All statuses</option>
+                            <option value="Open">Open</option>
+                            <option value="InProgress">In Progress</option>
+                            <option value="Solved">Solved</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="fromDate" class="form-label fw-semibold">From</label>
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="toDate" class="form-label fw-semibold">To</label>
+                        <input type="date" id="toDate" name="toDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button type="submit" class="btn btn-primary flex-fill">Search</button>
+                            <button type="button" id="clearFilters" class="btn btn-outline-secondary flex-fill">Clear</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="searchResults" class="card shadow-sm border-0">
+            <div class="card-body text-muted">
+                Run a search to see matching queries.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        const form = document.getElementById("searchForm");
+        const results = document.getElementById("searchResults");
+        const clearButton = document.getElementById("clearFilters");
+        const keywordInput = document.getElementById("keyword");
+        const searchUrl = "@Url.Action("Search", "AdminSearch")";
+        const initialResultsHtml = '<div class="card-body text-muted">Run a search to see matching queries.</div>';
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            results.innerHTML = '<div class="card-body text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+
+            try {
+                const response = await fetch(searchUrl, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Search request failed.");
+                }
+
+                results.innerHTML = await response.text();
+            } catch (error) {
+                results.innerHTML = `<div class="card-body"><div class="alert alert-danger mb-0">${error.message}</div></div>`;
+            }
+        });
+
+        clearButton.addEventListener("click", function () {
+            form.reset();
+            results.innerHTML = initialResultsHtml;
+            keywordInput.focus();
+        });
+    })();
+</script>
+}

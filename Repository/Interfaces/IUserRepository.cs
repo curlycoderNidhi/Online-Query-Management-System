@@ -7,6 +7,11 @@ namespace Repository.Interfaces
         Task<int> Register(User user);
 
         Task<User?> Login(UserLoginModel model);
+        Task UpdatePassword(string email, string password);
+
+         Task<User> GetByEmail(string email);
+        Task<User?> GetById(int userId);
+  
 
         // Task<int> SubmitQuery(Query query);
 

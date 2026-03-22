@@ -1,348 +1,118 @@
 @model Repository.Models.Query
-
 @{
-    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
     ViewData["Title"] = "Edit Query";
 }
 
-<!-- SAME Elite CDN + SweetAlert2 -->
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/8.2.2/default/default-main.css" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-
 <style>
-:root {
-    --bg: #f8fafc; --bg-card: #ffffff; --bg-header: #ffffff; --bg-dark: #f8fafc;
-    --bg-dark2: #eef4fb; --accent1: #f97316; --accent2: #2563eb; --accent3: #16a34a;
-    --text-main: #0f172a; --text-soft: #64748b; --border: #e2e8f0; --border-dark: #dbe4ee;
-    --shadow: 0 4px 20px rgba(15, 23, 42, 0.06); --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.10);
-}
-
-.dash-shell {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f8fafc 0%, #eef4fb 100%);
-    padding: 2rem 0;
-}
-
-.dash-header {
-    background: var(--bg-header);
-    padding: 0 48px;
-    height: 68px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.dash-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: var(--text-main);
-    letter-spacing: -0.01em;
-}
-
-.dash-title span {
-    background: linear-gradient(135deg, var(--accent2), var(--accent1));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.dash-meta {
-    font-size: 0.7rem;
-    color: var(--text-soft);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 500;
-}
-
-.form-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0;
-}
-
-.form-card {
-    background: var(--bg-card);
-    border-radius: 24px;
-    padding: 3rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.form-card:hover {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-4px);
-}
-
-#kendoEditForm .k-form-field {
-    margin-bottom: 2rem;
-}
-
-#kendoEditForm .k-label,
-#kendoEditForm .k-form-label {
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 0.85rem !important;
-    font-weight: 700 !important;
-    color: var(--text-main) !important;
-    letter-spacing: 0.05em !important;
-    text-transform: uppercase !important;
-    margin-bottom: 0.75rem !important;
-}
-
-#kendoEditForm .k-input,
-#kendoEditForm .k-textbox,
-#kendoEditForm .k-textarea,
-#kendoEditForm .k-picker,
-#kendoEditForm .k-dropdownlist {
-    width: 100% !important;
-    border-radius: 16px !important;
-    border: 2px solid var(--border) !important;
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 1rem !important;
-    background: linear-gradient(145deg, #fcfdff, #f8faff) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-#kendoEditForm .k-input-inner {
-    padding: 14px 20px !important;
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 1rem !important;
-    color: var(--text-main) !important;
-}
-
-#kendoEditForm .k-input:focus-within,
-#kendoEditForm .k-textbox:focus-within,
-#kendoEditForm .k-picker:focus-within {
-    border-color: var(--accent2) !important;
-    box-shadow: 0 0 0 4px rgba(37,99,235,0.1), 0 4px 12px rgba(37,99,235,0.15) !important;
-    background: white !important;
-}
-
-#kendoEditForm .k-textarea {
-    min-height: 140px !important;
-    padding: 14px 20px !important;
-}
-
-#kendoEditForm .k-form-buttons {
-    display: none !important;
-}
-
-.form-buttons {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: flex-end;
-    margin-top: 3rem;
-    padding-top: 2.5rem;
-    border-top: 2px solid var(--border);
-}
-
-.k-button {
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    border-radius: 16px !important;
-    padding: 16px 36px !important;
-    border: 2px solid transparent !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    text-decoration: none !important;
-    cursor: pointer !important;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--accent2), #1d4ed8) !important;
-    color: white !important;
-    box-shadow: 0 10px 25px rgba(37,99,235,0.3) !important;
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 25px 50px rgba(37,99,235,0.4) !important;
-}
-
-.btn-secondary {
-    background: transparent !important;
-    color: var(--text-main) !important;
-    border: 2px solid var(--border-dark) !important;
-}
-
-.btn-secondary:hover {
-    background: var(--bg-dark2) !important;
-    border-color: var(--accent2) !important;
-    color: var(--accent2) !important;
-    transform: translateY(-2px) !important;
-}
-
-.k-tooltip-validation {
-    background: rgba(239,68,68,0.1) !important;
-    color: #ef4444 !important;
-    font-size: 0.82rem !important;
-    font-weight: 600 !important;
-    border-left: 4px solid #ef4444 !important;
-    border-radius: 8px !important;
-    padding: 6px 12px !important;
-}
+    .form-card { border-radius: 16px; border: 1px solid #e8edf3; box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden; background: #fff; }
+    .form-card-header { background: #2563eb; padding: 1.1rem 1.5rem; border-bottom: none; }
+    .form-card-header h5 { color: #fff; font-weight: 700; font-size: 0.95rem; margin: 0; }
+    .form-card-body { padding: 1.75rem; }
+    .form-label-custom { font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; display: block; }
+    .form-control-custom {
+        width: 100%; padding: 0.55rem 0.85rem;
+        border: 1.5px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.875rem; color: #0f172a; background: #f8fafc; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-control-custom:focus {
+        border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); background: #fff;
+    }
+    .form-control-custom.is-invalid { border-color: #f43f5e !important; box-shadow: 0 0 0 3px rgba(244,63,94,0.1) !important; }
+    .field-error { font-size: 0.75rem; color: #f43f5e; margin-top: 0.3rem; display: none; }
+    #priorityDdl { display: none; }
+    .k-dropdownlist {
+        width: 100% !important; height: 38px !important;
+        border-radius: 8px !important; border: 1.5px solid #e2e8f0 !important;
+        background: #f8fafc !important; font-size: 0.875rem !important;
+        color: #0f172a !important; box-shadow: none !important;
+    }
+    .k-dropdownlist:hover { border-color: #3b82f6 !important; }
+    .k-dropdownlist.k-focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important; background: #fff !important; }
+    .k-dropdownlist .k-input-inner { padding: 0 0.85rem !important; font-size: 0.875rem !important; color: #0f172a !important; }
+    .k-dropdownlist .k-input-button { border-left: 1px solid #e2e8f0 !important; background: transparent !important; }
 </style>
 
-<div class="dash-shell">
-    <div class="dash-header">
-        <div class="dash-title">Query<span>.</span>Edit</div>
-        <div class="header-right">
-            <div class="dash-meta">Query #@Model.QueryId · Edit Form</div>
-        </div>
-    </div>
-
-    <div class="form-container">
+<div class="row justify-content-center">
+    <div class="col-lg-7">
         <div class="form-card">
-
-            @{ var token = Html.AntiForgeryToken(); }
-            <div id="dataStore" style="display:none"
-                 data-title="@Model.Title"
-                 data-description="@Model.Description"
-                 data-priority="@Model.Priority"
-                 data-posturl="/user/edit-query"
-                 data-queryid="@Model.QueryId"
-                 data-userid="@Model.UserId"
-                 data-token="">
+            <div class="form-card-header">
+                <h5><i class="bi bi-pencil me-2"></i>Edit Query</h5>
             </div>
+            <div class="form-card-body">
+                <form asp-controller="User" asp-action="EditQuery"
+                      asp-route-id="@Model.QueryId" method="post" id="editForm">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="QueryId" type="hidden" />
 
-            @Html.AntiForgeryToken()
-            <div id="kendoEditForm"></div>
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="titleInput">Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" id="titleInput" class="form-control-custom" placeholder="Brief title of your issue" />
+                        <div class="field-error" id="titleError">Title is required.</div>
+                    </div>
 
-            <div class="form-buttons">
-                <a href="@Url.Action("Dashboard", "User")" class="k-button btn-secondary">
-                    <span class="k-icon k-i-arrow-left"></span>
-                    Cancel
-                </a>
-                <button id="btnUpdate"  href ="@Url.Action("Dashboard", "User")" type="button" class="k-button btn-primary">
-                    <span class="k-icon k-i-check"></span>
-                    Update Query
-                </button>
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="descInput">Description <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" id="descInput" class="form-control-custom" rows="5" placeholder="Describe your issue in detail…"></textarea>
+                        <div class="field-error" id="descError">Description is required.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Priority</label>
+                        <select asp-for="Priority" id="priorityDdl" class="form-control-custom"></select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" id="saveBtn" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i>Save Changes
+                        </button>
+                        <a asp-action="Dashboard" class="btn btn-outline-secondary px-4">Cancel</a>
+                    </div>
+                </form>
             </div>
-
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+@section Scripts {
 <script>
-$(document).ready(function () {
-
-    // Safe Razor → JS value injection using data attributes to avoid quote conflicts
-    var initialTitle       = document.getElementById("dataStore").dataset.title;
-    var initialDescription = document.getElementById("dataStore").dataset.description;
-    var initialPriority    = document.getElementById("dataStore").dataset.priority;
-    var postUrl            = document.getElementById("dataStore").dataset.posturl;
-    var queryId            = document.getElementById("dataStore").dataset.queryid;
-    var userId             = document.getElementById("dataStore").dataset.userid;
-    var antiforgery        = $('input[name="__RequestVerificationToken"]').val();
-
-    $("#kendoEditForm").kendoForm({
-        formData: {
-            Title:       initialTitle,
-            Description: initialDescription,
-            Priority:    initialPriority
-        },
-        items: [
-            {
-                field: "Title",
-                label: { text: "Query Title" },
-                validation: { required: { message: "Title is required." } }
-            },
-            {
-                field: "Description",
-                label: { text: "Description" },
-                editor: function(container, options){
-                    $('<textarea class="k-textarea" name="' + options.field + '" rows="5" placeholder="Describe your query in detail..."></textarea>')
-                        .val(initialDescription)
-                        .appendTo(container);
-                },
-                validation: {
-                    required:  { message: "Description is required." },
-                    minlength: { value: 10, message: "Description must be at least 10 characters." }
-                }
-            },
-            {
-                field: "Priority",
-                label: { text: "Priority" },
-                editor: "DropDownList",
-                editorOptions: {
-                    dataSource:  ["Low", "Medium", "High"],
-                    optionLabel: "-- Select Priority --"
-                },
-                validation: { required: { message: "Please select a priority." } }
-            }
-        ],
-        buttons: []
+    $("#priorityDdl").kendoDropDownList({
+        dataSource: ["Low", "Medium", "High"],
+        value: "@Model.Priority",
+        optionLabel: "Select priority"
     });
 
-    var kendoForm = $("#kendoEditForm").data("kendoForm");
+    document.getElementById("editForm").addEventListener("submit", function (e) {
+        var title = (document.getElementById("titleInput").value || "").trim();
+        var desc  = (document.getElementById("descInput").value  || "").trim();
+        var valid = true;
 
-    $("#btnUpdate").on("click", function (e) {
-        e.preventDefault();
-
-        if (!kendoForm.validate()) {
-            Swal.fire({
-                title: "Validation Error!",
-                text: "Please fill all required fields correctly.",
-                icon: "warning",
-                confirmButtonText: "OK"
-            });
-            return;
+        if (!title) {
+            document.getElementById("titleInput").classList.add("is-invalid");
+            document.getElementById("titleError").style.display = "block";
+            valid = false;
+        } else {
+            document.getElementById("titleInput").classList.remove("is-invalid");
+            document.getElementById("titleError").style.display = "none";
         }
 
-        // Read live values directly from Kendo widgets
-        var titleInput    = $("#kendoEditForm").find("[name='Title']");
-        var descInput     = $("#kendoEditForm").find("[name='Description']");
-        var priorityInput = $("#kendoEditForm").find("[name='Priority']");
-        var titleWidget    = $("#kendoEditForm").find("[name='Title']").data("kendoTextBox");
-        var descWidget     = $("#kendoEditForm").find("[name='Description']").data("kendoTextArea");
-        var priorityWidget = $("#kendoEditForm").find("[name='Priority']").data("kendoDropDownList");
+        if (!desc) {
+            document.getElementById("descInput").classList.add("is-invalid");
+            document.getElementById("descError").style.display = "block";
+            valid = false;
+        } else {
+            document.getElementById("descInput").classList.remove("is-invalid");
+            document.getElementById("descError").style.display = "none";
+        }
 
-        var title       = titleWidget    ? titleWidget.value()    : titleInput.val();
-        var description = descWidget     ? descWidget.value()     : descInput.val();
-        var priority    = priorityWidget ? priorityWidget.value() : priorityInput.val();
-
-        if (title === undefined || title === null) title = initialTitle;
-        if (description === undefined || description === null) description = initialDescription;
-        if (priority === undefined || priority === null) priority = initialPriority;
-
-        console.log(priority);
-
-        // Build a fresh dynamic form and POST it
-        var $dynForm = $('<form method="POST"></form>').attr("action", postUrl).appendTo("body");
-
-        $('<input type="hidden">').attr("name", "__RequestVerificationToken").val(antiforgery).appendTo($dynForm);
-        $('<input type="hidden">').attr("name", "QueryId").val(queryId).appendTo($dynForm);
-        $('<input type="hidden">').attr("name", "UserId").val(userId).appendTo($dynForm);
-        $('<input type="hidden">').attr("name", "Title").val(title).appendTo($dynForm);
-        $('<input type="hidden">').attr("name", "Description").val(description).appendTo($dynForm);
-        $('<input type="hidden">').attr("name", "Priority").val(priority).appendTo($dynForm);
-
-        Swal.fire({
-            title: "Updating Query...",
-            text: "Please wait",
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        setTimeout(function () {
-            $dynForm[0].submit();
-        }, 500);
+        if (!valid) e.preventDefault();
     });
 
-});
+    document.getElementById("titleInput").addEventListener("input", function () {
+        if (this.value.trim()) { this.classList.remove("is-invalid"); document.getElementById("titleError").style.display = "none"; }
+    });
+    document.getElementById("descInput").addEventListener("input", function () {
+        if (this.value.trim()) { this.classList.remove("is-invalid"); document.getElementById("descError").style.display = "none"; }
+    });
 </script>
-
+}

@@ -10,11 +10,15 @@ namespace MVC.Filters
     {
          public void OnActionExecuting(ActionExecutingContext context)
         {
-            // Check if the user has the required role
-            var role = context.HttpContext.Session.GetString("role");
-            if (role != "admin")
+            var controller = context.RouteData.Values["controller"]?.ToString();
+            var action = context.RouteData.Values["action"]?.ToString();
+            if (controller == "Admin" && string.Equals(action, "Login", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var role = context.HttpContext.Session.GetString("Role");
+            if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
             {
-                context.Result = new Microsoft.AspNetCore.Mvc.RedirectToActionResult("Login", "Home", null);
+                context.Result = new Microsoft.AspNetCore.Mvc.RedirectToActionResult("Login", "Employee", null);
             }
         }
 

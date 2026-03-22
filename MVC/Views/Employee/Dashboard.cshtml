@@ -1,357 +1,584 @@
 @{
-    Layout = "_EmpLayout";
     ViewData["Title"] = "Employee Dashboard";
+    var resolved = (int)(ViewBag.Resolved ?? 0);
+    var pending  = (int)(ViewBag.Pending  ?? 0);
+    var assigned = (int)(ViewBag.Assigned ?? 0);
+    var today    = (int)(ViewBag.TodayResolved ?? 0);
+    var empName  = Context.Session.GetString("empname") ?? "Employee";
 }
 
-<!-- Premium Kendo UI AppBar -->
-<div class="k-appbar k-appbar-stretch k-rounded-top dashboard-appbar" style="margin: -1.5rem -1.5rem 2rem -1.5rem;">
-    <div class="k-appbar-section k-appbar-section-start">
-        <h2 class="k-text-white mb-0 dashboard-title" style="text-align:center;" >Employee Dashboard</h2>
+<style>
+    /* ── Stat cards ── */
+    .stat-card {
+        background: #fff; border-radius: 16px;
+        padding: 1.35rem 1.4rem 1.2rem;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+        transition: box-shadow 0.2s, transform 0.2s;
+        position: relative; overflow: hidden;
+    }
+    .stat-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,0.1); transform: translateY(-2px); }
+    .stat-card::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 4px; border-radius: 16px 16px 0 0;
+    }
+    .stat-card.c-blue::after  { background: linear-gradient(90deg,#3b82f6,#6366f1); }
+    .stat-card.c-green::after { background: linear-gradient(90deg,#10b981,#34d399); }
+    .stat-card.c-red::after   { background: linear-gradient(90deg,#f43f5e,#fb923c); }
+    .stat-card.c-cyan::after  { background: linear-gradient(90deg,#06b6d4,#3b82f6); }
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.9rem; }
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; flex-shrink: 0;
+    }
+    .c-blue  .stat-icon { background: #eff6ff; color: #3b82f6; }
+    .c-green .stat-icon { background: #ecfdf5; color: #10b981; }
+    .c-red   .stat-icon { background: #fff1f2; color: #f43f5e; }
+    .c-cyan  .stat-icon { background: #ecfeff; color: #06b6d4; }
+    .stat-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #94a3b8; margin-bottom: 0.3rem; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; line-height: 1; color: #0f172a; }
+
+    /* ── Section cards ── */
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden;
+    }
+    .section-card-header {
+        padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    }
+    .section-card-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .section-card-sub   { font-size: 0.73rem; color: #94a3b8; margin-top: 1px; }
+    .section-card-body  { padding: 1.25rem 1.4rem; }
+
+    /* ── Badges ── */
+    .b { display: inline-flex; align-items: center; padding: 0.18rem 0.5rem; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .b-danger  { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+    .b-warn    { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .b-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .b-muted   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .b-blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    /* ── Grid ── */
+    .k-grid { border-radius: 8px; border: 1px solid #e8edf3; font-size: 0.83rem; }
+    .k-grid-header th { font-weight: 700; background: #f8fafc; color: #374151; letter-spacing: 0.2px; border-bottom-color: #e8edf3 !important; }
+    .k-grid-content tr:hover td { background: #f8fafc; }
+    .k-grid td { padding: 0.5rem 0.75rem; vertical-align: middle; }
+
+    /* ── Search ── */
+    .es-search-wrap { display: flex; align-items: center; gap: 10px; }
+    .es-search-box {
+        display: flex; align-items: center; gap: 10px;
+        max-width: 420px; width: 100%; height: 40px; padding: 0 14px;
+        background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px;
+        transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .es-search-box:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); background: #fff; }
+    .es-icon { flex-shrink: 0; color: #94a3b8; }
+    .es-input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 0.85rem; color: #0f172a; }
+    .es-input::placeholder { color: #94a3b8; }
+    .es-clear {
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        width: 20px; height: 20px; padding: 0; border: none; border-radius: 50%;
+        background: #e2e8f0; color: #475569; cursor: pointer;
+    }
+    .es-clear:hover { background: #cbd5e1; }
+    .search-bar-input {
+        flex: 1; max-width: 420px;
+        padding: 0.5rem 0.85rem 0.5rem 2.4rem;
+        border: 1px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.85rem; background: #f8fafc;
+        color: #0f172a; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-bar-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        background: #fff;
+    }
+    .search-bar-wrap-inner { position: relative; flex: 1; max-width: 420px; }
+    .search-bar-wrap-inner .search-icon {
+        position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
+        color: #94a3b8; font-size: 0.85rem; pointer-events: none;
+    }
+    .search-bar-input { width: 100%; max-width: unset; }
+    .emp-filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.1rem;
+    }
+    .emp-filter-search {
+        position: relative;
+        flex: 1 1 280px;
+        min-width: 240px;
+    }
+    .emp-filter-search .search-bar-input { width: 100%; }
+    .emp-filter-select,
+    .emp-filter-date {
+        padding: 0.48rem 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.83rem;
+        background: #f8fafc;
+        color: #374151;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .emp-filter-select {
+        min-width: 150px;
+        cursor: pointer;
+    }
+    .emp-filter-dates {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex: 0 0 auto;
+    }
+    .emp-filter-date { min-width: 160px; }
+    .emp-filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+    .emp-filter-status {
+        font-size: 0.75rem;
+        color: #64748b;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    @@media (max-width: 992px) {
+        .emp-filter-bar {
+            flex-wrap: wrap;
+            overflow-x: visible;
+        }
+        .emp-filter-search,
+        .emp-filter-dates,
+        .emp-filter-actions {
+            width: 100%;
+        }
+    }
+
+    /* ── Chart legend ── */
+    .chart-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; padding: 0.75rem 0 0; }
+    .legend-item  { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #475569; font-weight: 500; }
+    .legend-dot   { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── Modal ── */
+    .modal-header-custom { background: #2563eb; border-radius: 0; padding: 1.1rem 1.4rem; border-bottom: none; }
+    .modal-header-custom .modal-title { color: #fff; font-weight: 700; font-size: 0.95rem; }
+    .modal-header-custom .btn-close { filter: invert(1) brightness(2); opacity: 0.8; }
+</style>
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Welcome, @empName</h4>
+    <p class="text-muted mb-0 small">Your personal performance overview</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card c-blue">
+            <div class="stat-top">
+                <div><div class="stat-label">Assigned to Me</div><div class="stat-value">@assigned</div></div>
+                <div class="stat-icon"><i class="bi bi-journal-text"></i></div>
+            </div>
+        </div>
     </div>
-    <div class="k-appbar-section k-appbar-section-end dashboard-logout-wrap">
-        <form method="post" action="/Logout" style="margin:0;">
-            <button type="submit" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base dashboard-logout-btn">Logout</button>
-        </form>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card c-green">
+            <div class="stat-top">
+                <div><div class="stat-label">Solved</div><div class="stat-value">@resolved</div></div>
+                <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card c-red">
+            <div class="stat-top">
+                <div><div class="stat-label">Pending</div><div class="stat-value">@pending</div></div>
+                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card c-cyan">
+            <div class="stat-top">
+                <div><div class="stat-label">Solved Today</div><div class="stat-value">@today</div></div>
+                <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+            </div>
+        </div>
     </div>
 </div>
-<a class="nav-button" 
-        style="display: inline-block; 
-               padding: 12px 24px; 
-               margin: 8px; 
-               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-               color: white; 
-               border: none; 
-               border-radius: 8px; 
-               font-size: 16px; 
-               font-weight: 500; 
-               text-decoration: none; 
-               cursor: pointer; 
-               box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); 
-               transition: all 0.3s ease; 
-               text-align: center; 
-               min-width: 140px;"
-        asp-area="" 
-        asp-controller="Employee" 
-        asp-action="MyQueries"
-        title="View My Queries">
-    <i class="fas fa-sign-in-alt" 
-       style="margin-right: 8px; font-size: 18px;"></i>
-    My Queries
-</a>
 
-<div class="dashboard-container">
-    <!-- Elite Stats Grid -->
-    <div class="stats-grid-container">
-        <div class="stats-grid">
-            <!-- Total Resolved - Primary Blue -->
-            <div class="metric-card primary-card hover-card">
-                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
-                    <div class="metric-icon primary-icon">✓</div>
-                    <div class="metric-title">Total Resolved</div>
-                    <div class="metric-value">@ViewBag.Resolved</div>
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <!-- Pie Chart -->
+    <div class="col-lg-5">
+        <div class="section-card h-100">
+            <div class="section-card-header">
+                <div>
+                    <div class="section-card-title">Query Breakdown</div>
+                    <div class="section-card-sub">Status distribution of your queries</div>
                 </div>
             </div>
-
-            <!-- Today Resolved - Success Green -->
-            <div class="metric-card success-card hover-card">
-                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
-                    <div class="metric-icon success-icon">📅</div>
-                    <div class="metric-title">Today Resolved</div>
-                    <div class="metric-value">@ViewBag.TodayResolved</div>
-                </div>
-            </div>
-
-            <!-- Pending Queries - Warning Orange -->
-            <div class="metric-card warning-card hover-card">
-                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
-                    <div class="metric-icon warning-icon">⏰</div>
-                    <div class="metric-title">Pending Queries</div>
-                    <div class="metric-value">@ViewBag.Pending</div>
-                </div>
-            </div>
-
-            <!-- Total Queries - Info Cyan -->
-            <div class="metric-card info-card hover-card">
-                <div class="k-card-body k-d-flex k-flex-col k-align-items-center k-justify-content-center k-text-center">
-                    <div class="metric-icon info-icon">📋</div>
-                    <div class="metric-title">Total Queries</div>
-                    <div class="metric-value">@ViewBag.Assigned</div>
+            <div class="section-card-body">
+                <div id="pieChart" style="height:320px; overflow:visible;"></div>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div>Solved</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>In Progress</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;"></div>Open</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Ultimate Performance Card -->
-    <div class="performance-card">
-        <div class="performance-header">
-            <div class="performance-left">
-                <div class="performance-label" style="text-align:center; font-weight:bold;">
-                    Performance Score
-                </div>
-
-                <div class="performance-score" style="text-align:center;">
-                    @ViewBag.PerformancePercent%
+    <!-- Bar Chart -->
+    <div class="col-lg-7">
+        <div class="section-card h-100">
+            <div class="section-card-header">
+                <div>
+                    <div class="section-card-title">Queries by Priority &amp; Status</div>
+                    <div class="section-card-sub">In Progress vs Open per priority</div>
                 </div>
             </div>
-            @* <div class="performance-ratio">@ViewBag.Resolved / @ViewBag.Assigned</div> *@
+            <div class="section-card-body">
+                <div id="barChart" style="height:300px; overflow:visible;"></div>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:#93c5fd;"></div>In Progress</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div>Open</div>
+                </div>
+            </div>
         </div>
-        
-        @* <div id="performanceProgress" class="performance-progress"></div>
-        <div id="sparklineChart" class="sparkline-preview"></div> *@
+    </div>
+</div>
+
+<!-- My Queries Grid -->
+<div class="section-card mb-4">
+    <div class="section-card-header">
+        <div>
+            <div class="section-card-title">My Queries</div>
+            <div class="section-card-sub">Your assigned queries</div>
+        </div>
+        <a asp-action="MyQueries" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="section-card-body">
+        <div class="emp-filter-bar mb-3">
+
+    <div class="search-bar-wrap-inner emp-filter-search">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" id="querySearchInput"
+               class="search-bar-input"
+               placeholder="Search by title, priority, status…"
+               autocomplete="off" />
     </div>
 
-    <!-- Professional Activity Grid -->
-    @* <div class="activity-section">
-        <div class="activity-header">
-            <h3 class="activity-title">Recent Activity</h3>
+    <select id="empFilterStatus" class="emp-filter-select">
+        <option value="">All Statuses</option>
+        <option value="InProgress">In Progress</option>
+        <option value="Solved">Solved</option>
+    </select>
+
+    <div class="emp-filter-dates">
+        <input type="date" id="empFromDate" aria-label="From date" title="From date" class="emp-filter-date" />
+        <span style="font-size:0.83rem;color:#64748b;font-weight:600;">to</span>
+        <input type="date" id="empToDate" aria-label="To date" title="To date" class="emp-filter-date" />
+    </div>
+
+    <div class="emp-filter-actions">
+        <button id="empApplyFilterBtn" style="padding:0.48rem 1rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#2563eb;color:#fff;border:none;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+            <i class="bi bi-funnel-fill"></i> Filter
+        </button>
+
+        <button id="empResetFilterBtn" style="padding:0.48rem 0.85rem;border-radius:8px;font-size:0.83rem;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;transition:background 0.15s;">
+            <i class="bi bi-x-lg"></i> Reset
+        </button>
+    </div>
+
+    <span id="empSearchStatus" class="emp-filter-status"></span>
+
+</div>
+        <div id="myQueriesGrid"></div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:14px; border:none; box-shadow:0 20px 60px rgba(15,23,42,0.15);">
+            <div class="modal-header modal-header-custom" style="border-radius:14px 14px 0 0;">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Update Query</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="updateModalBody"></div>
         </div>
-        <div id="activityGrid" class="activity-grid"></div>
-    </div> *@
+    </div>
 </div>
 
 @section Scripts {
 <script>
-$(document).ready(function() {
-    // Premium ProgressBar
-    $("#performanceProgress").kendoProgressBar({
-        value: @Html.Raw(Json.Serialize(ViewBag.PerformancePercent ?? 0)),
-        themeColor: "success",
-        animation: { duration: 2000 }
-    });
+    var ELASTIC_SEARCH_ENABLED = true;
+    var ELASTIC_SEARCH_URL     = "/Employee/SearchMyQueries";
 
-    // Elegant Sparkline
-    $("#sparklineChart").kendoSparkline({
-        type: "line",
-        data: [25, 45, 32, 67, @Html.Raw(Json.Serialize(ViewBag.PerformancePercent ?? 0))],
-        line: { color: "#10B981", width: 3 },
-        markers: { size: 3, background: "#10B981" }
-    });
+    function statusMeta(v) {
+        if (v === 2 || v === "Solved")                              return { text: "Solved",      cls: "b-success" };
+        if (v === 1 || v === "InProgress" || v === "In Progress")   return { text: "In Progress", cls: "b-blue" };
+        return { text: "Open", cls: "b-muted" };
+    }
+    function priorityMeta(v) {
+        if (v === 2 || v === "High")   return { text: "High",   cls: "b-danger" };
+        if (v === 1 || v === "Medium") return { text: "Medium", cls: "b-warn" };
+        return { text: "Low", cls: "b-success" };
+    }
 
-    // Pro Activity Grid
-    $("#activityGrid").kendoGrid({
-        dataSource: {
-            data: [
-                { id: 1, title: "Login Issue", status: "Solved", priority: "High", time: "2 min ago" },
-                { id: 2, title: "Report Error", status: "In Progress", priority: "Medium", time: "1 hr ago" },
-                { id: 3, title: "Data Export", status: "Solved", priority: "Low", time: "3 hrs ago" }
-            ]
-        },
-        height: 400,
-        scrollable: true,
-        sortable: true,
-        columns: [
-            { field: "id", title: "ID", width: 60 },
-            { field: "title", title: "Activity" },
-            { field: "status", title: "Status", width: 110, template: "#= statusTemplate(data.status) #" },
-            { field: "priority", title: "Priority", width: 100 },
-            { field: "time", title: "Time", width: 110 }
-        ]
-    });
-
-    // Elite Hover Effects
-    $(".hover-card").hover(
-        function() { 
-            $(this).addClass("elevated").css({ 
-                transform: "translateY(-15px) scale(1.03)",
-                boxShadow: "0 35px 70px rgba(0,0,0,0.3)"
-            }); 
-        },
-        function() { 
-            $(this).removeClass("elevated").css({ 
-                transform: "none", 
-                boxShadow: "0 15px 35px rgba(0,0,0,0.12)"
-            }); 
+    function renderGrid(data) {
+        var grid = $("#myQueriesGrid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.data(data);
+            grid.dataSource.page(1);
+            grid.refresh();
+            return;
         }
+        $("#myQueriesGrid").kendoGrid({
+            dataSource: { data: data, pageSize: 5 },
+            pageable: { pageSizes: [5, 10, 15] },
+            scrollable: false,
+            sortable: true,
+            noRecords: { template: "No queries found." },
+            columns: [
+                { field: "title",     title: "Title",    minWidth: 180 },
+                { field: "priority",  title: "Priority", width: 100,
+                  template: function(d) { var m = priorityMeta(d.priority); return "<span class='b " + m.cls + "'>" + m.text + "</span>"; }},
+                { field: "status",    title: "Status",   width: 130,
+                  template: function(d) { var m = statusMeta(d.status); return "<span class='b " + m.cls + "'>" + m.text + "</span>"; }},
+                { field: "queryDate", title: "Date",     width: 110,
+                  template: function(d) { return kendo.toString(new Date(d.queryDate), "yyyy-MM-dd"); }},
+                { title: "Action", width: 100,
+                  template: function(d) {
+                      var s = statusMeta(d.status).text;
+                      if (s === "Solved") return "<span class='text-muted small'>—</span>";
+                      return "<button type='button' class='btn btn-sm btn-outline-primary' onclick='openUpdate(" + d.queryId + ")'>Update</button>";
+                  }}
+            ]
+        });
+    }
+
+var allData = [], searchTimer = null, activeEmpRequest = null;
+
+function setEmpSearchBusy(busy) {
+    $("#empApplyFilterBtn").prop("disabled", busy).html(
+        busy ? '<span class="spinner-border spinner-border-sm me-1"></span>Searching…'
+             : '<i class="bi bi-funnel-fill"></i> Filter'
     );
+}
+
+function updateEmpSearchStatus(count) {
+    $("#empSearchStatus").text(count === null ? "" : count + " result" + (count !== 1 ? "s" : ""));
+}
+
+function runEmpElasticSearch() {
+    var q        = $("#querySearchInput").val().trim();
+    var status   = $("#empFilterStatus").val();
+    var fromDate = $("#empFromDate").val();
+    var toDate   = $("#empToDate").val();
+
+    // If nothing is selected, show all assigned queries
+    if (!q && !status && !fromDate && !toDate) {
+        renderGrid(allData);
+        updateEmpSearchStatus(null);
+        setEmpSearchBusy(false);
+        return;
+    }
+
+    if (activeEmpRequest) { activeEmpRequest.abort(); activeEmpRequest = null; }
+
+    setEmpSearchBusy(true);
+    $("#empSearchStatus").text("Searching…");
+
+    var params = {};
+    if (q)        params.q        = q;
+    if (status)   params.status   = status;
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate)   params.toDate   = toDate;
+
+    activeEmpRequest = $.get("/Employee/SearchMyQueries", params)
+        .done(function (results) {
+            activeEmpRequest = null;
+
+            if (results && results.error) {
+                console.error("Search error:", results.error);
+                setEmpSearchBusy(false);
+                updateEmpSearchStatus(null);
+                return;
+            }
+
+            var mapped = (results || []).map(function(r) {
+                return {
+                    queryId:   r.queryId,
+                    title:     r.title     || "",
+                    priority:  r.priority  || "",
+                    status:    r.status    || "",
+                    queryDate: r.queryDate ? new Date(r.queryDate) : new Date(),
+                    comments:  r.comments  || ""
+                };
+            });
+
+            renderGrid(mapped);
+            updateEmpSearchStatus(mapped.length);
+            setEmpSearchBusy(false);
+        })
+        .fail(function (xhr) {
+            activeEmpRequest = null;
+            if (xhr.statusText === "abort") return;
+            setEmpSearchBusy(false);
+            updateEmpSearchStatus(null);
+        });
+}
+
+$("#querySearchInput").on("input", function () {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(runEmpElasticSearch, 300);
 });
 
-function statusTemplate(status) {
-    const colors = { "Solved": "success", "In Progress": "warning" };
-    return `<span class="status-chip ${colors[status] || 'info'}">${status}</span>`;
-}
+$("#empApplyFilterBtn")
+    .hover(
+        function() { $(this).css("background", "#1d4ed8"); },
+        function() { $(this).css("background", "#2563eb"); })
+    .on("click", function () {
+        clearTimeout(searchTimer);
+        runEmpElasticSearch();
+    });
+
+$("#empResetFilterBtn")
+    .hover(
+        function() { $(this).css("background", "#f1f5f9"); },
+        function() { $(this).css("background", "#f8fafc"); })
+    .on("click", function () {
+        clearTimeout(searchTimer);
+        if (activeEmpRequest) { activeEmpRequest.abort(); activeEmpRequest = null; }
+        $("#querySearchInput").val("");
+        $("#empFilterStatus").val("");
+        $("#empFromDate").val("");
+        $("#empToDate").val("");
+        updateEmpSearchStatus(null);
+        setEmpSearchBusy(false);
+        renderGrid(allData);
+    });
+
+$("#empFilterStatus, #empFromDate, #empToDate").on("focus", function() {
+    $(this).css({ "border-color": "#3b82f6", "box-shadow": "0 0 0 3px rgba(59,130,246,0.12)", "background": "#fff" });
+}).on("blur", function() {
+    $(this).css({ "border-color": "#e2e8f0", "box-shadow": "none", "background": "#f8fafc" });
+});
+    $.getJSON("/Employee/GetMyQueries")
+        .done(function (data) {
+            allData = data;
+
+            // Pie chart — show Solved + InProgress + Open
+            var solvedCount   = data.filter(function(q) { return statusMeta(q.status).text === "Solved"; }).length;
+            var progressCount = data.filter(function(q) { return statusMeta(q.status).text === "In Progress"; }).length;
+            var openCount     = data.filter(function(q) { return statusMeta(q.status).text === "Open"; }).length;
+
+            $("#pieChart").kendoChart({
+                legend: { visible: false },
+                chartArea: { background: "transparent", margin: { top: 60, bottom: 25, left: 20, right: 20 } },
+                series: [{
+                    type: "pie",
+                    data: [
+                        { category: "Solved",      value: solvedCount,   color: "#10b981" },
+                        { category: "In Progress", value: progressCount, color: "#3b82f6" },
+                        { category: "Open",        value: openCount,     color: "#94a3b8" }
+                    ],
+                    labels: {
+                        visible: true, background: "transparent",
+                        template: "#= category #\n#= kendo.toString(percentage,'p0') #",
+                        font: "600 12px 'Segoe UI'"
+                    },
+                    border: { width: 2, color: "#fff" }, padding: 10
+                }],
+                tooltip: { visible: true, background: "#0f172a", color: "#fff",
+                    template: "#= category #: #= value # (#= kendo.toString(percentage,'p0') #)" }
+            });
+
+            // Bar chart — matching admin style
+            var priorities = ["High", "Medium", "Low"];
+            function normPriority(p) { return typeof p === "string" ? p : p === 2 ? "High" : p === 1 ? "Medium" : "Low"; }
+            var barData = priorities.map(function(p) {
+                return {
+                    priority:   p,
+                    inProgress: data.filter(function(q) { return normPriority(q.priority) === p && statusMeta(q.status).text === "In Progress"; }).length,
+                    open:       data.filter(function(q) { return normPriority(q.priority) === p && statusMeta(q.status).text === "Open"; }).length
+                };
+            });
+
+            $("#barChart").kendoChart({
+                dataSource: { data: barData },
+                chartArea:  { background: "transparent", margin: { top: 10, bottom: 30, left: 10, right: 10 } },
+                series: [
+                    { type: "column", field: "inProgress", name: "In Progress", color: "#93c5fd", border: { width: 0 } },
+                    { type: "column", field: "open",       name: "Open",        color: "#2563eb", border: { width: 0 } }
+                ],
+                categoryAxis: {
+                    field: "priority",
+                    labels: { font: "600 12px 'Segoe UI'", color: "#374151" },
+                    majorGridLines: { visible: false }
+                },
+                valueAxis: {
+                    title: { text: "Queries", font: "12px 'Segoe UI'", color: "#94a3b8" },
+                    min: 0, majorUnit: 1,
+                    labels: { font: "12px 'Segoe UI'", color: "#94a3b8" },
+                    majorGridLines: { color: "#f1f5f9" }
+                },
+                legend: { visible: false },
+                tooltip: { visible: true, background: "#0f172a", color: "#fff", template: "#= series.name #: #= value #" }
+            });
+
+            // Dashboard shows only pending (In Progress) queries
+            var pendingOnly = data.filter(function(q) { return statusMeta(q.status).text === "In Progress"; });
+            renderGrid(pendingOnly);
+        })
+        .fail(function () { $("#pieChart,#barChart").text("Failed to load data."); });
+
+    function openUpdate(id) {
+        kendo.ui.progress($("#myQueriesGrid"), true);
+        $.get("/Employee/UpdateQuery", { id: id })
+            .done(function (html) {
+                $("#updateModalBody").html(html);
+                new bootstrap.Modal(document.getElementById("updateModal"), { backdrop: "static" }).show();
+            })
+            .fail(function (xhr) { alert(xhr.responseText || "Failed to open update form."); })
+            .always(function () { kendo.ui.progress($("#myQueriesGrid"), false); });
+    }
+
+    $(document).on("click", ".js-close-update", function () {
+        var m = bootstrap.Modal.getInstance(document.getElementById("updateModal"));
+        if (m) m.hide();
+    });
+    $(document).on("click", ".js-update-query", function () {
+    kendo.ui.progress($("#updateModal"), true);
+    $.ajax({
+        url: "/Employee/UpdateQueryStatus", type: "POST", data: $("#updateForm").serialize(),
+        success: function (res) {
+            if (res && res.success) {
+                bootstrap.Modal.getInstance(document.getElementById("updateModal")).hide();
+                $.getJSON("/Employee/GetMyQueries").done(function(data) {
+                    allData = data;
+                    // Dashboard always shows only In Progress queries
+                    var pendingOnly = data.filter(function(q) { return statusMeta(q.status).text === "In Progress"; });
+                    renderGrid(pendingOnly);
+                });
+                return;
+            }
+                alert((res && res.message) || "Failed to update query.");
+            },
+            error: function (xhr) { alert((xhr.responseJSON && xhr.responseJSON.message) || "Failed to update query."); },
+            complete: function () { kendo.ui.progress($("#updateModal"), false); }
+        });
+    });
 </script>
 }
-
-<style>
-/* ===========================================
-   ELITE DASHBOARD CSS - PROFESSIONAL GRADE
-============================================= */
-
-/* Root Variables for Perfect Colors */
-:root {
-    --primary: #3B82F6;
-    --primary-dark: #1D4ED8;
-    --success: #10B981;
-    --success-dark: #059669;
-    --warning: #F59E0B;
-    --warning-dark: #D97706;
-    --info: #0EA5E9;
-    --info-dark: #0284C7;
-    --secondary: #64748B;
-    --shadow: rgba(0,0,0,0.12);
-    --shadow-hover: rgba(0,0,0,0.25);
-}
-
-/* Dashboard Container */
-.dashboard-container {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 0 2.5rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* AppBar - Perfect Gradient */
-.dashboard-appbar{
-    background: linear-gradient(to right, #b39fff, #4300af); /* Blue → Purple */
-    padding: 12px 20px;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.dashboard-logout-wrap {
-    margin-left: auto;
-}
-
-.dashboard-logout-btn {
-    background: #ffffff !important;
-    color: #1f2937 !important;
-    border: 1px solid #d1d5db !important;
-    font-weight: 600 !important;
-}
-
-/* Stats Grid - Perfect Layout */
-.stats-grid-container {
-    position: relative;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    margin-bottom: 3rem;
-}
-
-/* Metric Cards - Elite Design */
-.metric-card {
-    background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
-    border: 2px solid transparent;
-    border-radius: 2rem;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 15px 35px var(--shadow);
-}
-
-.metric-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
-    opacity: 0;
-    transition: all 0.5s ease;
-    z-index: 1;
-}
-
-.metric-card:hover::before {
-    opacity: 1;
-}
-
-/* Card Content */
-.metric-card .k-card-body {
-    position: relative;
-    z-index: 2;
-    padding: 3rem 2rem !important;
-}
-
-/* Metric Icons - Perfect Colors */
-.metric-icon {
-    font-size: 4rem;
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    transition: all 0.4s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-
-.primary-icon { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
-.success-icon { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; }
-.warning-icon { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); color: white; }
-.info-icon { background: linear-gradient(135deg, var(--info), var(--info-dark)); color: white; }
-
-/* Metric Typography */
-.metric-title {
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 1rem;
-    opacity: 0.85;
-}
-
-.metric-value {
-    font-size: 3.8rem;
-    font-weight: 900;
-    line-height: 1;
-    margin: 0;
-}
-
-/* Performance Card - Ultimate Design */
-.performance-card {
-    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
-    border: 2px solid rgba(59,130,246,0.2);
-    border-radius: 2.5rem;
-    box-shadow: 0 25px 60px var(--shadow);
-    position: relative;
-    overflow: hidden;
-}
-
-.performance-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(16,185,129,0.1), transparent);
-    border-radius: 50%;
-}
-
-/* Performance Header */
-.performance-header {
-    position: relative;
-    z-index: 2;
-}
-
-.performance-score {
-    font-size: 3rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--primary), var(--info));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Grid Styling */
-.activity-grid .k-grid-header {
-    background: linear-gradient(90deg, #F1F5F9, #E2E8F0);
-    border-bottom: 3px solid var(--primary);
-}
-
-.activity-grid .k-grid tr:hover {
-    background: linear-gradient(90deg, rgba(59,130,246,0.08), rgba(16,185,129,0.08));
-}
-
-/* Hover States */
-.hover-card.elevated {
-    border-color: rgba(59,130,246,0.4) !important;
-    transform: translateY(-15px) scale(1.03) !important;
-}
-
-</style>

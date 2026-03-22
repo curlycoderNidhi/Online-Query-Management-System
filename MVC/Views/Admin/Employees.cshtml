@@ -1,0 +1,300 @@
+@{
+    ViewData["Title"] = "Employees";
+    var employees = ViewBag.Employees as List<Repository.Models.Employee> ?? new List<Repository.Models.Employee>();
+}
+
+<style>
+    .emp-page { padding: 1.75rem 1.5rem 3rem; }
+
+    /* ── Heading ── */
+    .emp-heading {
+        display: flex; align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 1.75rem; gap: 1rem;
+    }
+    .emp-heading-left h4 {
+        font-size: 1.35rem; font-weight: 700;
+        color: #0f172a; margin-bottom: 0.2rem; letter-spacing: -0.2px;
+    }
+    .emp-heading-left p { font-size: 0.82rem; color: #64748b; margin: 0; }
+
+    /* ── Section card ── */
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden;
+    }
+    .section-card-header {
+        padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    }
+    .section-card-header-left { display: flex; align-items: center; gap: 0.6rem; }
+    .section-card-icon {
+        width: 30px; height: 30px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; background: #eff6ff;
+        border: 1px solid #bfdbfe; color: #3b82f6; flex-shrink: 0;
+    }
+    .section-card-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .section-card-sub   { font-size: 0.73rem; color: #94a3b8; margin-top: 1px; }
+    .section-count-badge {
+        font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.6rem;
+        border-radius: 20px; background: #eff6ff; color: #2563eb;
+        border: 1px solid #bfdbfe; white-space: nowrap;
+    }
+    .section-card-body { padding: 1.25rem 1.4rem; }
+
+    /* ── Kendo grid ── */
+    .k-grid { border-radius: 10px; border: 1px solid #e8edf3; font-size: 0.84rem; }
+    .k-grid-header th {
+        font-weight: 700; background: #f8fafc; color: #374151;
+        letter-spacing: 0.2px; border-bottom-color: #e8edf3 !important;
+    }
+    .k-grid-content tr { transition: background 0.1s; }
+    .k-grid-content tr:hover td { background: #f8fafc; }
+    .k-grid td { padding: 0.6rem 0.85rem; vertical-align: middle; }
+
+    /* ── Avatar ── */
+    .emp-avatar {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        color: #fff; font-size: 0.75rem; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-right: 0.55rem; flex-shrink: 0;
+    }
+    .emp-name-cell { display: flex; align-items: center; }
+
+    /* ── Add button ── */
+    .btn-add-emp {
+        background: #2563eb; color: #fff; border: none;
+        padding: 0.45rem 1rem; border-radius: 8px;
+        font-size: 0.83rem; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        transition: background 0.15s, transform 0.15s; cursor: pointer;
+    }
+    .btn-add-emp:hover { background: #1d4ed8; color: #fff; transform: translateY(-1px); }
+
+    /* ── Modal ── */
+    .modal-card { border-radius: 14px !important; border: none; box-shadow: 0 20px 60px rgba(15,23,42,0.15); }
+    .modal-header-custom {
+        background: #2563eb;
+        border-radius: 14px 14px 0 0 !important;
+        padding: 1.1rem 1.4rem; border-bottom: none;
+    }
+    .modal-header-custom .modal-title { color: #fff; font-weight: 700; font-size: 0.95rem; }
+    .modal-header-custom .btn-close { filter: invert(1) brightness(2); opacity: 0.8; }
+    .modal-body-custom { padding: 1.4rem; }
+    .modal-footer-custom {
+        padding: 0.9rem 1.4rem 1.2rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex; justify-content: flex-end; gap: 0.5rem;
+    }
+    .form-label-custom { font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; display: block; }
+    .form-control-custom {
+        width: 100%; padding: 0.52rem 0.85rem;
+        border: 1.5px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.875rem; color: #0f172a; background: #f8fafc; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .form-control-custom:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        background: #fff;
+    }
+    .form-control-custom.is-invalid { border-color: #f43f5e; }
+    .field-error { font-size: 0.75rem; color: #f43f5e; margin-top: 0.28rem; display: none; }
+</style>
+
+<div class="emp-page">
+
+    <div class="emp-heading">
+        <div class="emp-heading-left">
+            <h4><i class="bi bi-people-fill me-2 text-primary"></i>Employees</h4>
+            <p>View and manage employees in the system</p>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-card-header">
+            <div class="section-card-header-left">
+                <div class="section-card-icon"><i class="bi bi-person-lines-fill"></i></div>
+                <div>
+                    <div class="section-card-title">Registered Employees</div>
+                    <div class="section-card-sub">All employees in the system</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="section-count-badge" id="empCountBadge">
+                    @employees.Count(e => e.Role.ToString().ToLower() != "admin") employees
+                </span>
+                <button class="btn-add-emp" data-bs-toggle="modal" data-bs-target="#addEmpModal">
+                    <i class="bi bi-plus-lg"></i> Add Employee
+                </button>
+            </div>
+        </div>
+        <div class="section-card-body">
+            <div id="empGrid"></div>
+            <div class="mt-3">
+                <a asp-controller="Admin" asp-action="AdminDashboard"
+                   class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+        <div class="modal-content modal-card">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus-fill me-2"></i>Add New Employee
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body-custom">
+                <div id="modalError" class="alert alert-danger py-2 px-3 mb-3"
+                     style="display:none; font-size:0.82rem; border-radius:8px;"></div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Employee Name</label>
+                    <input type="text" id="empNameInput" class="form-control-custom"
+                           placeholder="e.g. Emp3" autocomplete="off" />
+                    <div class="field-error" id="empNameError">Please enter an employee name.</div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label-custom">Password</label>
+                    <div style="position:relative;">
+                        <input type="password" id="empPassInput" class="form-control-custom"
+                               placeholder="emp3@123" autocomplete="new-password"
+                               style="padding-right:2.5rem;" />
+                        <button type="button" id="togglePass"
+                                style="position:absolute;right:0.7rem;top:50%;transform:translateY(-50%);
+                                       background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">
+                            <i class="bi bi-eye" id="togglePassIcon"></i>
+                        </button>
+                    </div>
+                    <div class="field-error" id="empPassError">Please enter a password.</div>
+                </div>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary px-4" id="saveEmpBtn">
+                    <i class="bi bi-check-lg me-1"></i>Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="empNotification"></div>
+
+@section Scripts {
+<script>
+    // Only non-admin employees
+    var empData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    employees
+        .Where(e => e.Role.ToString().ToLower() != "admin")
+        .Select(e => new { empId = e.EmpId, empName = e.EmpName ?? "" })
+));
+
+    var notify = $("#empNotification").kendoNotification({
+        position: { bottom: 20, right: 20 },
+        autoHideAfter: 3500
+    }).data("kendoNotification");
+
+    var empDS = new kendo.data.DataSource({
+        data: empData,
+        pageSize: 10,
+        schema: { model: { id: "empId" } }
+    });
+
+    function initials(name) {
+        if (!name) return "?";
+        var parts = name.trim().split(/\s+/);
+        return parts.length >= 2
+            ? (parts[0][0] + parts[1][0]).toUpperCase()
+            : name.substring(0, 2).toUpperCase();
+    }
+
+    $("#empGrid").kendoGrid({
+        dataSource: empDS,
+        pageable:   { pageSizes: [10, 25, 50, "all"], refresh: true },
+        sortable:   true,
+        filterable: false,
+        scrollable: false,
+        columns: [
+            { field: "empId",   title: "ID",       width: 90 },
+            { field: "empName", title: "Employee",
+              template: function(d) {
+                  return "<div class='emp-name-cell'>" +
+                             "<div class='emp-avatar'>" + initials(d.empName) + "</div>" +
+                             "<span style='font-weight:600;color:#0f172a;'>" + kendo.htmlEncode(d.empName) + "</span>" +
+                         "</div>";
+              }
+            }
+        ]
+    });
+
+    // Password show/hide
+    $("#togglePass").on("click", function () {
+        var $inp   = $("#empPassInput");
+        var isPass = $inp.attr("type") === "password";
+        $inp.attr("type", isPass ? "text" : "password");
+        $("#togglePassIcon").toggleClass("bi-eye", !isPass).toggleClass("bi-eye-slash", isPass);
+    });
+
+    // Reset modal on open
+    $("#addEmpModal").on("show.bs.modal", function () {
+        $("#empNameInput, #empPassInput").val("").removeClass("is-invalid");
+        $("#empNameError, #empPassError, #modalError").hide();
+        $("#empPassInput").attr("type", "password");
+        $("#togglePassIcon").removeClass("bi-eye-slash").addClass("bi-eye");
+        $("#saveEmpBtn").prop("disabled", false).html('<i class="bi bi-check-lg me-1"></i>Save');
+    });
+
+    // Save
+    $("#saveEmpBtn").on("click", function () {
+        var name  = $("#empNameInput").val().trim();
+        var pass  = $("#empPassInput").val().trim();
+        var valid = true;
+
+        if (!name) { $("#empNameInput").addClass("is-invalid"); $("#empNameError").show(); valid = false; }
+        else        { $("#empNameInput").removeClass("is-invalid"); $("#empNameError").hide(); }
+
+        if (!pass) { $("#empPassInput").addClass("is-invalid"); $("#empPassError").show(); valid = false; }
+        else        { $("#empPassInput").removeClass("is-invalid"); $("#empPassError").hide(); }
+
+        if (!valid) return;
+
+        var $btn = $(this);
+        $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving…');
+
+        $.post("/Employees", { empName: name, password: pass })
+            .done(function (res) {
+                if (res && res.success === false) {
+                    $("#modalError").text(res.message || "Failed to add employee.").show();
+                    $btn.prop("disabled", false).html('<i class="bi bi-check-lg me-1"></i>Save');
+                    return;
+                }
+                var newEmp = { empId: res.empId || Date.now(), empName: res.empName || name };
+                empDS.add(newEmp);
+                var count = empDS.data().length;
+                $("#empCountBadge").text(count + " employee" + (count !== 1 ? "s" : ""));
+                bootstrap.Modal.getInstance(document.getElementById("addEmpModal")).hide();
+                notify.show(newEmp.empName + " added successfully!", "success");
+            })
+            .fail(function () {
+                $("#modalError").text("Request failed. Please try again.").show();
+                $btn.prop("disabled", false).html('<i class="bi bi-check-lg me-1"></i>Save');
+            });
+    });
+
+    // Enter key submits
+    $("#empNameInput, #empPassInput").on("keydown", function (e) {
+        if (e.key === "Enter") $("#saveEmpBtn").trigger("click");
+    });
+</script>
+}

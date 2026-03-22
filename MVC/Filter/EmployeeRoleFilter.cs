@@ -19,7 +19,7 @@ namespace MVC
             }
 
 
-            if (role != "employee")
+            if (!string.Equals(role, "employee", StringComparison.OrdinalIgnoreCase))
             {
                 context.Result = new Microsoft.AspNetCore.Mvc.RedirectToActionResult("Login", "Employee", null);
             }

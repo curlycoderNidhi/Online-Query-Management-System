@@ -1,293 +1,181 @@
-@using System.Text.Json
-@using System.Text.Json.Serialization
 @model IEnumerable<Repository.Models.Query>
-
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
-    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
-    ViewData["Title"] = "User Dashboard";
+    ViewData["Title"] = "My Queries";
+    var antiToken  = Antiforgery.GetAndStoreTokens(Context).RequestToken ?? string.Empty;
+    var editBase   = Url.Action("EditQuery",   "User", new { id = "__id__" })?.Replace("__id__", string.Empty) ?? "/user/edit-query/";
+    var deleteBase = Url.Action("DeleteQuery", "User", new { id = "__id__" })?.Replace("__id__", string.Empty) ?? "/user/delete-query/";
+    var total   = Model.Count();
+    var solved  = Model.Count(q => q.Status == Repository.Models.Enums.QueryStatus.Solved);
+    var pending = Model.Count(q => q.Status != Repository.Models.Enums.QueryStatus.Solved);
 }
-
-<!-- KENDO UI 2021 CDN -->
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css"/>
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css"/>
-
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
-
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style>
+    /* ── Stat cards ── */
+    .stat-card {
+        background: #fff; border-radius: 16px;
+        padding: 1.35rem 1.4rem 1.2rem;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+        transition: box-shadow 0.2s, transform 0.2s;
+        position: relative; overflow: hidden;
+    }
+    .stat-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,0.1); transform: translateY(-2px); }
+    .stat-card::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 4px; border-radius: 16px 16px 0 0;
+    }
+    .stat-card.c-blue::after  { background: linear-gradient(90deg,#3b82f6,#6366f1); }
+    .stat-card.c-green::after { background: linear-gradient(90deg,#10b981,#34d399); }
+    .stat-card.c-red::after   { background: linear-gradient(90deg,#f43f5e,#fb923c); }
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.9rem; }
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; flex-shrink: 0;
+    }
+    .c-blue  .stat-icon { background: #eff6ff; color: #3b82f6; }
+    .c-green .stat-icon { background: #ecfdf5; color: #10b981; }
+    .c-red   .stat-icon { background: #fff1f2; color: #f43f5e; }
+    .stat-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #94a3b8; margin-bottom: 0.3rem; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; line-height: 1; color: #0f172a; }
 
-:root{
---bg:#f8fafc;
---card:#ffffff;
---accent:#2563eb;
---accent2:#1d4ed8;
---success:#10b981;
---warning:#f59e0b;
---danger:#ef4444;
---text:#0f172a;
---soft:#64748b;
---border:#e2e8f0;
---shadow:0 10px 30px rgba(0,0,0,0.08);
-}
+    /* ── Section card ── */
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden;
+    }
+    .section-card-header {
+        padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-card-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .section-card-sub   { font-size: 0.73rem; color: #94a3b8; margin-top: 1px; }
+    .section-card-body  { padding: 1.25rem 1.4rem; }
 
-/* DASHBOARD STATS */
+    /* ── Admin-style badges ── */
+    .b { display: inline-flex; align-items: center; padding: 0.18rem 0.5rem; border-radius: 20px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .b-danger  { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+    .b-warn    { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .b-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .b-muted   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .b-blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 
-.stats-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-gap:20px;
-margin-bottom:30px;
-}
-
-.stat-card{
-background:var(--card);
-border-radius:20px;
-padding:30px;
-box-shadow:var(--shadow);
-border:1px solid var(--border);
-text-align:center;
-transition:.3s;
-}
-
-.stat-card:hover{
-transform:translateY(-6px);
-box-shadow:0 20px 40px rgba(0,0,0,.12);
-}
-
-.stat-icon{
-font-size:42px;
-margin-bottom:10px;
-}
-
-.stat-number{
-font-size:38px;
-font-weight:800;
-color:var(--accent);
-}
-
-/* BUTTON */
-
-.k-primary{
-background:linear-gradient(135deg,var(--accent),var(--accent2))!important;
-border:none!important;
-color:white!important;
-border-radius:12px!important;
-padding:10px 22px!important;
-font-weight:600!important;
-}
-
-.k-primary:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 20px rgba(37,99,235,.35);
-}
-
-/* GRID */
-
-.k-grid{
-border-radius:16px!important;
-overflow:hidden!important;
-border:1px solid var(--border)!important;
-box-shadow:var(--shadow)!important;
-}
-
-.k-grid-header{
-background:#f1f5f9!important;
-border-bottom:2px solid var(--border)!important;
-}
-
-.k-grid th{
-font-size:12px!important;
-font-weight:700!important;
-letter-spacing:.08em!important;
-text-transform:uppercase!important;
-color:var(--soft)!important;
-}
-
-.k-grid td{
-padding:14px!important;
-}
-
-.k-grid tr:nth-child(even){
-background:#fafafa!important;
-}
-
-.k-grid tr:hover{
-background:#eff6ff!important;
-}
-
-/* BUTTONS */
-
-.k-warning{
-background:#f59e0b!important;
-border:none!important;
-color:white!important;
-border-radius:8px!important;
-}
-
-.k-danger{
-background:#ef4444!important;
-border:none!important;
-color:white!important;
-border-radius:8px!important;
-}
-
-/* PAGER */
-
-.k-pager-wrap{
-background:#f8fafc!important;
-border-top:1px solid var(--border)!important;
-}
-
-.k-pager-numbers .k-state-selected{
-background:var(--accent)!important;
-color:white!important;
-border-radius:6px!important;
-}
-
+    /* ── Grid ── */
+    .k-grid { border-radius: 8px; border: 1px solid #e8edf3; font-size: 0.83rem; }
+    .k-grid-header th { font-weight: 700; background: #f8fafc; color: #374151; letter-spacing: 0.2px; border-bottom-color: #e8edf3 !important; }
+    .k-grid-content tr:hover td { background: #f8fafc; }
+    .k-grid td { padding: 0.5rem 0.75rem; vertical-align: middle; }
 </style>
 
-<div class="dash-shell">
-
-<div class="content-area">
-
-@{
-    var totalQueries = Model.Count();
-    var solvedQueries = Model.Count(q => q.Status == Repository.Models.Enums.QueryStatus.Solved);
-    var pendingQueries = Model.Count(q => q.Status != Repository.Models.Enums.QueryStatus.Solved);
-}
-
-<h2>User Dashboard</h2>
-
-<div class="stats-grid">
-
-<div class="stat-card">
-<div class="stat-icon">📋</div>
-<div class="stat-number">@totalQueries</div>
-<div>Total Queries</div>
+<!-- Heading -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-list-ul me-2 text-primary"></i>My Queries</h4>
+        <p class="text-muted mb-0 small">Track and manage your submitted queries</p>
+    </div>
+    <a asp-action="CreateQuery" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>New Query
+    </a>
 </div>
 
-<div class="stat-card">
-<div class="stat-icon">✅</div>
-<div class="stat-number">@solvedQueries</div>
-<div>Solved</div>
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card c-blue">
+            <div class="stat-top">
+                <div><div class="stat-label">Total Queries</div><div class="stat-value">@total</div></div>
+                <div class="stat-icon"><i class="bi bi-journal-text"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card c-green">
+            <div class="stat-top">
+                <div><div class="stat-label">Solved</div><div class="stat-value">@solved</div></div>
+                <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card c-red">
+            <div class="stat-top">
+                <div><div class="stat-label">Pending</div><div class="stat-value">@pending</div></div>
+                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="stat-card">
-<div class="stat-icon">⏳</div>
-<div class="stat-number">@pendingQueries</div>
-<div>Pending</div>
+<!-- Queries Grid -->
+<div class="section-card">
+    <div class="section-card-header">
+        <div>
+            <div class="section-card-title">All Queries</div>
+            <div class="section-card-sub">Sortable and filterable</div>
+        </div>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.22rem 0.6rem;border-radius:20px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">@total total</span>
+    </div>
+    <div class="section-card-body">
+        <div id="queriesGrid"></div>
+    </div>
 </div>
 
-</div>
-
-<a href="/user/create-query" class="k-button k-primary">
-Create New Query
-</a>
-
-<br/><br/>
-
-<div id="grid"></div>
-
-</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+@section Scripts {
 <script>
+    const antiToken  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(antiToken));
+    const editBase   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(editBase));
+    const deleteBase = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(deleteBase));
 
-var queries = @Html.Raw(JsonSerializer.Serialize(
-    Model,
-    new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } }
-));
+    const queries = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Select(q => new {
+            queryId     = q.QueryId,
+            title       = q.Title,
+            description = q.Description ?? "",
+            priority    = q.Priority.ToString(),
+            status      = q.Status.ToString(),
+            queryDate   = q.QueryDate.ToString("yyyy-MM-dd"),
+            comments    = q.Comments ?? ""
+        })
+    ));
 
-$(document).ready(function(){
+    // Admin-style badge helpers
+    function priBadge(p) {
+        var cls = p === "High" ? "b-danger" : p === "Medium" ? "b-warn" : "b-success";
+        return "<span class='b " + cls + "'>" + p + "</span>";
+    }
+    function staBadge(s) {
+        var label = s === "InProgress" ? "In Progress" : s;
+        var cls   = s === "Solved" ? "b-success" : s === "InProgress" ? "b-blue" : "b-muted";
+        return "<span class='b " + cls + "'>" + label + "</span>";
+    }
 
-$("#grid").kendoGrid({
-
-dataSource:{
-data:queries,
-pageSize:5
-},
-
-height:450,
-sortable:true,
-pageable:true,
-
-columns:[
-{ field:"QueryId", title:"ID", width:80 },
-{ field:"Title", title:"Title" },
-{ field:"Description", title:"Description" },
-{ field:"Priority", title:"Priority" },
-{ field:"Status", title:"Status" },
-
-{
-title:"Edit",
-template:"<a class='k-button k-warning' href='/user/edit-query/#=QueryId#'>Edit</a>",
-width:100
-},
-
-{
-title:"Delete",
-template:"<button class='k-button k-danger delete-btn' data-id='#=QueryId#'>Delete</button>",
-width:100
-}
-
-]
-
-});
-
-$(document).on('click','.delete-btn',function(e){
-
-e.preventDefault();
-
-var queryId=$(this).data('id');
-
-Swal.fire({
-title:'Confirm Delete',
-text:'This action cannot be undone!',
-icon:'warning',
-showCancelButton:true,
-confirmButtonText:'Delete',
-confirmButtonColor:'#ef4444'
-}).then((result)=>{
-
-if(result.isConfirmed){
-
-$.ajax({
-
-url:`/user/delete-query/${queryId}`,
-type:'POST',
-
-success:function(){
-
-Swal.fire({
-icon:'success',
-title:'Deleted',
-timer:1500,
-showConfirmButton:false
-});
-
-setTimeout(()=>location.reload(),800)
-
-},
-
-error:function(){
-
-Swal.fire({
-icon:'error',
-title:'Delete failed'
-});
-
-}
-
-})
-
-}
-
-})
-
-});
-
-});
+    $("#queriesGrid").kendoGrid({
+        dataSource: { data: queries, pageSize: 5 },
+        pageable:   { pageSizes: [5, 10, 15] },
+        sortable:   true,
+        filterable: true,
+        scrollable: false,
+        columns: [
+            { field: "title",     title: "Title",    minWidth: 200 },
+            { field: "priority",  title: "Priority", width: 110,
+              template: function(d) { return priBadge(d.priority); }},
+            { field: "status",    title: "Status",   width: 130,
+              template: function(d) { return staBadge(d.status); }},
+            { field: "queryDate", title: "Date",     width: 115 },
+            { title: "Actions",   width: 130, filterable: false, sortable: false,
+              template: function(d) {
+                  if (d.status === "Solved") return "<span class='text-muted small'>No actions</span>";
+                  var editUrl   = editBase   + d.queryId;
+                  var deleteUrl = deleteBase + d.queryId;
+                  return "<a href='" + editUrl + "' class='btn btn-sm btn-outline-primary me-1'><i class='bi bi-pencil'></i></a>" +
+                         "<form method='post' action='" + deleteUrl + "' style='display:inline' onsubmit=\"return confirm('Delete this query?')\">" +
+                             "<input name='__RequestVerificationToken' type='hidden' value='" + antiToken + "' />" +
+                             "<button class='btn btn-sm btn-outline-danger'><i class='bi bi-trash'></i></button>" +
+                         "</form>";
+              }}
+        ]
+    });
 </script>
+}

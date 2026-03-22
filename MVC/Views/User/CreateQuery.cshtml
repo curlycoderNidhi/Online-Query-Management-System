@@ -1,328 +1,147 @@
 @model Repository.Models.Query
-
 @{
-    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
     ViewData["Title"] = "Create Query";
 }
 
-<!-- SAME Elite CDN + SweetAlert2 -->
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/8.2.2/default/default-main.css" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap">
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-
-<!-- IDENTICAL ELITE CSS FROM DASHBOARD -->
 <style>
-:root {
-    --bg: #f8fafc; --bg-card: #ffffff; --bg-header: #ffffff; --bg-dark: #f8fafc;
-    --bg-dark2: #eef4fb; --accent1: #f97316; --accent2: #2563eb; --accent3: #16a34a;
-    --text-main: #0f172a; --text-soft: #64748b; --border: #e2e8f0; --border-dark: #dbe4ee;
-    --shadow: 0 4px 20px rgba(15, 23, 42, 0.06); --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.10);
-}
-
-.dash-shell { 
-    min-height: 100vh; 
-    background: linear-gradient(135deg, #f8fafc 0%, #eef4fb 100%); 
-    padding: 2rem 0; 
-}
-
-.dash-header { 
-    background: linear-gradient(135deg, #1f6fe5, #1e6ae0); 
-    padding: 0 48px; 
-    height: 68px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    position: sticky; 
-    top: 0; 
-    z-index: 100; 
-    border-bottom: 0; 
-    box-shadow: 0 4px 16px rgba(30, 106, 224, 0.25); 
-}
-
-.dash-title { 
-    font-family: 'IBM Plex Sans', sans-serif; 
-    font-size: 1.8rem; 
-    font-weight: 700; 
-    color: #ffffff; 
-    letter-spacing: 0; 
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.dash-title span { 
-    color: #ffffff;
-}
-
-.dash-meta { 
-    font-size: 0.7rem; 
-    color: var(--text-soft); 
-    letter-spacing: 0.12em; 
-    text-transform: uppercase; 
-    font-weight: 500; 
-}
-
-/* SIMPLE KENDO UI FORM STYLING */
-.form-container {
-    max-width: 1080px;
-    margin: 2rem auto;
-    padding: 0;
-}
-
-.form-card {
-    background: var(--bg-card);
-    border-radius: 24px;
-    padding: 3rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.form-card:hover {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-4px);
-}
-
-.form-group {
-    margin-bottom: 2.5rem;
-}
-
-.form-label {
-    display: block;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 1rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-
-#title-input, #description-input, #priority-input {
-    width: 100% !important;
-    border-radius: 16px !important;
-    border: 2px solid var(--border) !important;
-    padding: 16px 20px !important;
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 1rem !important;
-    background: linear-gradient(145deg, #fcfdff, #f8faff) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-#title-input:focus, #description-input:focus {
-    border-color: var(--accent2) !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(37, 99, 235, 0.15) !important;
-    background: white !important;
-    transform: translateY(-2px) !important;
-}
-
-#description-input {
-    min-height: 140px !important;
-    resize: vertical;
-}
-
-#priority-input .k-input {
-    border-radius: 16px !important;
-    background: linear-gradient(145deg, #fcfdff, #f8faff) !important;
-}
-
-.form-group .k-dropdownlist {
-    width: 100% !important;
-    border-radius: 16px !important;
-    border: 2px solid var(--border) !important;
-    background: linear-gradient(145deg, #fcfdff, #f8faff) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.form-group .k-dropdownlist:hover,
-.form-group .k-dropdownlist.k-focus {
-    border-color: var(--accent2) !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(37, 99, 235, 0.15) !important;
-    background: white !important;
-}
-
-.k-list-content .k-list-item.k-selected,
-.k-list-content .k-selected {
-    background: linear-gradient(135deg, #f97316, #ea580c) !important;
-    color: #ffffff !important;
-}
-
-.k-list-content .k-list-item:hover {
-    background: rgba(37, 99, 235, 0.08) !important;
-}
-
-.form-buttons {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: flex-end;
-    margin-top: 3rem;
-    padding-top: 2.5rem;
-    border-top: 2px solid var(--border);
-}
-
-.k-button {
-    font-family: 'IBM Plex Sans', sans-serif !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    border-radius: 16px !important;
-    padding: 16px 36px !important;
-    border: 2px solid transparent !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    text-decoration: none !important;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--accent2), #1d4ed8) !important;
-    color: white !important;
-    box-shadow: 0 10px 25px rgba(37,99,235,0.3) !important;
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 25px 50px rgba(37,99,235,0.4) !important;
-}
-
-.btn-secondary {
-    background: transparent !important;
-    color: var(--text-main) !important;
-    border: 2px solid var(--border-dark) !important;
-}
-
-.btn-secondary:hover {
-    background: var(--bg-dark2) !important;
-    border-color: var(--accent2) !important;
-    color: var(--accent2) !important;
-    transform: translateY(-2px) !important;
-}
-
-.text-danger {
-    color: #ef4444 !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    margin-top: 0.75rem !important;
-    background: rgba(239, 68, 68, 0.1) !important;
-    padding: 8px 12px !important;
-    border-radius: 8px !important;
-    border-left: 4px solid #ef4444 !important;
-    display: block !important;
-}
-
-.field-error:empty {
-    display: none !important;
-    margin-top: 0 !important;
-    padding: 0 !important;
-    border-left: 0 !important;
-    background: transparent !important;
-}
+    .form-card { border-radius: 16px; border: 1px solid #e8edf3; box-shadow: 0 1px 4px rgba(15,23,42,0.05); overflow: hidden; background: #fff; }
+    .form-card-header {
+        background: #2563eb; padding: 1.1rem 1.5rem; border-bottom: none;
+    }
+    .form-card-header h5 { color: #fff; font-weight: 700; font-size: 0.95rem; margin: 0; }
+    .form-card-body { padding: 1.75rem; }
+    .form-label-custom { font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; display: block; }
+    .form-control-custom {
+        width: 100%; padding: 0.55rem 0.85rem;
+        border: 1.5px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.875rem; color: #0f172a; background: #f8fafc; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-control-custom:focus {
+        border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); background: #fff;
+    }
+    .form-control-custom.is-invalid { border-color: #f43f5e !important; box-shadow: 0 0 0 3px rgba(244,63,94,0.1) !important; }
+    .field-error { font-size: 0.75rem; color: #f43f5e; margin-top: 0.3rem; display: none; }
+    /* Kendo dropdown override to match style */
+    #priorityDdl { display: none; }
+    .k-dropdownlist {
+        width: 100% !important;
+        height: 38px !important;
+        border-radius: 8px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        background: #f8fafc !important;
+        font-size: 0.875rem !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+    }
+    .k-dropdownlist:hover {
+        border-color: #3b82f6 !important;
+    }
+    .k-dropdownlist.k-focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+        background: #fff !important;
+    }
+    .k-dropdownlist .k-input-inner {
+        padding: 0 0.85rem !important;
+        font-size: 0.875rem !important;
+        color: #0f172a !important;
+    }
+    .k-dropdownlist .k-input-button {
+        border-left: 1px solid #e2e8f0 !important;
+        background: transparent !important;
+    }
 </style>
 
-<div class="dash-shell">
-    <div class="dash-header">
-        <div class="dash-title"><span class="k-icon k-i-plus-outline"></span>Submit New Query</div>
-    </div>
-
-    <div class="form-container">
+<div class="row justify-content-center">
+    <div class="col-lg-7">
         <div class="form-card">
-            <form id="queryForm" method="post" action="@Url.Action("CreateQuery", "User")">
-                @Html.AntiForgeryToken()
-                
-                <div class="form-group">
-                    <label class="form-label">Query Title</label>
-                    <input type="text" id="title-input" name="Title" class="k-input" placeholder="Enter query title..." required />
-                    <span class="text-danger field-error" data-valmsg-for="Title"></span>
-                </div>
+            <div class="form-card-header">
+                <h5><i class="bi bi-plus-circle me-2"></i>Submit New Query</h5>
+            </div>
+            <div class="form-card-body">
+                <form asp-action="CreateQuery" method="post" id="createForm">
+                    @Html.AntiForgeryToken()
 
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea id="description-input" name="Description" class="k-input k-textarea" placeholder="Describe your query in detail..." required></textarea>
-                    <span class="text-danger field-error" data-valmsg-for="Description"></span>
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="titleInput">Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" id="titleInput" class="form-control-custom"
+                               placeholder="Brief title of your issue" autocomplete="off" />
+                        <div class="field-error" id="titleError">Title is required.</div>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Priority</label>
-                    <select id="priority-input" name="Priority" class="k-dropdown" required></select>
-                    <span class="text-danger field-error" data-valmsg-for="Priority"></span>
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="descInput">Description <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" id="descInput" class="form-control-custom" rows="5"
+                                  placeholder="Describe your issue in detail…"></textarea>
+                        <div class="field-error" id="descError">Description is required.</div>
+                    </div>
 
-                <div class="form-buttons">
-                    <a href="@Url.Action("Dashboard")" class="k-button btn-secondary">
-                        <span class="k-icon k-i-arrow-left"></span>
-                        Cancel
-                    </a>
-                    <button type="submit" class="k-button btn-primary k-primary">
-                        <span class="k-icon k-i-plus"></span>
-                        Create Query
-                    </button>
-                </div>
-            </form>
+                    <div class="mb-4">
+                        <label class="form-label-custom">Priority</label>
+                        <select asp-for="Priority" id="priorityDdl" class="form-control-custom"></select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="submitBtn" class="btn btn-primary px-4">
+                            <i class="bi bi-send me-1"></i>Submit Query
+                        </button>
+                        <a asp-action="Dashboard" class="btn btn-outline-secondary px-4">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@section Scripts {
 <script>
-$(document).ready(function() {
-    // Simple Kendo UI Components
-    $("#title-input").kendoTextBox();
-    
-    $("#priority-input").kendoDropDownList({
+    $("#priorityDdl").kendoDropDownList({
         dataSource: ["Low", "Medium", "High"],
-        optionLabel: "-- Select Priority --"
+        value: "@Model.Priority",
+        optionLabel: "Select priority"
     });
-    
-    // Kendo Validator for client-side validation
-    var validator = $("#queryForm").kendoValidator({
-        rules: {
-            required: function(input) {
-                return input.val().trim() !== "";
-            },
-            minlength: function(input) {
-                if (input.is("[name=Description]")) {
-                    return input.val().length >= 10;
-                }
-                return true;
-            }
-        },
-        messages: {
-            required: "This field is required",
-            minlength: "Description must be at least 10 characters"
-        },
-        errorTemplate: "<span class='text-danger field-error'>#=message#</span>"
-    }).data("kendoValidator");
-    
-    // Form submission with SweetAlert2
-    $("#queryForm").on('submit', function(e) {
-        e.preventDefault();
-        
-        if (validator.validate()) {
-            Swal.fire({
-                title: 'Creating Query...',
-                text: 'Please wait',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => Swal.showLoading()
-            });
-            
-            // Submit form after short delay
-            setTimeout(() => {
-                this.submit();
-            }, 500);
+
+    document.getElementById("submitBtn").addEventListener("click", function () {
+        var title = (document.getElementById("titleInput").value || "").trim();
+        var desc  = (document.getElementById("descInput").value  || "").trim();
+        var valid = true;
+
+        if (!title) {
+            document.getElementById("titleInput").classList.add("is-invalid");
+            document.getElementById("titleError").style.display = "block";
+            valid = false;
         } else {
-            Swal.fire({
-                title: 'Validation Error!',
-                text: 'Please fill all required fields correctly.',
-                icon: 'warning',
-                confirmButtonText: 'OK',
-                customClass: {
-                    confirmButton: 'k-button k-button-solid k-button-warning'
-                }
-            });
+            document.getElementById("titleInput").classList.remove("is-invalid");
+            document.getElementById("titleError").style.display = "none";
+        }
+
+        if (!desc) {
+            document.getElementById("descInput").classList.add("is-invalid");
+            document.getElementById("descError").style.display = "block";
+            valid = false;
+        } else {
+            document.getElementById("descInput").classList.remove("is-invalid");
+            document.getElementById("descError").style.display = "none";
+        }
+
+        if (valid) {
+            document.getElementById("createForm").submit();
         }
     });
-});
-</script>
 
+    // Clear error on input
+    document.getElementById("titleInput").addEventListener("input", function () {
+        if (this.value.trim()) {
+            this.classList.remove("is-invalid");
+            document.getElementById("titleError").style.display = "none";
+        }
+    });
+    document.getElementById("descInput").addEventListener("input", function () {
+        if (this.value.trim()) {
+            this.classList.remove("is-invalid");
+            document.getElementById("descError").style.display = "none";
+        }
+    });
+</script>
+}

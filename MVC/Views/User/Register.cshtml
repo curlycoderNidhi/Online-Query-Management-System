@@ -1,371 +1,443 @@
-@model dynamic
+@model MVC.Models.UserSignupViewModel
 @{
-    ViewData["Title"] = "User Registration";
+    ViewData["Title"] = "Register";
+    Layout = null;
 }
 
-<style>
-/* ===========================================
-   ELITE USER REGISTRATION - SAME CSS AS EMPLOYEE LOGIN
-   Kendo Form Structure PRESERVED
-============================================= */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
 
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+    <!-- jQuery (required by Kendo) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-.login-card {
-    width: 100%;
-    max-width: 420px;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(32px);
-    border-radius: 28px;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    box-shadow: 0 32px 96px rgba(15, 23, 42, 0.20);
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin: 1rem;
-}
+    <!-- Kendo UI -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" />
+    <script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
 
-.login-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 48px 120px rgba(15, 23, 42, 0.28);
-}
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-.login-header {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-    color: white;
-    padding: 2.5rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
 
-.login-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 1.5rem 0;
+        }
 
-.login-card:hover .login-header::before {
-    opacity: 1;
-}
+        /* ── Card ── */
+        .login-card {
+            width: 100%;
+            max-width: 460px;
+            margin: 1.5rem;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0,0,0,.30);
+            overflow: hidden;
+        }
 
-.logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
+        /* ── Header ── */
+        .login-header {
+            background: #fff;
+            padding: 2.2rem 2rem 1.8rem;
+            text-align: center;
+            color: #1e293b;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .login-header .logo-icon {
+            font-size: 2.4rem;
+            margin-bottom: .5rem;
+            color: #0d6efd;
+        }
+        .login-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            color: #1e293b;
+        }
+        .login-header p {
+            margin: .3rem 0 0;
+            font-size: .9rem;
+            color: #6c757d;
+        }
+        .login-header .role-badge {
+            display: inline-block;
+            margin-top: .75rem;
+            background: rgba(255,255,255,.18);
+            border: 1.5px solid rgba(255,255,255,.4);
+            border-radius: 20px;
+            padding: .3rem 1.1rem;
+            font-size: .85rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
 
-.logo-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #10B981, #059669);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    box-shadow: 0 12px 36px rgba(16, 185, 129, 0.4);
-}
+        /* ── Body ── */
+        .login-body {
+            padding: 2rem 2.2rem 2.2rem;
+        }
 
-.login-title {
-    margin: 0;
-    font-size: 1.875rem;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    opacity: 0.95;
-}
+        /* ── Icon wrapper ── */
+        .input-icon {
+            position: relative;
+        }
+        .input-icon .fa {
+            position: absolute;
+            top: 24px;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            font-size: 1rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .input-icon .k-textbox,
+        .input-icon .k-input {
+            padding-left: 2.8rem !important;
+        }
+        .input-icon .k-input-inner {
+            padding-left: 2.8rem !important;
+        }
 
-.login-subtitle {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
-    opacity: 0.8;
-    font-weight: 400;
-}
+        /* ── Password eye toggle ── */
+        .pwd-wrap {
+            position: relative;
+        }
+        .pwd-wrap .fa-lock,
+        .pwd-wrap .fa-lock-open {
+            position: absolute;
+            top: 24px;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            font-size: 1rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .pwd-wrap .k-textbox,
+        .pwd-wrap .k-input {
+            padding-left: 2.8rem !important;
+            padding-right: 3rem !important;
+        }
+        .pwd-wrap .k-input-inner {
+            padding-left: 2.8rem !important;
+            padding-right: 3rem !important;
+        }
+        .eye-btn {
+            position: absolute;
+            right: .6rem;
+            top: 24px;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: .25rem .4rem;
+            border-radius: 6px;
+            transition: color .2s;
+        }
+        .eye-btn:hover { color: #0d6efd; }
 
-.login-body {
-    padding: 2.5rem 2.5rem 2.75rem;
-}
+        /* ── Kendo TextBox overrides ── */
+        .k-textbox,
+        .k-input {
+            width: 100% !important;
+            height: 48px !important;
+            border-radius: 10px !important;
+            border: 2px solid #dee2e6 !important;
+            background: #f8f9ff !important;
+            font-size: .97rem !important;
+            color: #212529 !important;
+            transition: border-color .2s, box-shadow .2s !important;
+        }
+        .k-textbox:hover, .k-input:hover {
+            border-color: #0d6efd !important;
+        }
+        .k-textbox.k-focus, .k-input.k-focus,
+        .k-textbox:focus-within, .k-input:focus-within {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 .2rem rgba(13,110,253,.15) !important;
+            background: #fff !important;
+        }
+        .k-input-inner {
+            background: transparent !important;
+            border: none !important;
+            height: 100% !important;
+            font-size: .97rem !important;
+        }
 
-.login-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(226, 232, 240, 0.6);
-}
+        /* ── Kendo Form labels ── */
+        .k-form .k-form-field {
+            margin-bottom: 1.3rem;
+        }
+        .k-form .k-label,
+        .k-form .k-form-label {
+            font-weight: 700;
+            font-size: .85rem;
+            color: #1e293b;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            margin-bottom: .5rem;
+        }
 
-.login-link a {
-    color: #3B82F6;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
+        /* ── Validation errors ── */
+        .k-form-error,
+        .field-validation-error {
+            display: block !important;
+            margin-top: 6px !important;
+            padding: 5px 10px !important;
+            font-size: .82rem !important;
+            font-weight: 600 !important;
+            color: #dc3545 !important;
+            background: rgba(220,53,69,.08) !important;
+            border-left: 4px solid #dc3545 !important;
+            border-radius: 6px !important;
+            animation: fadeIn .2s ease !important;
+        }
+        .field-validation-valid { display: none !important; }
 
-.login-link a:hover {
-    color: #1D4ED8;
-    text-decoration: underline;
-}
+        /* server-side summary */
+        .validation-summary-errors ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem;
+        }
+        .validation-summary-errors li {
+            padding: 6px 10px;
+            font-size: .83rem;
+            font-weight: 600;
+            color: #dc3545;
+            background: rgba(220,53,69,.08);
+            border-left: 4px solid #dc3545;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
 
-/* KENDO FORM ENHANCEMENTS - ELITE STYLING */
-.k-form-field {
-    margin-bottom: 1.9rem;
-}
+        /* ── Register button ── */
+        #registerBtn.k-button {
+            width: 100% !important;
+            height: 50px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            background: linear-gradient(135deg, #0d6efd 0%, #084298 100%) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            letter-spacing: .04em !important;
+            box-shadow: 0 8px 24px rgba(13,110,253,.35) !important;
+            transition: all .25s !important;
+            margin-top: .25rem;
+        }
+        #registerBtn.k-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 14px 32px rgba(13,110,253,.45) !important;
+        }
+        #registerBtn.k-button:active {
+            transform: translateY(0) !important;
+        }
 
-.k-form-field label {
-    display: block;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 0.75rem;
-    font-size: 0.95rem;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-    opacity: 0.9;
-}
+        /* ── Login link ── */
+        .login-link {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: .88rem;
+            color: #6c757d;
+        }
+        .login-link a {
+            color: #0d6efd;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .login-link a:hover { text-decoration: underline; }
 
-/* Input Icon Styling */
-.input-icon {
-    position: relative;
-}
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-3px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
 
-.input-icon i {
-    position: absolute;
-    top: 50%;
-    left: 1rem;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    font-size: 1.1rem;
-    z-index: 2;
-    pointer-events: none;
-}
+<div class="login-card">
 
-.input-icon input.k-textbox {
-    padding-left: 3rem !important;
-}
+    <!-- Header -->
+    <div class="login-header">
+        <div class="logo-icon"><i class="fa fa-user-plus"></i></div>
+        <h2>Create Account</h2>
+        <p>Register to submit queries</p>
+        <div class="role-badge">
+            <i class="fa fa-pen me-1"></i>New Registration
+        </div>
+    </div>
 
-/* Kendo TextBox - ELITE STYLING */
-.k-textbox,
-.k-textbox .k-input-inner {
-    width: 100% !important;
-    height: 56px !important;
-    border-radius: 20px !important;
-    background: rgba(255,255,255,0.85) !important;
-    border: 2px solid rgba(226,232,240,0.7) !important;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    transition: all .3s ease !important;
-    font-size: 1rem !important;
-    color: #374151 !important;
-    padding: 0 1rem !important;
-}
+    <!-- Body -->
+    <div class="login-body">
 
-.k-textbox:hover,
-.k-textbox .k-input-inner:hover {
-    border-color: #3B82F6 !important;
-    box-shadow: 0 16px 45px rgba(59,130,246,.15);
-}
+        <!-- Server-side validation summary -->
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-.k-textbox:focus,
-.k-textbox.k-focus,
-.k-textbox.k-focus .k-input-inner {
-    border-color: #3B82F6 !important;
-    box-shadow: 0 20px 60px rgba(59,130,246,.25);
-}
+        <!-- Kendo Form -->
+        <form id="registerForm" method="post" asp-action="Register" asp-controller="User">
+            @Html.AntiForgeryToken()
+        </form>
 
-/* Clear Button */
-.k-input-inner-clear,
-.k-clear-button {
-    right: 1rem !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 50% !important;
-    background: rgba(107, 114, 128, 0.2) !important;
-    transition: all 0.2s ease !important;
-}
-
-.k-input-inner-clear:hover,
-.k-clear-button:hover {
-    background: rgba(239, 68, 68, 0.2) !important;
-}
-
-/* Kendo Form Error - ELITE STYLING */
-.k-form-error,
-.field-validation-error {
-    display: block !important;
-    margin-top: 10px !important;
-    padding: 6px 10px !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    color: #ef4444 !important;
-    background: rgba(239,68,68,.08) !important;
-    border-left: 4px solid #ef4444 !important;
-    border-radius: 8px !important;
-    animation: fadeIn .2s ease !important;
-}
-
-
-
-/* Kendo Form Buttons - ELITE STYLING */
-.k-form-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 1rem;
-}
-
-.k-button.k-primary {
-    flex: 1;
-    height: 60px !important;
-    border-radius: 20px !important;
-    border: none !important;
-    font-weight: 800 !important;
-    font-size: 1.1rem !important;
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-    box-shadow: 0 16px 48px rgba(16, 185, 129, 0.4) !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    position: relative !important;
-    overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    color: white !important;
-}
-
-.k-button.k-primary:hover:not(.k-state-disabled) {
-    transform: translateY(-4px) scale(1.02) !important;
-    box-shadow: 0 28px 72px rgba(16, 185, 129, 0.5) !important;
-}
-
-.k-button.k-primary:active:not(.k-state-disabled) {
-    transform: translateY(-2px) scale(0.98) !important;
-}
-
-.k-button.reset {
-    height: 60px !important;
-    border-radius: 20px !important;
-    border: 2px solid rgba(226,232,240,0.7) !important;
-    background: transparent !important;
-    color: #374151 !important;
-    font-weight: 700 !important;
-    transition: all 0.3s ease !important;
-}
-
-.k-button.reset:hover:not(.k-state-disabled) {
-    background: rgba(107, 114, 128, 0.1) !important;
-    border-color: #10B981 !important;
-    color: #10B981 !important;
-}
-
-/* Notification */
-#notification {
-    min-height: 20px;
-    margin-bottom: 1rem;
-}
-</style>
-
-<div class="login-container">
-    <div class="login-card" id="loginCard">
-        <!-- Header -->
-        <div class="login-header">
-            <div class="logo-container">
-                <div class="logo-icon">➕</div>
-            </div>
-            <h1 class="login-title">User Registration</h1>
-            <p class="login-subtitle">Create New Account</p>
+        <!-- Login link -->
+        <div class="login-link">
+            Already have an account?
+            <a asp-action="Login" asp-controller="User">Sign in</a>
         </div>
 
-        <!-- Form Body -->
-        <div class="login-body">
-            <div id="notification"></div>
-            
-            <!-- Kendo Form - YOUR EXACT STRUCTURE PRESERVED -->
-            <form id="registerForm" method="post" action="/user/register"></form>
-            
-            <div class="login-link">
-                Already have an account? 
-                <a href="/user/login">Login</a>
-            </div>
-        </div>
     </div>
 </div>
 
-@section Scripts {
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script>
+$(document).ready(function () {
 
-    
-    <script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
-
-    <!-- YOUR ORIGINAL KENDO FORM SCRIPT - 100% UNCHANGED -->
-    <script>
-    $(document).ready(function () {
-        var form = $("#registerForm").kendoForm({
-            formData: {
-                CompanyName: "",
-                Email: "",
-                Password: ""
-            },
-            items: [
-                {
-                    field: "CompanyName",
-                    label: "Company Name",
-                    editor: function(container, options){
-                        $('<div class="input-icon">'+
-                          '<i class="fa fa-building"></i>'+
-                          '<input required data-required-msg="Company Name is required" class="k-textbox" name="'+options.field+'" placeholder="Enter Company Name"/>'+
-                          '</div>').appendTo(container);
-                    }
-                },
-                {
-                    field: "Email",
-                    label: "Email",
-                    editor: function(container, options){
-                        $('<div class="input-icon">'+
-                          '<i class="fa fa-envelope"></i>'+
-                          '<input required type="email" data-required-msg="Email is required" data-email-msg="Enter valid email" class="k-textbox" name="'+options.field+'" placeholder="Enter Email"/>'+
-                          '</div>').appendTo(container);
-                    }
-                },
-                {
-                    field: "Password",
-                    label: "Password",
-                    editor: function(container, options){
-                        $('<div class="input-icon">'+
-                          '<i class="fa fa-lock"></i>'+
-                          '<input required data-required-msg="Password is required" type="password" class="k-textbox" name="'+options.field+'" placeholder="Enter Password"/>'+
-                          '</div>').appendTo(container);
-                    }
+    var form = $("#registerForm").kendoForm({
+        formData: {
+            CompanyName: "",
+            Email:       "",
+            Password:    "",
+            ConfirmPassword: ""
+        },
+        items: [
+            {
+                field: "CompanyName",
+                label: "Company Name",
+                editor: function (container, options) {
+                    $('<div class="input-icon">' +
+                        '<i class="fa fa-building"></i>' +
+                        '<input required ' +
+                               'type="text" ' +
+                               'data-required-msg="Company name is required" ' +
+                               'class="k-textbox" ' +
+                               'name="' + options.field + '" ' +
+                               'id="companyInput" ' +
+                               'placeholder="Your company name" />' +
+                      '</div>').appendTo(container);
                 }
-            ],
-            buttonsTemplate:
-            '<div class="k-form-buttons">'+
-            '<button class="k-button k-primary" type="submit"><i class="fa fa-user-plus"></i> Register</button>'+
-            '<button class="k-button reset" type="reset"><i class="fa fa-rotate-left"></i> Reset</button>'+
-            '</div>'
-        }).data("kendoForm");
-
-        $("#registerForm").on("submit", function(e){
-            if(!form.validate()){
-                e.preventDefault();
+            },
+            {
+                field: "Email",
+                label: "Email Address",
+                editor: function (container, options) {
+                    $('<div class="input-icon">' +
+                        '<i class="fa fa-envelope"></i>' +
+                        '<input required ' +
+                               'type="email" ' +
+                               'data-required-msg="Email is required" ' +
+                               'data-email-msg="Enter a valid email" ' +
+                               'class="k-textbox" ' +
+                               'name="' + options.field + '" ' +
+                               'id="emailInput" ' +
+                               'placeholder="you@company.com" />' +
+                      '</div>').appendTo(container);
+                }
+            },
+            {
+                field: "Password",
+                label: "Password",
+                editor: function (container, options) {
+                    $('<div class="pwd-wrap">' +
+                        '<i class="fa fa-lock"></i>' +
+                        '<input required ' +
+                               'type="password" ' +
+                               'data-required-msg="Password is required" ' +
+                               'data-minlength="6" ' +
+                               'data-minlength-msg="Password must be at least 6 characters" ' +
+                               'class="k-textbox" ' +
+                               'name="' + options.field + '" ' +
+                               'id="pwdInput" ' +
+                               'placeholder="Min 6 characters" />' +
+                        '<button type="button" class="eye-btn" id="eyePwd">' +
+                            '<i class="fa fa-eye" id="eyePwdIcon"></i>' +
+                        '</button>' +
+                      '</div>').appendTo(container);
+                }
+            },
+            {
+                field: "ConfirmPassword",
+                label: "Confirm Password",
+                editor: function (container, options) {
+                    $('<div class="pwd-wrap">' +
+                        '<i class="fa fa-lock"></i>' +
+                        '<input required ' +
+                               'type="password" ' +
+                               'data-required-msg="Please confirm your password" ' +
+                               'class="k-textbox" ' +
+                               'name="ConfirmPassword" ' +
+                               'id="confirmPwdInput" ' +
+                               'placeholder="Re-enter password" />' +
+                        '<button type="button" class="eye-btn" id="eyeConfirm">' +
+                            '<i class="fa fa-eye" id="eyeConfirmIcon"></i>' +
+                        '</button>' +
+                      '</div>').appendTo(container);
+                }
             }
-        });
+        ],
+        buttonsTemplate:
+            '<div style="margin-top:.5rem">' +
+                '<button id="registerBtn" type="submit" class="k-button">' +
+                    '<i class="fa fa-user-check"></i>&nbsp; Register' +
+                '</button>' +
+            '</div>'
+    }).data("kendoForm");
+
+    // ── Kendo Button ──
+    $("#registerBtn").kendoButton({ themeColor: "primary" });
+
+    // ── Eye toggles ──
+    $(document).on("click", "#eyePwd", function () {
+        var el = $("#pwdInput"), icon = $("#eyePwdIcon");
+        el.attr("type") === "password"
+            ? (el.attr("type", "text"),  icon.removeClass("fa-eye").addClass("fa-eye-slash"))
+            : (el.attr("type", "password"), icon.removeClass("fa-eye-slash").addClass("fa-eye"));
     });
-    </script>
-}
+    $(document).on("click", "#eyeConfirm", function () {
+        var el = $("#confirmPwdInput"), icon = $("#eyeConfirmIcon");
+        el.attr("type") === "password"
+            ? (el.attr("type", "text"),  icon.removeClass("fa-eye").addClass("fa-eye-slash"))
+            : (el.attr("type", "password"), icon.removeClass("fa-eye-slash").addClass("fa-eye"));
+    });
+
+    // ── Submit: validate + confirm password match ──
+    $("#registerForm").on("submit", function (e) {
+        if (!form.validate()) {
+            e.preventDefault();
+            return;
+        }
+        if ($("#pwdInput").val() !== $("#confirmPwdInput").val()) {
+            e.preventDefault();
+            var errHtml = '<span class="k-form-error" id="confirmErr">Passwords do not match.</span>';
+            if ($("#confirmErr").length === 0) {
+                $("#confirmPwdInput").closest(".pwd-wrap").after(errHtml);
+            }
+            return;
+        }
+        $("#confirmErr").remove();
+    });
+
+    // ── Clear confirm-match error on type ──
+    $(document).on("input", "#confirmPwdInput, #pwdInput", function () {
+        $("#confirmErr").remove();
+    });
+
+    // ── Auto-focus ──
+    setTimeout(function () { $("#companyInput").focus(); }, 150);
+});
+</script>
+</body>
+</html>

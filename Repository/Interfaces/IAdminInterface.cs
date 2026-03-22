@@ -23,6 +23,7 @@ namespace Repositories.Interfaces
 
       
         Task<List<Employee>> GetAllEmployees();
+        Task<int> CreateEmployee(Employee employee);
 
        
         Task<int> AssignEmployee(int queryId, int empId);
